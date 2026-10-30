@@ -1,0 +1,6 @@
+{
+  "name": "AstroKP - AI KP Astrology Engine",
+  "description": "Precision KP Astrology (Placidus Semi-Arc & KP New Ayanamsa), Horary Prashna, Event Probability, and Gemini AI Predictive Copilot",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
