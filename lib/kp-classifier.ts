@@ -260,3 +260,37 @@ export function extractCleanKPJson(kpMatrix: KPMatrix) {
     },
   };
 }
+
+/**
+ * Validates whether user query is in the domain of Vedic Astrology, Kundli,
+ * Horoscopes, Planetary Dashas, Gochar or genuine personal life guidance.
+ * Protects against generic AI chatbot deflection (coding, recipes, politics, math, etc.)
+ */
+export function isAstrologicalQuery(query: string): boolean {
+  const q = (query || '').trim().toLowerCase();
+  if (!q || q.length < 2) return true;
+
+  // Obvious non-astrology / bot-like requests
+  const nonAstroPatterns = [
+    /\b(write|create|solve|run|generate|execute)\s+(a\s+)?(python|javascript|typescript|java|c\+\+|sql|code|script|program|app|html|css|function|algorithm|class)\b/i,
+    /\b(recipe|how to cook|how to bake|ingredients of|bake a cake|cook|cooking|pizza recipe|pasta recipe)\b/i,
+    /\b(who is the (prime minister|president|ceo|king|queen|governor))\b/i,
+    /\b(capital of|population of|distance between|currency of|translate this into (french|german|spanish|russian))\b/i,
+    /\b(tell me a joke|write a poem about|write an essay|solve this math|what is \d+[\+\-\*\/]\d+)\b/i,
+    /\b(what is (photosynthesis|quantum computing|mitochondria|newton's law|gravity|relativity))\b/i,
+    /\b(who made you|are you gemini|who is sundar pichai|what model are you|ignore previous instructions)\b/i,
+  ];
+
+  for (const pattern of nonAstroPatterns) {
+    if (pattern.test(q)) {
+      // If it contains explicit astrological words, allow it
+      const hasAstroTerms = /\b(kundli|kundali|astrolog|jyotish|planet|graha|rashi|nakshatra|dasha|dasa|gochar|transit|career|job|marriage|health|wealth|remedy|upay|future|bhava|house|horoscope|shani|guru|mangal|rahu|ketu|surya|chandra|budh|shukra)\b/i.test(q);
+      if (!hasAstroTerms) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+

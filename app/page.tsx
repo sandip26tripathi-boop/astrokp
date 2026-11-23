@@ -75,35 +75,48 @@ export default function Home() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
         {/* Hero Section */}
-        <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto pt-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-sm shadow-amber-500/10 animate-fade-in max-w-full flex-wrap justify-center">
+        <div className="text-center space-y-2.5 sm:space-y-4 max-w-3xl mx-auto pt-1 sm:pt-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-sm shadow-amber-500/10 animate-fade-in max-w-full flex-wrap justify-center">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Vedic Astrological Standard & AI Intelligence</span>
+            <span>
+              {language === 'hi'
+                ? 'प्रामाणिक वैदिक ज्योतिष एवं AI इंटेलिजेंस'
+                : 'Vedic Astrological Standard & AI Intelligence'}
+            </span>
           </div>
 
-          <h1 className="text-2xl sm:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-[1.2] sm:leading-[1.15]">
-            Astronomical Precision Meets{' '}
-            <span className="gold-gradient-text">Cosmic Intelligence</span>
+          <h1 className="text-xl sm:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-[1.2] sm:leading-[1.15]">
+            {language === 'hi' ? (
+              <>
+                खगोलीय सटीकता एवं <span className="gold-gradient-text">दैवीय ज्योतिषीय दृष्टि</span>
+              </>
+            ) : (
+              <>
+                Astronomical Precision Meets{' '}
+                <span className="gold-gradient-text">Cosmic Intelligence</span>
+              </>
+            )}
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions,
-            D1 Lagna chart, 4-step significators, and real-time verifiable predictions from AstroLabs.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed px-1">
+            {language === 'hi'
+              ? 'वैदिक लग्न चक्र, भाव चलित, विंशोत्तरी महादशा-अंतर्दशा एवं वास्तविक गोचर आधारित १००% प्रामाणिक विश्लेषण व Astro Gemini फलादेश।'
+              : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Vimshottari dasha, and real-time verifiable predictions from Astro Gemini.'}
           </p>
 
           {/* Quick Metrics Bar */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <div className="pt-1 sm:pt-2 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-500" />
-              <span>Vedic Ayanamsa</span>
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+              <span>{language === 'hi' ? 'वैदिक अयनांश' : 'Vedic Ayanamsa'}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-500" />
-              <span>D1 & Bhava Chalit Charts</span>
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+              <span>{language === 'hi' ? 'लग्न व भाव चलित' : 'D1 & Bhava Chalit'}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-500" />
-              <span>AstroLabs Voice</span>
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+              <span>{language === 'hi' ? 'Astro Gemini परामर्श' : 'Astro Gemini Voice'}</span>
             </div>
           </div>
         </div>

@@ -322,10 +322,21 @@ export default function ReportView({ onClose }: ReportViewProps) {
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs">
-                    <span className="text-slate-400">अनुकूलता स्कोर:</span>
+                    <span className="text-slate-400">{language === 'hi' ? 'अनुकूलता स्कोर:' : 'Vitality Score:'}</span>
                     <span className="font-bold text-amber-700 font-mono px-2 py-0.5 rounded bg-amber-100 border border-amber-200">
                       {pred.ratingScore}%
                     </span>
+                  </div>
+                </div>
+
+                {/* Transit & Auspicious Timing Sub-bar */}
+                <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px]">
+                  <div className="text-slate-700 dark:text-amber-200 font-medium">
+                    {pred.transitSummary}
+                  </div>
+                  <div className="text-amber-800 dark:text-amber-300 font-semibold flex items-center gap-1">
+                    <span>✨ {language === 'hi' ? 'शुभ समय:' : 'Auspicious Months:'}</span>
+                    <span>{pred.auspiciousMonths}</span>
                   </div>
                 </div>
 
@@ -368,9 +379,17 @@ export default function ReportView({ onClose }: ReportViewProps) {
                   </div>
                 </div>
 
+                {/* Key Challenge */}
+                {pred.keyChallenge && (
+                  <div className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-xs flex items-start gap-2">
+                    <span className="font-bold text-slate-700 shrink-0">⚠️ {language === 'hi' ? 'मुख्य सावधानी:' : 'Key Focus:'}</span>
+                    <span className="text-slate-600 text-[11px]">{pred.keyChallenge}</span>
+                  </div>
+                )}
+
                 {/* Annual Remedy & Guidance */}
                 <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs flex items-start gap-2">
-                  <span className="font-bold text-amber-900 shrink-0">🌿 {language === 'hi' ? 'वार्षिक सलाह व के.पी. उपाय:' : 'Key Annual Remedy:'}</span>
+                  <span className="font-bold text-amber-900 shrink-0">🌿 {language === 'hi' ? 'वार्षिक सलाह व वैदिक उपाय:' : 'Key Annual Remedy:'}</span>
                   <span className="text-amber-800 text-[11px]">{pred.remedy}</span>
                 </div>
               </div>

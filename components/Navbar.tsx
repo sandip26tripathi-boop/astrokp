@@ -36,21 +36,21 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/70 dark:bg-cosmic-obsidian/80 border-b border-amber-500/20 dark:border-amber-500/20 transition-colors">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/80 dark:bg-cosmic-obsidian/90 border-b border-amber-500/20 dark:border-amber-500/20 transition-colors shadow-sm">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <TriangleLogo size="md" />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <TriangleLogo size="sm" />
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-serif font-black text-base sm:text-xl tracking-tight gold-gradient-text">
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <span className="font-serif font-black text-sm sm:text-xl tracking-tight gold-gradient-text">
                   AstroLabs
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                <span className="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                   PRO
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">
+              <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">
                 Vedic Astrology & Astrological AI
               </p>
             </div>

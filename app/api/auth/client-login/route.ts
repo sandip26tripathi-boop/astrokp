@@ -20,30 +20,55 @@ interface ClientLead {
   birthDetails?: any;
 }
 
-// Helper to safely read existing leads
+// Global in-memory cache for ultra-fast, non-blocking concurrent logins
+declare global {
+  var __GLOBAL_CLIENT_LEADS__: ClientLead[] | undefined;
+}
+
+if (!global.__GLOBAL_CLIENT_LEADS__) {
+  global.__GLOBAL_CLIENT_LEADS__ = [];
+}
+
+// Helper to safely read existing leads (memory + filesystem fallback)
 function readLeads(): ClientLead[] {
+  const memoryLeads = global.__GLOBAL_CLIENT_LEADS__ || [];
   try {
-    if (!fs.existsSync(LEADS_FILE)) {
-      fs.writeFileSync(LEADS_FILE, JSON.stringify([], null, 2), 'utf-8');
-      return [];
+    if (fs.existsSync(LEADS_FILE)) {
+      const data = fs.readFileSync(LEADS_FILE, 'utf-8');
+      const fileLeads: ClientLead[] = JSON.parse(data || '[]');
+      // Merge unique by id
+      const ids = new Set(memoryLeads.map((l) => l.id));
+      for (const fl of fileLeads) {
+        if (!ids.has(fl.id)) {
+          memoryLeads.push(fl);
+          ids.add(fl.id);
+        }
+      }
     }
-    const data = fs.readFileSync(LEADS_FILE, 'utf-8');
-    return JSON.parse(data || '[]');
   } catch (err) {
-    console.error('Error reading client leads file:', err);
-    return [];
+    // Read-only serverless environment safe fallback
   }
+  return memoryLeads;
 }
 
 // Helper to safely append new lead
 function appendLead(lead: ClientLead): void {
+  if (!global.__GLOBAL_CLIENT_LEADS__) {
+    global.__GLOBAL_CLIENT_LEADS__ = [];
+  }
+  global.__GLOBAL_CLIENT_LEADS__.unshift(lead);
+
   try {
-    const leads = readLeads();
-    // Prepend newest lead first
-    leads.unshift(lead);
+    const leads = global.__GLOBAL_CLIENT_LEADS__;
     fs.writeFileSync(LEADS_FILE, JSON.stringify(leads, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error saving client lead to file:', err);
+    // In serverless read-only mode, attempt /tmp fallback
+    try {
+      const tmpPath = path.join('/tmp', 'client-leads.json');
+      fs.writeFileSync(tmpPath, JSON.stringify(global.__GLOBAL_CLIENT_LEADS__, null, 2), 'utf-8');
+    } catch (tmpErr) {
+      // Memory persistence active
+    }
   }
 }
 

@@ -79,9 +79,8 @@ export const useAstrologyStore = create<AstrologyState>()(
       chatMessages: [
         {
           role: 'model',
-          content:
-            'नमस्ते! मैं आपका के.पी. ज्योतिष सहायक (KP Astrology AI) हूँ। आपकी जन्म कुंडली के कस्पल सब-लॉर्ड, दशा और वर्तमान तात्कालिक गोचर के आधार पर आप क्या मार्गदर्शन चाहते हैं?',
-          timestamp: '2025-01-01T00:00:00.000Z',
+          content: 'नमस्ते! मैं Astro Gemini हूँ। आप क्या मार्गदर्शन चाहते हैं?',
+          timestamp: '2026-01-01T00:00:00.000Z',
         },
       ],
       savedCharts: [],
@@ -278,8 +277,8 @@ export const useAstrologyStore = create<AstrologyState>()(
               role: 'model',
               content:
                 lang === 'hi'
-                  ? 'सत्र रीफ़्रेश हो गया है। आप करियर, विवाह, धन, स्वास्थ्य या अन्य किसी भी विषय पर अपना प्रश्न पूछ सकते हैं।'
-                  : 'Session refreshed. Ask me any question on Career, Marriage, Finances, Health, or Horary Prashna.',
+                  ? 'नमस्ते! मैं Astro Gemini हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                  : 'Namaste! I am Astro Gemini. What guidance do you seek?',
               timestamp: new Date().toISOString(),
             },
           ],

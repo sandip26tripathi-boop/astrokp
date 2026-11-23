@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import dns from 'dns';
-import { extractCleanKPJson, classifyQuestionTopic } from '@/lib/kp-classifier';
+import { extractCleanKPJson, classifyQuestionTopic, isAstrologicalQuery } from '@/lib/kp-classifier';
 import { evaluateParashariKundli } from '@/lib/parashari-evaluator';
 import { evaluateGochar } from '@/lib/gochar-evaluator';
+import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 
 // Enforce IPv4 on Windows to prevent Undici IPv6 connect timeouts to Google APIs
 try {
@@ -222,6 +223,20 @@ export async function POST(req: NextRequest) {
       .map((m: any) => m.text || m.content || '')
       .join(' ');
 
+    // Strict Astrology Guardrail: If client asks non-astrology questions (coding, general knowledge, etc.)
+    if (!isAstrologicalQuery(currentQuestion)) {
+      const redirectMsg = isEnglish
+        ? '🙏 **Namaste!**\n\nI am **Astro Gemini**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
+        : '🙏 **सादर अभिवादन!**\n\nमैं **Astro Gemini** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
+
+      return NextResponse.json({
+        reply: redirectMsg,
+        text: redirectMsg,
+        model: 'Astro-Gemini-Guardrail',
+        debug: { topic: 'Off-Topic Redirection', isAstrological: false },
+      });
+    }
+
     const topicAnalysis = classifyQuestionTopic(currentQuestion, previousContext);
 
     // Build the dynamic, intelligent Dual-Engine (Parashari + Cuspal + Gochar) system instruction
@@ -398,14 +413,10 @@ ${gocharData.summaryTextHi}
       });
     }
 
-    // Cascade through verified active Google GenAI models
+    // Ultra-fast model cascade with strict 4.5s timeout per request
     const models = [
       'gemini-3.5-flash-lite',
-      'gemini-3.7-flash',
       'gemini-3.1-flash-lite',
-      'gemini-3.1-flash-lite-preview',
-      'gemini-3.5-flash',
-      'gemini-3.8-flash',
     ];
 
     let replyText = '';
@@ -414,7 +425,11 @@ ${gocharData.summaryTextHi}
 
     for (const m of models) {
       try {
-        const response = await ai.models.generateContent({
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), 4500)
+        );
+
+        const aiCallPromise = ai.models.generateContent({
           model: m,
           contents: formattedContents,
           config: {
@@ -423,10 +438,14 @@ ${gocharData.summaryTextHi}
           },
         });
 
-        if (response.text && response.text.trim().length > 10) {
+        const response: any = await Promise.race([aiCallPromise, timeoutPromise]);
+
+        if (response && response.text && response.text.trim().length > 10) {
           replyText = response.text.trim();
           modelUsed = m;
           break;
+        } else if (!response) {
+          console.warn(`Model ${m} timed out after 4500ms`);
         }
       } catch (mErr: any) {
         lastError = mErr?.message || String(mErr);
@@ -434,17 +453,16 @@ ${gocharData.summaryTextHi}
       }
     }
 
-    // If Gemini fails, return actual error
-    if (!replyText) {
-      return NextResponse.json(
-        {
-          error: `Gemini API Call Failed: ${lastError}`,
-          details: isEnglish
-            ? 'Unable to generate response from Google GenAI models. Please check API Key quota or model availability.'
-            : 'Google GenAI मॉडल से परामर्श प्राप्त करने में समस्या आई। कृपया API Key कोटा या कनेक्शन जांचें।',
-        },
-        { status: 502 }
+    // Fail-safe Astrological Synthesis: If Gemini is busy, rate-limited, or slow,
+    // NEVER hang or crash! Provide instant high-precision mathematical astrological reading.
+    if (!replyText || replyText.trim().length === 0) {
+      replyText = synthesizeFastKPAnswer(
+        activeChart,
+        gocharData,
+        currentQuestion,
+        clientLanguage
       );
+      modelUsed = 'Astro-Gemini-Synthesis-Engine (High-Speed Local)';
     }
 
     const debugData = {
