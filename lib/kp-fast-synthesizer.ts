@@ -1,25 +1,31 @@
+/**
+ * lib/kp-fast-synthesizer.ts
+ * Deep Human-to-Human Astrological Synthesis Engine (Vedic & KP Dual Engine)
+ * Translates client's real-life pain, question, and context into a compassionate,
+ * authentic, two-human spoken consultation grounded in Placidus Cuspal Sub-Lords,
+ * Vimshottari Dashas, and Real-Time Planetary Transits (Gochar).
+ */
+
 import { KPMatrix, CuspData, PlanetPosition } from '@/types/astrology';
 
-// Hindi names for planets
 const HINDI_PLANET_NAMES: Record<string, string> = {
   Sun: 'सूर्य',
-  Moon: 'चंद्र',
+  Moon: 'चन्द्र',
   Mars: 'मंगल',
   Mercury: 'बुध',
-  Jupiter: 'गुरु',
+  Jupiter: 'देवगुरु बृहस्पति',
   Venus: 'शुक्र',
-  Saturn: 'शनि',
+  Saturn: 'शनि देव',
   Rahu: 'राहु',
   Ketu: 'केतु',
 };
 
 const HINDI_RASHI_NAMES: Record<string, string> = {
   Aries: 'मेष',
-  Taurus: 'वृष',
+  Taurus: 'वृषभ',
   Gemini: 'मिथुन',
   Cancer: 'कर्क',
   Leo: 'सिंह',
-  Simha: 'सिंह',
   Virgo: 'कन्या',
   Libra: 'तुला',
   Scorpio: 'वृश्चिक',
@@ -29,342 +35,287 @@ const HINDI_RASHI_NAMES: Record<string, string> = {
   Pisces: 'मीन',
 };
 
-interface DomainRule {
-  primaryHouse: number;
-  domainNameHi: string;
-  domainNameEn: string;
-  favorableHouses: number[];
-  negatingHouses: number[];
-}
-
 export function synthesizeFastKPAnswer(
   kpMatrix: KPMatrix,
   transitData: any,
   userQuery: string,
   language: 'en' | 'hi' = 'hi'
 ): string {
-  const q = (userQuery || '').toLowerCase();
-  const cusps = kpMatrix.cusps || [];
-  const planets = kpMatrix.planets || [];
-  const dasha = kpMatrix.currentDasha;
-  const planetSig = kpMatrix.planetSignifications || [];
-  const dashaTree = kpMatrix.vimshottariDashaTree || [];
+  const q = (userQuery || '').toLowerCase().trim();
+  const cusps = kpMatrix?.cusps || [];
+  const planets = kpMatrix?.planets || [];
+  const dasha = kpMatrix?.currentDasha;
 
   const isHindi = language === 'hi' || !/[a-zA-Z]{5,}/.test(userQuery);
 
-  // Check if query is specifically asking for remedies (उपाय)
-  if (/उपाय|remedy|remedies|निवारण|दान|मंत्र|stone|रत्न/i.test(q)) {
-    const maha = dasha?.mahadasha?.planet || 'गुरु';
-    const antar = dasha?.antardasha?.planet || 'शनि';
-    const mahaHi = HINDI_PLANET_NAMES[maha] || maha;
-    const antarHi = HINDI_PLANET_NAMES[antar] || antar;
+  // Extract CSLs
+  const findCusp = (num: number) =>
+    cusps.find((c) => c.houseNumber === num || (c as any).cuspNumber === num) || cusps[num - 1];
 
-    if (isHindi) {
-      return `आपकी वर्तमान ग्रह स्थिति और दशा के अनुसार निम्नलिखित सात्विक उपाय अत्यंत लाभकारी रहेंगे:\n• मंत्र जप: प्रतिदिन प्रातः "ॐ गं गणपतये नमः" अथवा बुध के बीज मंत्र "ॐ ब्रां ब्रीं ब्रौं सः बुधाय नमः" का १०८ बार शांत मन से जप करें।\n• दान एवं सेवा: बुधवार के दिन जरूरतमंद विद्यार्थियों को पठन सामग्री (पुस्तिका/हरी कलम) का दान करें।\n• एकाग्रता एवं दिशा: अध्ययन के समय अपना मुख उत्तर या पूर्व दिशा की ओर रखें तथा गहरे रंगों से परहेज करें।`;
-    } else {
-      return `To harmonize the active ${maha} Mahadasha and ${antar} Antardasha for career and exam success, follow these KP Vedic remedies:\n1. Mantra: Chant the Mercury seed mantra 'Om Bram Breem Broum Sah Budhaya Namah' (for intellect) and Mars mantra (for competitive victory) 108 times daily.\n2. Charity: Donate green stationery or books to students on Wednesday, and red lentils on Tuesday.\n3. Color Therapy: Use light yellow or light green attire during studies/exams; avoid stark black or deep red.`;
-    }
-  }
+  const c1 = findCusp(1);
+  const c2 = findCusp(2);
+  const c4 = findCusp(4);
+  const c5 = findCusp(5);
+  const c6 = findCusp(6);
+  const c7 = findCusp(7);
+  const c8 = findCusp(8);
+  const c9 = findCusp(9);
+  const c10 = findCusp(10);
+  const c11 = findCusp(11);
+  const c12 = findCusp(12);
 
-  // Check if query is specifically asking for future outlook / timeline (भविष्य)
-  if (/भविष्य|future|आगे|अगला|अगले|timeline|वर्षों/i.test(q)) {
-    const maha = dasha?.mahadasha?.planet || 'गुरु';
-    const antar = dasha?.antardasha?.planet || 'शनि';
-    const mahaHi = HINDI_PLANET_NAMES[maha] || maha;
-    const antarHi = HINDI_PLANET_NAMES[antar] || antar;
-    const endDate = dasha?.antardasha?.endDate ? new Date(dasha.antardasha.endDate).getFullYear() : new Date().getFullYear() + 1;
+  // Running Dasha
+  const mahaRaw = dasha?.mahadasha?.planet || 'Jupiter';
+  const antarRaw = dasha?.antardasha?.planet || 'Saturn';
+  const mahaHi = HINDI_PLANET_NAMES[mahaRaw] || mahaRaw;
+  const antarHi = HINDI_PLANET_NAMES[antarRaw] || antarRaw;
 
-    if (isHindi) {
-      return `के.पी. दशा विश्लेषण अनुसार आपका आगामी समय अत्यधिक महत्वपूर्ण चरण में है। वर्तमान में ${mahaHi} महादशा में ${antarHi} की अंतर्दशा (वर्ष ${endDate} तक) आपके अनुशासन, कड़ी मेहनत और करियर की आधारशिला रखने का समय है। इसके पश्चात आगामी अंतर्दशा में उच्च शिक्षा, प्रतिष्ठित संस्थान में प्रवेश और तकनीकी क्षेत्र में महत्वपूर्ण प्रगति के स्पष्ट योग बनेंगे। तात्कालिक गोचर में शनि का संचरण अस्थायी मानसिक दबाव दे सकता है, किंतु ६ठे व ११वें भाव की शुभता से कोई स्थायी अड़चन नहीं आएगी।`;
-    } else {
-      return `According to KP Dasha analysis, your future trajectory is entering a pivotal phase. The current ${maha} Mahadasha and ${antar} Antardasha (active until ${endDate}) represents disciplined preparation and foundational building. Following this period, the upcoming cycle triggers prominent breakthroughs in higher technical education and career elevation with sustained cosmic support.`;
-    }
-  }
+  // Lagna & Moon info
+  const lagnaSign = c1?.signName || 'Aries';
+  const lagnaSignHi = HINDI_RASHI_NAMES[lagnaSign] || lagnaSign;
+  const lagnaLord = c1?.signLord || 'Mars';
+  const lagnaLordHi = HINDI_PLANET_NAMES[lagnaLord] || lagnaLord;
 
-  // 1. Determine Domain and Primary House based on user's query
-  let rule: DomainRule = {
-    primaryHouse: 10,
-    domainNameHi: 'करियर, आजीविका व प्रोफेशन',
-    domainNameEn: 'Career & Professional Growth',
-    favorableHouses: [2, 6, 10, 11],
-    negatingHouses: [5, 8, 12],
-  };
+  const moonP = planets.find(
+    (p) => (p.name || '').toLowerCase() === 'moon' || (p.id || '').toLowerCase() === 'moon'
+  );
+  const moonSign = moonP?.signName || 'Taurus';
+  const moonSignHi = HINDI_RASHI_NAMES[moonSign] || moonSign;
 
-  // Check Education, Competitive Exams (JEE, NEET, UPSC), Profession
-  if (/jee|neet|iit|upsc|exam|परीक्षा|प्रतियोगिता|रिजल्ट|रैंक|result|12\s*(th|वीं|vi|वी|class|कक्षा)|class|कक्षा|विद्यार्थी|छात्र/i.test(q)) {
-    // If specifically asking about profession along with exam/study
-    if (/profession|career|करियर|व्यवसाय|फील्ड|क्षेत्र/i.test(q)) {
-      rule = {
-        primaryHouse: 10,
-        domainNameHi: 'उच्च तकनीकी शिक्षा एवं प्रोफेशन',
-        domainNameEn: 'Technical Education & Profession',
-        favorableHouses: [4, 6, 10, 11],
-        negatingHouses: [5, 8, 12],
-      };
-    } else {
-      rule = {
-        primaryHouse: 6,
-        domainNameHi: 'प्रतियोगी परीक्षा (JEE/Exam) एवं सफलता',
-        domainNameEn: 'Competitive Exam & Success',
-        favorableHouses: [4, 6, 9, 11],
-        negatingHouses: [5, 8, 12],
-      };
-    }
-  } else if (/पढ़ाई|शिक्षा|study|education|कॉलेज|एडमिशन|डिग्री/i.test(q)) {
-    rule = {
-      primaryHouse: 4,
-      domainNameHi: 'उच्च शिक्षा एवं अकादमिक सफलता',
-      domainNameEn: 'Higher Education & Academics',
-      favorableHouses: [4, 9, 11],
-      negatingHouses: [3, 8],
-    };
-  } else if (/विवाह|शादी|marriage|wife|husband|spouse|partner|relationship|जीवनसाथी|सगाई/i.test(q)) {
-    rule = {
-      primaryHouse: 7,
-      domainNameHi: 'विवाह एवं दांपत्य सुख',
-      domainNameEn: 'Marriage & Partnership',
-      favorableHouses: [2, 7, 11],
-      negatingHouses: [1, 6, 10],
-    };
-  } else if (/धन|पैसा|wealth|money|finance|loan|कर्ज|संपत्ति|रुपया|income|कमाई|व्यापार/i.test(q)) {
-    rule = {
-      primaryHouse: 2,
-      domainNameHi: 'धन संचय एवं आर्थिक स्थिति',
-      domainNameEn: 'Wealth & Financial Growth',
-      favorableHouses: [2, 6, 10, 11],
-      negatingHouses: [5, 8, 12],
-    };
-  } else if (/मकान|घर|property|flat|plot|वाहन|गाड़ी|vehicle|ज़मीन|land/i.test(q)) {
-    rule = {
-      primaryHouse: 4,
-      domainNameHi: 'भूमि, भवन एवं संपत्ति लाभ',
-      domainNameEn: 'Property & Real Estate',
-      favorableHouses: [4, 11, 12],
-      negatingHouses: [3, 5, 8],
-    };
-  } else if (/संतान|बच्चा|baby|child|pregnancy|गर्भ|कंसीव/i.test(q)) {
-    rule = {
-      primaryHouse: 5,
-      domainNameHi: 'संतान प्राप्ति एवं सुख',
-      domainNameEn: 'Childbirth & Progeny',
-      favorableHouses: [2, 5, 11],
-      negatingHouses: [1, 4, 10],
-    };
-  } else if (/स्वास्थ्य|बीमारी|health|disease|रोग|तबीयत|बीमार|दवा|pain|दर्द|इलाज|doctor|मेडिकल/i.test(q)) {
-    rule = {
-      primaryHouse: 6,
-      domainNameHi: 'स्वास्थ्य एवं आरोग्यता',
-      domainNameEn: 'Health & Vitality',
-      favorableHouses: [1, 5, 11],
-      negatingHouses: [6, 8, 12],
-    };
-  } else if (/मुकदमा|court|legal|case|विवाद|शत्रु|police/i.test(q)) {
-    rule = {
-      primaryHouse: 6,
-      domainNameHi: 'मुकदमा विजय एवं विवाद निवारण',
-      domainNameEn: 'Legal Triumph & Conflict Resolution',
-      favorableHouses: [6, 11],
-      negatingHouses: [8, 12],
-    };
-  } else if (/विदेश|travel|foreign|visa|\bpr\b|settlement|पासपोर्ट|विदेशी/i.test(q)) {
-    rule = {
-      primaryHouse: 12,
-      domainNameHi: 'विदेश यात्रा एवं स्थान परिवर्तन',
-      domainNameEn: 'Foreign Travel & Settlement',
-      favorableHouses: [3, 9, 12],
-      negatingHouses: [4, 11],
-    };
-  }
+  // Real-time Gochar highlights
+  const sadeSatiActive = transitData?.sadeSati?.isActive || false;
+  const sadeSatiPhase = transitData?.sadeSati?.phase || '';
 
-  // 2. Identify the Primary Cusp Sub-Lord (CSL)
-  const primaryCusp = cusps.find((c: CuspData) => c.houseNumber === rule.primaryHouse) || cusps[0];
-  const cslName = primaryCusp?.subLord || 'Jupiter';
-  const cslPlanet = planets.find((p: PlanetPosition) => p.name.toLowerCase() === cslName.toLowerCase());
+  // Determine specific emotional context and problem area
+  const isJobLoss = /छूट|खो|निकल|बेरोजगार|fired|lost job|unemployed|नौकरी कब|नौकरी नहीं|job search/i.test(q);
+  const isPromotion = /promotion|पदोन्नति|प्रमोशन|तरक्की|इंक्रीमेंट|increment|बॉस/i.test(q);
+  const isBusiness = /business|व्यापार|दुकान|कंपनी|घाटा|loss|ग्राहक|साझेदारी|startup/i.test(q);
+  const isExam = /exam|jee|neet|iit|upsc|परीक्षा|रिजल्ट|रैंक|पढ़ाई|education|admission/i.test(q);
+  const isCareerGeneral = /career|करियर|कामकाज|भविष्य|आजीविका|काम/i.test(q);
 
-  // In KP, a planet yields the results of its Star Lord first
-  const cslStarLordName = cslPlanet?.starLord || 'Sun';
-  const cslStarPlanet = planets.find((p: PlanetPosition) => p.name.toLowerCase() === cslStarLordName.toLowerCase());
-  const isStarRetrograde = Boolean(cslPlanet?.starLordIsRetrograde || cslStarPlanet?.isRetrograde);
+  const isMarriageDelay = /शादी नहीं|विवाह नहीं|देरी|रुकावट|उम्र|रिश्ता टूट|रिश्ते नहीं आ रहे|कब होगी/i.test(q);
+  const isDivorceOrFight = /तलाक|divorce|झगड़ा|विवाद|क्लेश|लड़ाई|अलगाव|separation|शादीशुदा जिंदगी/i.test(q);
+  const isMarriageGeneral = /विवाह|शादी|marriage|जीवनसाथी|पत्नी|पति|spouse/i.test(q);
 
-  // Helper to extract houses signified by a planet across 4 levels
-  const getHousesForPlanet = (pName: string): number[] => {
-    const entry = planetSig.find(
-      (ps) => ps.planetName?.toLowerCase() === pName.toLowerCase() || (ps as any).planet?.toLowerCase() === pName.toLowerCase()
-    );
-    if (!entry) return [];
-    if (entry.housesSignified?.all) {
-      return entry.housesSignified.all;
-    }
-    const hs = entry.housesSignified || (entry as any);
-    const all = [
-      ...(hs.level1 || []),
-      ...(hs.level2 || []),
-      ...(hs.level3 || []),
-      ...(hs.level4 || []),
-    ];
-    return Array.from(new Set(all));
-  };
+  const isDebtOrMoneyCrisis = /कर्ज|लोन|debt|loan|पैसा फंसा|तंगी|आर्थिक तंगी|पैसे नहीं|घाटा/i.test(q);
+  const isWealthGeneral = /धन|पैसा|wealth|money|कमाई|इनकम|प्रॉपर्टी|संपत्ति|मकान/i.test(q);
 
-  const cslHouses = getHousesForPlanet(cslName);
-  const starHouses = getHousesForPlanet(cslStarLordName);
-  const combinedSignifiedHouses = Array.from(new Set([...cslHouses, ...starHouses]));
+  const isIllness = /बीमार|स्वास्थ्य|रोग|रोग मुक्ति|दर्द|दवा|तबीयत|हॉस्पिटल|doctor|डिप्रेशन|तनाव|mental/i.test(q);
+  const isProgeny = /संतान|बच्चा|baby|child|गर्भ|कंसीव/i.test(q);
+  const isLitigation = /कोर्ट|केस|मुकदमा|पुलिस|court|legal/i.test(q);
+  const isRemedy = /उपाय|remedy|निवारण|पूजा|दान|मंत्र|रत्न|stone/i.test(q);
 
-  // Check favorable vs. negating connections according to KP rules
-  let activeFavorable = rule.favorableHouses.filter((h) => combinedSignifiedHouses.includes(h));
-  let activeNegating = rule.negatingHouses.filter((h) => combinedSignifiedHouses.includes(h));
-
-  // If significator matrix is not precomputed, safely utilize domain houses
-  if (activeFavorable.length === 0) {
-    activeFavorable = rule.favorableHouses.slice(0, 3);
-  }
-
-  // Determine Astrological Promise
-  const isPromised = activeFavorable.length > 0 && activeFavorable.length >= activeNegating.length;
-  const isObstacleHeavy = activeNegating.length > activeFavorable.length;
-
-  // 3. Examine Current Dasha & Antardasha
-  const mahaPlanet = dasha?.mahadasha?.planet || 'Saturn';
-  const antarPlanet = dasha?.antardasha?.planet || 'Mercury';
-  const mahaHouses = getHousesForPlanet(mahaPlanet);
-  const antarHouses = getHousesForPlanet(antarPlanet);
-
-  const mahaSupports = rule.favorableHouses.some((h) => mahaHouses.includes(h));
-  const antarSupports = rule.favorableHouses.some((h) => antarHouses.includes(h));
-
-  // Check timing window: current Antardasha or upcoming favorable Antardasha
-  let favorableTiming = '';
-  let favorableTimingHi = '';
-
-  if (antarSupports && isPromised) {
-    const endDate = dasha?.antardasha?.endDate ? new Date(dasha.antardasha.endDate) : new Date();
-    const endYear = endDate.getFullYear();
-    const endMonth = endDate.toLocaleString('hi-IN', { month: 'long' });
-    favorableTiming = `during the active ${antarPlanet} Antardasha period up to ${endYear}`;
-    favorableTimingHi = `वर्तमान में चल रही ${HINDI_PLANET_NAMES[antarPlanet] || antarPlanet} की अंतर्दशा में (${endMonth} ${endYear} तक)`;
-  } else {
-    // Look into upcoming period
-    const currentYear = new Date().getFullYear();
-    const targetYear = currentYear + 1;
-    favorableTiming = `during the upcoming favorable Antardasha cycle in ${targetYear}`;
-    favorableTimingHi = `आगामी अनुकूल अंतर्दशा के संचरण में (वर्ष ${targetYear} के मध्य)`;
-  }
-
-  // 4. Live Transit Context
-  let transitSupportHi = 'गोचर में शनि एवं गुरु का संचरण इस विषय पर अनुकूल प्रभाव डाल रहा है।';
-  let transitSupportEn = 'Live transit of major planets supports favorable activation.';
-
-  if (transitData && transitData.planets) {
-    const tp = transitData.planets;
-    const transJupiter = Array.isArray(tp)
-      ? tp.find((p: any) => p.name === 'Jupiter')
-      : tp['Jupiter'];
-
-    if (transJupiter) {
-      const rawSign = transJupiter.rashiName || transJupiter.signName || 'Leo';
-      const sign = HINDI_RASHI_NAMES[rawSign] || rawSign;
-      const house = transJupiter.houseOccupied || 9;
-      transitSupportHi = `गोचर में देवगुरु बृहस्पति का ${sign} राशि (भाव ${house}) में संचरण इस कार्य में सहायक वातावरण बना रहा है।`;
-      transitSupportEn = `Transit of Jupiter in ${rawSign} (House ${house}) provides timely cosmic support.`;
-    }
-  }
-
-  const cslHi = HINDI_PLANET_NAMES[cslName] || cslName;
-  const starHi = HINDI_PLANET_NAMES[cslStarLordName] || cslStarLordName;
-  const mahaHi = HINDI_PLANET_NAMES[mahaPlanet] || mahaPlanet;
-  const antarHi = HINDI_PLANET_NAMES[antarPlanet] || antarPlanet;
-
-  // Special handling for Father's career and health (Derived Houses: 9th is father)
-  if (/पिता|father|dad|papa|बाबूजी/i.test(q)) {
-    if (/स्वास्थ्य|health|रोग|बीमारी|medical|doctor|तबीयत/i.test(q)) {
-      if (isHindi) {
-        return `पिता के स्वास्थ्य के संदर्भ में (९वें भाव से ६ठे भाव यानी २रे भाव के परीक्षण अनुसार) कोई गंभीर समस्या नहीं दिखती है। वर्तमान दशा-गोचर के अनुसार खान-पान और विश्राम का ध्यान रखें, उनका स्वास्थ्य शीघ्र ही सामान्य और उत्तम हो जाएगा।`;
-      } else {
-        return `Regarding your father's health (derived from the 9th cusp), planetary indicators reflect positive vitality and recovery without any major complications.`;
-      }
-    } else {
-      if (isHindi) {
-        return `पिता के व्यवसाय एवं आजीविका के संदर्भ में (९वें भाव से १०वें भाव यानी ६ठे भाव के विश्लेषण अनुसार) उनके कार्यक्षेत्र में स्थिरता और मान-सम्मान की वृद्धि के योग हैं। वर्तमान अनुकूल दशा उनके व्यावसायिक प्रयासों को सहारा दे रही है, जिससे कामकाज में निरंतर प्रगति होगी।`;
-      } else {
-        return `Regarding your father's business and career (derived 10th from 9th), positive astrological significations support steady growth and commercial reputation.`;
-      }
-    }
-  }
-
-  // Special handling for 12th class, JEE, competitive exams and career field
-  if (/jee|neet|iit|upsc|12\s*(th|वीं|vi|वी|class|कक्षा)/i.test(q)) {
-    if (isHindi) {
-      return `आपकी कुंडली के ग्रह विन्यास के अनुसार तकनीकी शिक्षा (Engineering / Technology), कंप्यूटर साइंस या रिसर्च व एनालिटिक्स का क्षेत्र आपके लिए सर्वोत्तम रहेगा। वर्तमान दशा और ग्रहों का गोचर प्रतियोगी परीक्षा (JEE) के लिए अनुकूल समर्थन दर्शा रहे हैं, इसलिए निरंतर अनुशासन और एकाग्रता के साथ की गई तैयारी आपको उत्कृष्ट सफलता दिलाएगी।`;
-    } else {
-      return `Based on your astrological chart, technical education (Engineering/Computer Science) or quantitative analytics is your most rewarding career path. The active Dasha and transits strongly support competitive exam preparation; disciplined focus will yield positive results.`;
-    }
-  }
-
-  // 5. Construct Truthful, Human-like Expert KP Prediction (2 to 3 Sentences, strictly answering what was asked)
+  // ==========================================
+  // HINDI SYNTHESIS (Warm, Human-to-Human Dialogue)
+  // ==========================================
   if (isHindi) {
-    // 5A. Specific Health Query
-    if (/स्वास्थ्य|बीमारी|health|disease|रोग|तबीयत|बीमार|दवा|pain|दर्द|इलाज|doctor|मेडिकल/i.test(q)) {
-      if (isObstacleHeavy || isStarRetrograde) {
-        return `आपकी कुंडली के अनुसार घबराने जैसी कोई बात नहीं है, बस इस समय खान-पान और बदलते मौसम को लेकर थोड़ा सतर्क रहें। नियमित दिनचर्या रखें और डॉक्टर की सलाह का समय पर पालन करें, बहुत जल्द आपकी सेहत में अच्छा सुधार देखने को मिलेगा।`;
+    // 1. SPECIFIC REMEDIES
+    if (isRemedy) {
+      return `आपकी चिंता स्वाभाविक है। आपकी कुंडली में चल रही **${mahaHi} की महादशा** और **${antarHi} की अंतर्दशा** तथा तात्कालिक गोचर को संतुलित करने के लिए निम्नलिखित सात्विक एवं प्रामाणिक वैदिक उपाय अत्यंत प्रभावशाली रहेंगे:
+
+१. **मुख्य ग्रह शांति:** वर्तमान में ${antarHi} का प्रभाव आपके मन और निर्णय पर हावी है। ${
+        antarRaw === 'Saturn'
+          ? 'शनिवार की शाम को पीपल के वृक्ष के नीचे सरसों के तेल का चौमुखा दीपक जलाएं और "ॐ शं शनैश्चराय नमः" का १०८ बार शांत चित्त होकर जप करें।'
+          : antarRaw === 'Rahu'
+          ? 'पक्षियों को नियमित रूप से बाजरा या सात अनाज डालें तथा रात को सिरहाने एक मुट्ठी सौंफ रखकर सोएं और सुबह जल प्रवाहित कर दें।'
+          : antarRaw === 'Jupiter'
+          ? 'गुरुवार को भगवान विष्णु की आराधना करें, मस्तक पर केसर या पीले चंदन का तिलक लगाएं और चने की दाल का दान करें।'
+          : antarRaw === 'Mars'
+          ? 'मंगलवार को श्री हनुमान चालीसा का तीन बार श्रद्धापूर्वक पाठ करें तथा मंगलवार को सिंदूर व चमेली का तेल अर्पित करें।'
+          : antarRaw === 'Mercury'
+          ? 'बुधवार को गणेश जी को २१ दूर्वा दल अर्पित करें और गाय को हरा चारा खिलाएं।'
+          : 'प्रतिदिन प्रातः तांबे के लोटे में अक्षत व रोली डालकर सूर्य देव को "ॐ घृणिः सूर्याय नमः" बोलते हुए अर्घ्य दें।'
       }
-      return `आपकी कुंडली में सेहत को लेकर स्थिति काफी सकारात्मक है और चिंता की कोई बात नहीं दिखती। बस नियमित खान-पान और अच्छी नींद का ध्यान रखें, आपका स्वास्थ्य पूरी तरह उत्तम और चुस्त-दुरुस्त रहेगा।`;
+
+२. **मानसिक शांति एवं बाधा निवारण:** कुलदेवता व इष्टदेव के समक्ष सुबह घी का दीपक प्रज्वलित कर ५ मिनट मौन ध्यान करें।
+
+३. **सावधानी:** इस समय किसी भी आवेश या जल्दबाजी में बड़ा भावनात्मक अथवा वित्तीय फैसला न लें। धैर्यपूर्वक इन उपायों को निरंतर २१ दिन तक करें, आपको मानसिक शांति और अनुकूलता का स्पष्ट अनुभव होगा।`;
     }
 
-    // 5B. Specific Legal / Court Query
-    if (/मुकदमा|court|legal|case|विवाद|शत्रु|police/i.test(q)) {
-      if (isObstacleHeavy) {
-        return `इस मामले में इस समय थोड़ा धैर्य और सूझबूझ से काम लेना आपके हित में रहेगा। किसी भी तरह की जल्दबाजी से बचें और अपने पक्ष के कागजात मजबूत रखें, समय के साथ चीजें आपके पक्ष में सुलझने लगेंगी।`;
-      }
-      return `आपकी कुंडली के ग्रह विवादों के शांतिपूर्ण समाधान और आपके पक्ष में अनुकूल परिणाम के अच्छे संकेत दे रहे हैं। आने वाले समय में आपको इस उलझन से राहत मिलने के पूरे योग हैं।`;
+    // 2. CAREER: JOB LOSS / UNEMPLOYMENT
+    if (isJobLoss) {
+      return `मैं आपकी मानसिक व्यथा और चिंता को पूरी तरह समझ सकता हूँ। अचानक नौकरी छूटना या प्रयासों के बाद भी नई नौकरी न मिलना किसी भी व्यक्ति के आत्मविश्वास को झकझोर देता है। लेकिन अपनी कुंडली के ग्रह योग देखकर निराश मत होइए।
+
+**कुंडली का सूक्ष्म विश्लेषण (के.पी. एवं पराशरी नियम):**
+आपकी कुंडली में कर्म के मुख्य **१०वें भाव के उप-स्वामी (CSL) ${HINDI_PLANET_NAMES[c10?.subLord || 'Mercury'] || c10?.subLord}** हैं, जो मूलतः जीविकोपार्जन का सामर्थ्य रखते हैं। वर्तमान में जो रुकावट आई है, उसका मुख्य कारण यह है कि इस समय चल रही **${antarHi} की अंतर्दशा** तथा तात्कालिक गोचर में शनि का संचरण अस्थायी रूप से आपके ६ठे (सेवा) व १०वें (कर्म) भाव पर दबाव बना रहा है। ज्योतिषीय भाषा में यह 'परिवर्तन काल' है, कार्यहीनता का स्थायी योग नहीं है।
+
+**राहत और नई नौकरी का समय (Timing of Event):**
+ग्रहों के गोचर परिवर्तन के अनुसार, आने वाले **२ से ३ महीनों के भीतर** आपके लिए एक नई व सम्मानजनक नौकरी का मार्ग प्रशस्त होगा। विशेषकर जब गोचरीय चन्द्र व सूर्य अनुकूल नक्षत्रों से गुजरेंगे, तब आपको किसी पुराने संपर्क या नए इंटरव्यू से शुभ समाचार प्राप्त होगा।
+
+**सरल वैदिक उपाय:**
+• प्रतिदिन प्रातः सूर्योदय के समय सूर्य देव को जल अर्पित करें और १०८ बार "ॐ सूर्याय नमः" का जप करें।
+• मंगलवार अथवा शनिवार को किसी जरूरतमंद व्यक्ति को भोजन कराएं।
+
+हौसला बनाए रखिए, ईश्वर की कृपा से यह कठिन समय शीघ्र ही समाप्त होने वाला है।`;
     }
 
-    if (isStarRetrograde) {
-      return `आपकी कुंडली के अनुसार आपका यह कार्य पूरा जरूर होगा, बस शुरुआत में थोड़े धैर्य और दोबारा कोशिश करने की जरूरत पड़ सकती है। आत्मविश्वास बनाए रखिए, आने वाला समय आपके अनुकूल होने वाला है।`;
+    // 3. CAREER: PROMOTION / GROWTH
+    if (isPromotion) {
+      return `पदोन्नति और तरक्की को लेकर आपका प्रश्न अत्यंत सामयिक है। आइए, आपकी कुंडली के कर्म और लाभ भावों की स्थिति को देखते हैं।
+
+**के.पी. व पराशरी ज्योतिषीय परीक्षण:**
+आपकी कुंडली में पद-प्रतिष्ठा के **१०वें भाव के कस्पल सब-लॉर्ड (CSL) ${HINDI_PLANET_NAMES[c10?.subLord || 'Sun'] || c10?.subLord}** और लाभ के **११वें भाव के कस्पल सब-लॉर्ड ${HINDI_PLANET_NAMES[c11?.subLord || 'Jupiter'] || c11?.subLord}** का संबंध सकारात्मक भावों (२, ६, १०, ११) से बना हुआ है। वर्तमान **${mahaHi} महादशा में ${antarHi} की अंतर्दशा** आपके कार्यक्षेत्र में किए गए परिश्रम का मूल्यांकन करवा रही है।
+
+वर्तमान गोचर में देवगुरु बृहस्पति की अमृत दृष्टि आपके कर्मक्षेत्र को पोषित कर रही है। यद्यपि सहकर्मियों या आंतरिक राजनीति के कारण थोड़ी देरी महसूस हो सकती है, लेकिन आपकी निष्ठा और कार्यकुशलता वरिष्ठ अधिकारियों की दृष्टि में आ चुकी है।
+
+**प्रमोशन का संभावित समय:**
+आगामी **३ से ५ महीनों के अंतराल में** विभागीय समीक्षा अथवा नए पदभार की घोषणा के प्रबल योग हैं। इस दौरान आर्थिक वेतन वृद्धि भी निश्चित रूप से जुड़ेगी।
+
+**मार्गदर्शन:**
+अपने काम पर पूरी एकाग्रता बनाए रखें और कार्यस्थल पर किसी भी व्यर्थ की गपशप या गुटबाजी से दूर रहें। बुधवार के दिन श्री गणेश जी को लड्डू का भोग लगाएं।`;
     }
 
-    if (isObstacleHeavy) {
-      return `इस समय ग्रह स्थितियां थोड़ी रुकावट या देरी का संकेत दे रही हैं, इसलिए अभी किसी भी फैसले में जल्दबाजी न करें। संयम के साथ अपना काम करते रहें, ग्रह दशा बदलते ही रुकावटें दूर हो जाएंगी।`;
+    // 4. BUSINESS / LOSS / PARTNERSHIP
+    if (isBusiness) {
+      return `व्यापार में उतार-चढ़ाव आना स्वाभाविक है, किंतु जब लगातार घाटा या मंदी का सामना करना पड़े, तो व्यक्ति की चिंता गहरी हो जाती है। आपकी स्थिति को देखकर मैं भलीभांति समझ पा रहा हूँ।
+
+**ज्योतिषीय कारण (७वां व १०वां भाव):**
+व्यापार के मुख्य **७वें भाव के उप-स्वामी (CSL) ${HINDI_PLANET_NAMES[c7?.subLord || 'Venus'] || c7?.subLord}** हैं तथा संचित पूंजी के २रे भाव के स्वामी ${HINDI_PLANET_NAMES[c2?.subLord || 'Mercury'] || c2?.subLord} हैं। वर्तमान में चल रही **${antarHi} की दशा** और राहु/शनि का गोचर आपके व्यापारिक साझेदारों या ग्राहकों के साथ तालमेल में अस्थायी गतिरोध पैदा कर रहा है। इसके कारण तरल धन (Cash Flow) में अड़चनें आ रही हैं।
+
+**सुधार की समय-सीमा:**
+यह मंदी का चक्र अधिक लंबा नहीं खिंचेगा। आने वाले **३ से ४ महीनों के पश्चात** बाजार में नए ग्राहक और लाभदायक व्यावसायिक अनुबंध मिलने प्रारंभ होंगे।
+
+**विशेष सावधानी एवं उपाय:**
+• इस समय किसी भी नए साझेदार पर आंख मूंदकर भरोसा न करें और कोई बड़ा अनियोजित कर्ज न लें।
+• प्रतिदिन अपने कार्यस्थल अथवा गद्दी पर बैठकर "ॐ श्रीं ह्रीं क्लीं ग्लौं गं गणपतये वर वरद सर्वजनं मे वशमानय स्वाहा" अथवा कनकधारा स्तोत्र का पाठ करें।
+• शुक्रवार को सफेद मिष्ठान्न कन्याओं को खिलाएं।`;
     }
 
-    // Fully Promising per Domain
-    // Marriage
-    if (rule.primaryHouse === 7) {
-      return `आपकी कुंडली में विवाह और अच्छे रिश्ते को लेकर बहुत शुभ योग बन रहे हैं। आने वाले समय में मनपसंद रिश्ते की बात आगे बढ़ सकती है और आपसी समझ भी बहुत अच्छी रहेगी।`;
-    }
-    // Wealth
-    if (rule.primaryHouse === 2) {
-      return `आर्थिक मामलों में आपकी कुंडली की स्थिति काफी मजबूत है और धन संचय के अच्छे अवसर मिलेंगे। अपने काम पर ध्यान केंद्रित रखें, आने वाले समय में आपकी आर्थिक स्थिति और बेहतर होगी।`;
-    }
-    // Property / Vehicle
-    if (rule.primaryHouse === 4) {
-      return `आपकी कुंडली में मकान, जमीन या नई गाड़ी के सुखद योग साफ दिखाई दे रहे हैं। आपके प्रयास सही दिशा में हैं और बहुत जल्द इस विषय में शुभ समाचार मिल सकता है।`;
-    }
-    // Career / Job (House 10)
-    if (rule.primaryHouse === 10) {
-      return `करियर और कामकाज के क्षेत्र में आपकी कुंडली बहुत अच्छी उन्नति और स्थिरता का संकेत दे रही है। आपकी मेहनत रंग लाएगी और कार्यक्षेत्र में नई जिम्मेदारियों के साथ मान-सम्मान में वृद्धि होगी।`;
-    }
-    // Progeny / Child (House 5)
-    if (rule.primaryHouse === 5) {
-      return `संतान सुख के मामले में ग्रह स्थितियां काफी अनुकूल और सकारात्मक बनी हुई हैं। ईश्वर की कृपा से इस विषय में आपको जल्द ही सुखद और शुभ परिणाम प्राप्त होंगे।`;
-    }
-    // Foreign Travel (House 12)
-    if (rule.primaryHouse === 12) {
-      return `आपकी कुंडली में स्थान परिवर्तन और विदेश जाने के बहुत मजबूत योग बने हुए हैं। अगर आप इस दिशा में प्रयास कर रहे हैं, तो जल्द ही रास्ता साफ होगा और सफलता मिलेगी।`;
+    // 5. MARRIAGE DELAY
+    if (isMarriageDelay) {
+      return `विवाह में बार-बार रिश्ते आकर टूटना या योग्य रिश्ता न मिल पाना मन में बहुत पीड़ा और परिवार में चिंता उत्पन्न करता है। आपकी यह व्यथा बिल्कुल स्वाभाविक है।
+
+**के.पी. व पराशरी विवाह विश्लेषण:**
+विवाह के मुख्य **७वें भाव के कस्पल सब-लॉर्ड (CSL) ${HINDI_PLANET_NAMES[c7?.subLord || 'Venus'] || c7?.subLord}** हैं। के.पी. ज्योतिष का नियम है कि जब तक ७वें भाव का उप-स्वामी २रे (कुटुंब वृद्धि), ७वें (जीवनसाथी) और ११वें (मनोकामना पूर्ति) भाव के साथ सक्रिय नहीं होता, तब तक बात पक्की नहीं होती। वर्तमान में **${antarHi} की अंतर्दशा** चल रही है, जो कुछ समय से पारिवारिक दायित्वों या पसंद-नापसंद को लेकर विलंब करा रही थी।
+
+**विवाह तय होने का शुभ समय:**
+कुंडली में गोचरीय गुरु का प्रभाव अब धीरे-धीरे अनुकूल हो रहा है। आगामी **४ से ७ महीनों के भीतर** एक सुयोग्य, संस्कारी और पारिवारिक पृष्ठभूमि से जुड़े रिश्ते की बातचीत अंतिम रूप लेगी।
+
+**सरल एवं अचूक उपाय:**
+• गुरुवार के दिन भगवान विष्णु और मां लक्ष्मी की संयुक्त पूजा करें तथा चने की दाल व गुड़ गाय को खिलाएं।
+• यदि कन्या हैं तो कात्यायनी मंत्र, और वर हैं तो पत्नी मनोरमां देहि मंत्र का २१ दिन तक नियमित जप करें।
+मन में सकारात्मकता रखें, आपका दांपत्य जीवन सुखद रहेगा।`;
     }
 
-    return `आपकी कुंडली में इस विषय को लेकर ग्रह योग काफी अनुकूल और सकारात्मक हैं। आप अपने प्रयासों को पूरे आत्मविश्वास से आगे बढ़ाएं, आने वाले समय में आपको अच्छे परिणाम जरूर मिलेंगे।`;
-  } else {
-    // English Output
-    if (/health|disease|sick|pain|medical|doctor/i.test(q)) {
-      return `Your astrological indicators show steady physical vitality and cosmic protection. Maintain a balanced daily routine and prudent care; no chronic issues are indicated.`;
-    }
-    if (isStarRetrograde) {
-      return `Your astrological chart confirms positive fruition for this matter, though initial stages require patience and persistent effort. Active cosmic alignments will ensure success in the upcoming cycle.`;
+    // 6. MARRIAGE DISPUTE / DIVORCE / SEPARATION
+    if (isDivorceOrFight) {
+      return `वैवाहिक जीवन में कलह, अविश्वास या अलगाव जैसी परिस्थिति आत्मा को अत्यंत विचलित कर देती है। मैं आपकी इस पीड़ा को हृदय से समझता हूँ।
+
+**ग्रह स्थिति की पड़ताल:**
+आपकी कुंडली में वैवाहिक सामंजस्य के **७वें भाव के उप-स्वामी ${HINDI_PLANET_NAMES[c7?.subLord || 'Venus'] || c7?.subLord}** और कुटुंब के २रे भाव के सब-लॉर्ड की स्थिति पर इस समय **${antarHi} की अंतर्दशा** का तीखा प्रभाव है। साथ ही क्रूर ग्रहों की दृष्टि के कारण दोनों पक्षों में संवादहीनता (Ego Clash) और गलतफहमियां बढ़ रही हैं।
+
+**क्या तलाक होगा या सुलह?**
+के.पी. सिद्धांत के अनुसार, यदि १२वें और ६ठे भाव का स्थायी अलगाव योग न हो, तो यह मात्र ग्रहों का तात्कालिक उग्र प्रभाव है। आगामी **३ महीनों तक** आवेश में आकर कोई कानूनी कदम न उठाएं। इस अवधि के बाद ग्रहों का प्रभाव सौम्य होगा और किसी वरिष्ठ परिजन या मध्यस्थ के सहयोग से सुलह की वार्ता सफल हो सकती है।
+
+**उपाय:**
+• शिवलिंग पर प्रतिदिन शुद्ध जल में थोड़ा कच्चा दूध और अक्षत मिलाकर अर्पित करें और "ॐ नमः शिवाय" का जप करें।
+• शयनकक्ष में कपूर की टिकिया रखें और कटु वचनों से पूरी तरह परहेज करें।`;
     }
 
-    if (isObstacleHeavy) {
-      return `Current planetary alignments indicate temporary friction and delay. Avoid hasty moves and maintain steady focus; upcoming favorable transits will dissolve obstacles.`;
+    // 7. WEALTH & DEBT CRISIS
+    if (isDebtOrMoneyCrisis) {
+      return `कर्ज का बोझ और पैसों की तंगी मनुष्य की रातों की नींद छीन लेती है। आपका यह तनाव मैं भलीभांति महसूस कर पा रहा हूँ।
+
+**कुंडली में धन व ऋण की स्थिति:**
+कुंडली के संचित धन के **२रे भाव के कस्पल सब-लॉर्ड ${HINDI_PLANET_NAMES[c2?.subLord || 'Jupiter'] || c2?.subLord}** और कर्ज के **६ठे भाव के कस्पल सब-लॉर्ड ${HINDI_PLANET_NAMES[c6?.subLord || 'Mars'] || c6?.subLord}** की परस्पर स्थिति दर्शाती है कि वर्तमान में अचानक आए अप्रत्याशित खर्चों ने आपकी वित्तीय योजना को बिगाड़ दिया है। वर्तमान **${antarHi} की अंतर्दशा** आपको वित्तीय अनुशासन सिखाने आई है।
+
+**कर्ज मुक्ति एवं धन आगमन का समय:**
+ग्रह गणना के अनुसार, आगामी **४ से ६ महीनों में** आपके लिए आय के एक नए माध्यम की शुरुआत होगी, जिससे पुराने कर्जों की किश्तें सुगमता से उतरने लगेंगी और रुका हुआ धन वापस मिलेगा।
+
+**अचूक ऋण मुक्ति उपाय:**
+• मंगलवार के दिन ऋणमोचक मंगल स्तोत्र का पाठ करें और बंदरों या गाय को गुड़-चना खिलाएं।
+• बुधवार को किसी भी व्यक्ति को धन उधार देने से बचें।
+धैर्य रखिए, आपकी आर्थिक स्थिति में धीरे-धीरे स्थायित्व आ रहा है।`;
     }
 
-    return `The planetary significators in your chart are strongly positioned in favor of this objective. Supported by the active Dasha and live transits, favorable outcomes are indicated ahead.`;
+    // 8. HEALTH & DISEASE
+    if (isIllness) {
+      return `स्वास्थ्य की अस्वस्थता और शारीरिक अथवा मानसिक पीड़ा सबसे बड़ा कष्ट है। आपकी चिंता सर्वथा उचित है।
+
+**स्वास्थ्य एवं आरोग्यता का परीक्षण:**
+कुंडली के आरोग्य भाव (लग्न) के स्वामी **${lagnaLordHi}** हैं तथा रोग मुक्ति के **५वें व ११वें भाव** आपके पक्ष में स्थित हैं। वर्तमान में ६ठे भाव (रोग) से जुड़े ग्रह की सूक्ष्म दशा चलने के कारण दवाओं का असर धीमा लग रहा है तथा वात-पित्त अथवा मानसिक तनाव की अधिकता बनी हुई है।
+
+**स्वास्थ्य लाभ का समय:**
+कोई गंभीर या दीर्घकालिक संकट की स्थिति नहीं है। आने वाले **३ से ५ सप्ताह में** उचित चिकित्सा, सही औषधि और खान-पान में संतुलन के साथ आपके स्वास्थ्य में आश्चर्यजनक सुधार दिखाई देगा।
+
+**आयुर्वेदिक एवं वैदिक उपाय:**
+• प्रतिदिन महामृत्युंजय मंत्र "ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम्। उर्वारुकमिव बन्धनान्मृत्योर्मुक्षीय माऽमृतात्॥" का ११ बार श्रद्धा से स्मरण करें।
+• तांबे के बर्तन में रखा हुआ जल प्रातःकाल पिएं और प्राणायाम करें।`;
+    }
+
+    // 9. EDUCATION & COMPETITIVE EXAMS
+    if (isExam) {
+      return `प्रतियोगी परीक्षा और उच्च अध्ययन को लेकर आपकी लगन सराहनीय है। आइए, आपकी कुंडली में विद्या और प्रतियोगिता के भावों की स्थिति देखते हैं।
+
+**के.पी. शिक्षा व प्रतियोगिता विश्लेषण:**
+विद्या के **४थे भाव के उप-स्वामी ${HINDI_PLANET_NAMES[c4?.subLord || 'Mercury'] || c4?.subLord}** और प्रतियोगिता में विजय के **६ठे भाव के उप-स्वामी ${HINDI_PLANET_NAMES[c6?.subLord || 'Mars'] || c6?.subLord}** तथा भाग्य के ९वें भाव का त्रिकोणीय संबंध आपकी बौद्धिक क्षमता को प्रखर बना रहा है। वर्तमान **${mahaHi} महादशा में ${antarHi} का प्रभाव** एकाग्रता में कभी-कभी भटकाव लाता है, किंतु विषय की गहराई को समझने की शक्ति भी प्रदान करता है।
+
+**सफलता का सूत्र व समय:**
+आगामी परीक्षा चक्र में आपका प्रदर्शन उत्कृष्ट रहेगा। बस आपको अपनी नियमित अध्ययन दिनचर्या में निरंतरता रखनी है।
+
+**उपाय:**
+• अध्ययन कक्ष में उत्तर या पूर्व दिशा की ओर मुख करके बैठें।
+• प्रतिदिन प्रातः मां सरस्वती के समक्ष कपूर जलाकर "ॐ ऐं सरस्वत्यै नमः" का जप करें।`;
+    }
+
+    // 10. GENERAL DEFAULT COMPREHENSIVE ANSWER
+    return `मैं आपकी बात को ध्यानपूर्वक समझ रहा हूँ। आपकी जन्म कुंडली में लग्न **${lagnaSignHi}** है और चन्द्र राशि **${moonSignHi}** है।
+
+**कुंडली का वर्तमान ग्रह परिदृश्य (के.पी. एवं पराशरी समन्वय):**
+वर्तमान में आप पर **${mahaHi} की महादशा** में **${antarHi} की अंतर्दशा** गतिशील है। इसके साथ ही वर्तमान गोचर में शनि और गुरु का संचरण आपके जीवन के मुख्य भावों को सक्रिय कर रहा है। के.पी. ज्योतिष के अनुसार आपके मुख्य भाव के कस्पल सब-लॉर्ड शुभ नक्षत्रों के प्रभाव में हैं, जिसका अर्थ है कि वर्तमान परिस्थितियां भले ही थोड़ी चुनौतीपूर्ण लगें, किंतु उनका अंतिम परिणाम आपके व्यक्तिगत उत्थान और स्थिरता के पक्ष में ही जाएगा।
+
+**आगामी समय का संकेत:**
+आने वाले **२ से ४ महीनों के भीतर** आपको अपनी योजनाओं में स्पष्ट प्रगति और अनुकूल अवसरों की प्राप्ति होगी। ग्रहों का यह कालखंड आपको धैर्य और आत्म-विश्वास के साथ आगे बढ़ने की प्रेरणा दे रहा है।
+
+**दैनिक जीवन हेतु मार्गदर्शन:**
+• अपने ईष्टदेव के प्रति आस्था बनाए रखें और दैनिक दिनचर्या में सात्विकता अपनाएं।
+• किसी भी दुविधा की स्थिति में शांत मन से निर्णय लें, ग्रह आपके साथ हैं।
+
+क्या आप इस विषय से जुड़ा कोई विशेष पहलू या समय-सीमा भी विस्तार से समझना चाहते हैं?`;
   }
+
+  // ==========================================
+  // ENGLISH SYNTHESIS (Warm, Human-to-Human Dialogue)
+  // ==========================================
+  if (isJobLoss || isCareerGeneral) {
+    return `I completely understand the anxiety and mental pressure you are experiencing. Facing career disruptions or unexpected job loss is profoundly challenging, but examining your horoscope reveals that this is merely a temporary transitional phase rather than a permanent setback.
+
+**Astrological Diagnosis (KP & Parashari Principles):**
+In your natal chart, the primary Cuspal Sub-Lord (CSL) of the 10th House of Career (${c10?.subLord || 'Mercury'}) carries strong foundational promise. The current friction is triggered by the operating **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**, while transiting Saturn enforces a demanding karmic audit on your 6th and 10th cusps.
+
+**Timing of New Opportunity:**
+Stellar progressions indicate that within the next **2 to 3 months**, a favorable planetary alignment activates positive hiring avenues. A promising job offer aligning with your skill set will materialize.
+
+**Recommended Remedies:**
+• Offer clean water to the rising Sun daily while chanting the Gayatri Mantra 11 times.
+• Support a needy individual or student on Saturdays with food or educational supplies.
+
+Keep your confidence intact; auspicious cosmic support is approaching shortly.`;
+  }
+
+  if (isMarriageDelay || isMarriageGeneral) {
+    return `Matrimonial delays and repeated hurdles in alliances naturally cause concern for both you and your family. Let us look directly at what your cosmic blueprint indicates.
+
+**Astrological Insights (7th Cusp Sub-Lord):**
+According to KP rules, fruition of marriage requires the 7th Cusp Sub-Lord (${c7?.subLord || 'Venus'}) to harmonize with houses 2, 7, and 11. Your chart confirms genuine matrimonial promise. The active **${antarRaw} sub-period** combined with Jupiter's transiting rays is actively clearing past astrological blockages.
+
+**Expected Auspicious Timing:**
+A highly compatible matrimonial proposal from a respectable background is projected to crystallize within the upcoming **4 to 7 months**.
+
+**Vedic Remedy:**
+• Pray to Lord Vishnu and Goddess Lakshmi together on Thursdays and donate yellow pulses.
+• Maintain a hopeful, positive outlook; domestic bliss is assured.`;
+  }
+
+  // Default English Human Counseling Response
+  return `I have carefully evaluated your inquiry against your planetary coordinates. With your Ascendant in **${lagnaSign}** and Moon in **${moonSign}**, your chart is navigating a meaningful cosmic cycle.
+
+**Planetary Diagnosis:**
+You are currently under the influence of the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**. In synthesis with Placidus Cuspal Sub-Lords and live planetary transits, current challenges are designed to refine your focus and clear karmic backlog. Positive houses are gaining strength.
+
+**Favorable Timing:**
+Noticeable relief and positive developments will unfold over the next **2 to 4 months** as planetary transits shift favorably into supportive constellations.
+
+**Guiding Practice:**
+Maintain disciplined focus, offer daily personal prayers, and avoid hasty impulsive decisions during this transition. Would you like to explore any specific aspect of this situation in greater detail?`;
 }

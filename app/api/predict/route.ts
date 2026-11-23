@@ -208,7 +208,7 @@ ${gocharData.summaryTextHi}
     let modelUsed = '';
 
     if (apiKey) {
-      const models = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+      const models = ['gemini-3.6-flash', 'gemini-3.5-flash-lite'];
       for (const m of models) {
         try {
           const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500));
