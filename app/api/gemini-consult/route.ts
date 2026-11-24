@@ -438,8 +438,8 @@ ${gocharData.summaryTextHi}
 
     // Verified active GenAI models with human-speed response
     const models = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
     ];
 
     let replyText = '';
@@ -449,7 +449,7 @@ ${gocharData.summaryTextHi}
     for (const m of models) {
       try {
         const timeoutPromise = new Promise<null>((resolve) =>
-          setTimeout(() => resolve(null), 5500)
+          setTimeout(() => resolve(null), 12000)
         );
 
         const aiCallPromise = ai.models.generateContent({
