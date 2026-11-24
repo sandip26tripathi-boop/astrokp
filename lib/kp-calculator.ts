@@ -733,12 +733,14 @@ export function calculateVimshottariDasha(
   let currentMaha = tree.find((d) => new Date(d.startDate) <= now && new Date(d.endDate) >= now);
   if (!currentMaha) currentMaha = tree[0];
 
-  // Calculate Antardasha within Current Mahadasha
+  // Calculate Antardasha within Current Mahadasha using true standard duration
   const mahaLordIdx = VIMSHOTTARI_LORDS.findIndex((l) => l.name === currentMaha!.planet);
-  const mahaStart = new Date(currentMaha.startDate).getTime();
-  const totalMahaDurationYears = currentMaha.durationYears;
+  const fullMahaLordYears = VIMSHOTTARI_LORDS[mahaLordIdx].years;
+  const isBirthMaha = currentMaha === tree[0];
+  const mEndMs = new Date(currentMaha.endDate).getTime();
+  const theoreticalMahaStartMs = isBirthMaha ? (mEndMs - fullMahaLordYears * 365.25 * 86400000) : new Date(currentMaha.startDate).getTime();
 
-  let antarStart = mahaStart;
+  let antarStart = theoreticalMahaStartMs;
   let activeAntar: { planet: string; startDate: string; endDate: string } = {
     planet: currentMaha.planet,
     startDate: currentMaha.startDate,
@@ -748,13 +750,15 @@ export function calculateVimshottariDasha(
   for (let a = 0; a < 9; a++) {
     const antarLordIdx = (mahaLordIdx + a) % 9;
     const aLord = VIMSHOTTARI_LORDS[antarLordIdx];
-    const antarDurationYears = (totalMahaDurationYears * aLord.years) / TOTAL_DASHA_YEARS;
+    const antarDurationYears = (fullMahaLordYears * aLord.years) / TOTAL_DASHA_YEARS;
     const antarEnd = antarStart + antarDurationYears * 365.25 * 86400000;
 
-    if (now.getTime() >= antarStart && now.getTime() <= antarEnd) {
+    const actualAntarStart = isBirthMaha ? Math.max(antarStart, safeBirthTime) : antarStart;
+
+    if (now.getTime() >= actualAntarStart && now.getTime() <= antarEnd) {
       activeAntar = {
         planet: aLord.name,
-        startDate: new Date(antarStart).toISOString(),
+        startDate: new Date(actualAntarStart).toISOString(),
         endDate: new Date(antarEnd).toISOString(),
       };
       break;
@@ -764,10 +768,11 @@ export function calculateVimshottariDasha(
 
   // Calculate Pratyantardasha within active Antardasha
   const antarLordIdx = VIMSHOTTARI_LORDS.findIndex((l) => l.name === activeAntar.planet);
-  const aStart = new Date(activeAntar.startDate).getTime();
-  const aDurationYears = (new Date(activeAntar.endDate).getTime() - aStart) / (365.25 * 86400000);
+  const fullAntarYears = (fullMahaLordYears * VIMSHOTTARI_LORDS[antarLordIdx].years) / TOTAL_DASHA_YEARS;
+  const aEnd = new Date(activeAntar.endDate).getTime();
+  const theoreticalAntarStart = aEnd - fullAntarYears * 365.25 * 86400000;
 
-  let pratStart = aStart;
+  let pratStart = theoreticalAntarStart;
   let activePratyantar = {
     planet: activeAntar.planet,
     startDate: activeAntar.startDate,
@@ -777,13 +782,15 @@ export function calculateVimshottariDasha(
   for (let p = 0; p < 9; p++) {
     const pratLordIdx = (antarLordIdx + p) % 9;
     const pLord = VIMSHOTTARI_LORDS[pratLordIdx];
-    const pDurationYears = (aDurationYears * pLord.years) / TOTAL_DASHA_YEARS;
+    const pDurationYears = (fullAntarYears * pLord.years) / TOTAL_DASHA_YEARS;
     const pEnd = pratStart + pDurationYears * 365.25 * 86400000;
 
-    if (now.getTime() >= pratStart && now.getTime() <= pEnd) {
+    const actualPratStart = isBirthMaha ? Math.max(pratStart, safeBirthTime) : pratStart;
+
+    if (now.getTime() >= actualPratStart && now.getTime() <= pEnd) {
       activePratyantar = {
         planet: pLord.name,
-        startDate: new Date(pratStart).toISOString(),
+        startDate: new Date(actualPratStart).toISOString(),
         endDate: new Date(pEnd).toISOString(),
       };
       break;

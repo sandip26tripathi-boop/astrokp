@@ -14,7 +14,7 @@ import { computeShodashvarga, ShodashvargaChart } from '@/lib/shodashvarga';
 import { calculateAshtakvarga, AshtakvargaResult } from '@/lib/ashtakvarga';
 import { evaluateGochar, GocharEvaluationResult } from '@/lib/gochar-evaluator';
 import { kundliCalculationCache } from '@/lib/cache-manager';
-import { generateFull120YearDashaTimeline, DetailedMahadasha } from '@/lib/dasha-date-resolver';
+import { generateFull120YearDashaTimeline, DetailedMahadasha, getUtcBirthDate, getAllMahadashasTable, DashaTableEntry } from '@/lib/dasha-date-resolver';
 
 export interface ExtendedDashaHierarchy {
   mahadasha: { planet: string; startDate: string; endDate: string };
@@ -113,6 +113,7 @@ export interface MasterKundliJSON {
   dashaHierarchy: ExtendedDashaHierarchy;
   full120YearDashaTimeline: DetailedMahadasha[];
   fullMahadashaSummary: { planet: string; startYear: number; endYear: number; periodStr: string }[];
+  allMahadashasTable?: DashaTableEntry[];
   shodashvarga: Record<string, ShodashvargaChart>;
   ashtakvarga: AshtakvargaResult;
   parashariAnalysis: ParashariAnalysis;
@@ -393,7 +394,7 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
     sookshmaDasha,
   };
 
-  const birthDateObj = new Date(`${dob}T${tob}:00Z`);
+  const birthDateObj = getUtcBirthDate(dob, tob, tz);
   const moonPlanet = kpMatrix.planets.find((p) => p.name === 'Moon');
   const moonLon = moonPlanet ? moonPlanet.longitude : 0;
   const full120YearDashaTimeline = generateFull120YearDashaTimeline(moonLon, birthDateObj);
@@ -476,6 +477,7 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
     dashaHierarchy,
     full120YearDashaTimeline,
     fullMahadashaSummary,
+    allMahadashasTable: getAllMahadashasTable(full120YearDashaTimeline),
     shodashvarga,
     ashtakvarga,
     parashariAnalysis,

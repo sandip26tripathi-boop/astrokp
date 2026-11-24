@@ -8,7 +8,7 @@ import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
 import { apiRateLimiter } from '@/lib/cache-manager';
 import { generateMasterKundli, MasterKundliJSON } from '@/lib/master-kundli-engine';
-import { extractQueriedTargetDate, getDashaForDate } from '@/lib/dasha-date-resolver';
+import { extractQueriedTargetDate, getDashaForDate, getAllMahadashasTable } from '@/lib/dasha-date-resolver';
 import { ChartInput } from '@/types/astrology';
 
 try {
@@ -197,7 +197,9 @@ export async function POST(req: NextRequest) {
 
     // Historical & Target Date Resolution (e.g., 2014, 2028, next year)
     const dateParse = extractQueriedTargetDate(currentQuestion);
-    const queriedDateDasha = getDashaForDate(masterKundli.full120YearDashaTimeline, dateParse.targetDate);
+    const targetDateDasha = getDashaForDate(masterKundli.full120YearDashaTimeline, dateParse.targetDate);
+    const todayDasha = getDashaForDate(masterKundli.full120YearDashaTimeline, new Date());
+    const allMahadashasTable = masterKundli.allMahadashasTable || getAllMahadashasTable(masterKundli.full120YearDashaTimeline);
 
     const cusps = activeChart.cusps || [];
     const currentDBA = masterKundli.dashaHierarchy;
@@ -211,26 +213,45 @@ export async function POST(req: NextRequest) {
         place: birthDetails?.placeName || masterKundli.meta.placeName,
         gender: birthDetails?.gender || 'male',
       },
-      dateAndDashaLock: {
+      dashaDateLock: {
+        strictInstruction: "STRICT RULE: Never calculate Dasha dates yourself. Read the exact Mahadasha, Antardasha, and Pratyantardasha directly from targetDateDasha (for any past/future year asked by the user) and todayDasha (for current questions).",
+        targetDateDasha: {
+          targetDate: targetDateDasha.targetDate,
+          mahadasha: targetDateDasha.planetMD,
+          mdStart: targetDateDasha.mdStart,
+          mdEnd: targetDateDasha.mdEnd,
+          antardasha: targetDateDasha.planetAD,
+          adStart: targetDateDasha.adStart,
+          adEnd: targetDateDasha.adEnd,
+          pratyantardasha: targetDateDasha.planetPD,
+          pdStart: targetDateDasha.pdStart,
+          pdEnd: targetDateDasha.pdEnd,
+          periodSummaryHi: targetDateDasha.periodDescription,
+          isPast: targetDateDasha.isPast,
+          isFuture: targetDateDasha.isFuture,
+          isCurrentToday: targetDateDasha.isCurrent,
+        },
+        todayDasha: {
+          targetDate: todayDasha.targetDate,
+          mahadasha: todayDasha.planetMD,
+          mdStart: todayDasha.mdStart,
+          mdEnd: todayDasha.mdEnd,
+          antardasha: todayDasha.planetAD,
+          adStart: todayDasha.adStart,
+          adEnd: todayDasha.adEnd,
+          pratyantardasha: todayDasha.planetPD,
+          pdStart: todayDasha.pdStart,
+          pdEnd: todayDasha.pdEnd,
+          periodSummaryHi: todayDasha.periodDescription,
+        },
+        allMahadashasTable: allMahadashasTable.map((m) => ({
+          mahadasha: m.mahadasha,
+          mdStart: m.mdStart,
+          mdEnd: m.mdEnd,
+          durationYears: m.durationYears,
+        })),
         userQueriedYear: dateParse.yearMentioned,
-        isSpecificDateQueried: !queriedDateDasha.isCurrent,
-        queriedDateDasha: {
-          targetDate: queriedDateDasha.targetDate,
-          mahadasha: queriedDateDasha.planetMD,
-          antardasha: queriedDateDasha.planetAD,
-          pratyantardasha: queriedDateDasha.planetPD,
-          periodSummaryHi: queriedDateDasha.periodDescription,
-          isPast: queriedDateDasha.isPast,
-          isFuture: queriedDateDasha.isFuture,
-          isCurrentToday: queriedDateDasha.isCurrent,
-        },
-        currentRunningDashaToday: {
-          mahadasha: currentDBA.mahadasha.planet,
-          antardasha: currentDBA.antardasha.planet,
-          pratyantardasha: currentDBA.pratyantardasha.planet,
-          sookshmaDasha: currentDBA.sookshmaDasha.planet,
-        },
-        full120YearMahadashaRoadmap: masterKundli.fullMahadashaSummary,
+        isSpecificDateQueried: !targetDateDasha.isCurrent,
       },
       natalCoordinates: {
         lagna: {
@@ -310,7 +331,7 @@ export async function POST(req: NextRequest) {
     const masterSystemPrompt = `You are "Gemini Astro", an authoritative, empathetic, and deeply logical Indian Astrologer mastering both Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology. You NEVER guess, generalize, or give mood-pleasing answers. Every single conclusion must come strictly from the client's Backend Master Kundli JSON.
 
 MANDATORY SILENT ANALYSIS PIPELINE (DO NOT SHOW RAW JSON, TABLES, OR TECHNICAL CODES TO CLIENT):
-1. Date & Dasha Lock: Check if the client is asking about a past date/year (e.g., 2014), the present, or a future period. Lock onto the exact queriedDateDasha and fullMahadashaSummary from the JSON. Never confuse current Dasha with past or future Dasha.
+1. Date & Dasha Lock: STRICT RULE: Never calculate Dasha dates yourself. Read the exact Mahadasha, Antardasha, and Pratyantardasha directly from targetDateDasha (for any past/future year asked by the user) and todayDasha (for current questions). Never confuse current Dasha with past or future Dasha.
 2. Apply Core KP Astrology Rules:
    - Map the query to Event-Forming Houses vs. Negating Houses (e.g., Career/Promotion: 2, 6, 10, 11 vs 5, 8, 12; Marriage: 2, 7, 11 vs 1, 6, 10; Wealth: 2, 6, 11 vs 5, 8, 12; Health/Dispute: 6, 8, 12 vs 1, 5, 11; Foreign/Travel: 3, 9, 12; Property/Vehicle: 4, 11, 12).
    - Inspect the Cuspal Sub-Lord (CSL) of the primary house: check its Star Lord (source of results) and Sub-Lord (final approval/denial) via 4-Fold Significators (L1–L4).
