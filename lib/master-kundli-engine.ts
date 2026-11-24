@@ -29,8 +29,30 @@ export interface MasterPlanetDetails extends PlanetPosition {
   hasBhavaShift: boolean;
   shiftDescription?: string;
   isUntenanted: boolean;
-  dignity: 'Exalted' | 'Debilitated' | 'Own Sign' | 'Vargottama' | 'Normal';
+  isCombust: boolean;
+  dignity: 'Exalted' | 'Debilitated' | 'Own Sign' | 'Moolatrikona' | 'Vargottama' | 'Normal';
+  baladiAvastha: 'Bala' | 'Kumara' | 'Yuva' | 'Vriddha' | 'Mrita';
+  avasthaDescriptionHi: string;
+  hasDigbala: boolean;
   specialAspectHouses: number[];
+}
+
+export interface BadhakaInfo {
+  lagnaModality: 'Movable' | 'Fixed' | 'Dual';
+  badhakaHouseNumber: number;
+  badhakeshPlanet: string;
+  badhakeshPlacedInHouse: number;
+  summaryHi: string;
+}
+
+export interface NodeRepresentation {
+  node: 'Rahu' | 'Ketu';
+  signLord: string;
+  starLord: string;
+  conjunctPlanets: string[];
+  aspectingPlanets: string[];
+  representedAgents: string[];
+  summaryHi: string;
 }
 
 export interface BhavaShiftRecord {
@@ -89,6 +111,8 @@ export interface MasterKundliJSON {
   };
   untenantedPlanets: string[];
   bhavaShifts: BhavaShiftRecord[];
+  badhakaInfo: BadhakaInfo;
+  nodeRepresentation: { rahu: NodeRepresentation; ketu: NodeRepresentation };
   conjunctionsByHouse: { house: number; planets: string[] }[];
   planetaryAspects: AspectDetails[];
   houseLordships: BhavaBhaveshInfo[];
@@ -160,49 +184,228 @@ function computeSookshmaDasha(
 }
 
 /**
- * Evaluates dignity of a planet (Exalted, Debilitated, Own Sign, Vargottama, Normal)
+ * Evaluates dignity of a planet (Exalted, Debilitated, Own Sign, Moolatrikona, Vargottama, Normal)
  */
-function evaluatePlanetDignity(planetName: string, signId: number, d9SignId?: number): 'Exalted' | 'Debilitated' | 'Own Sign' | 'Vargottama' | 'Normal' {
+function evaluatePlanetDignity(
+  planetName: string,
+  signId: number,
+  degInSign: number = 15,
+  d9SignId?: number
+): 'Exalted' | 'Debilitated' | 'Own Sign' | 'Moolatrikona' | 'Vargottama' | 'Normal' {
   if (d9SignId && d9SignId === signId) return 'Vargottama';
 
   switch (planetName) {
     case 'Sun':
       if (signId === 1) return 'Exalted';
       if (signId === 7) return 'Debilitated';
-      if (signId === 5) return 'Own Sign';
+      if (signId === 5) return degInSign <= 20 ? 'Moolatrikona' : 'Own Sign';
       break;
     case 'Moon':
-      if (signId === 2) return 'Exalted';
+      if (signId === 2) return degInSign <= 3 ? 'Exalted' : 'Moolatrikona';
       if (signId === 8) return 'Debilitated';
       if (signId === 4) return 'Own Sign';
       break;
     case 'Mars':
       if (signId === 10) return 'Exalted';
       if (signId === 4) return 'Debilitated';
-      if (signId === 1 || signId === 8) return 'Own Sign';
+      if (signId === 1) return degInSign <= 12 ? 'Moolatrikona' : 'Own Sign';
+      if (signId === 8) return 'Own Sign';
       break;
     case 'Mercury':
-      if (signId === 6) return 'Exalted';
+      if (signId === 6) {
+        if (degInSign <= 15) return 'Exalted';
+        if (degInSign <= 20) return 'Moolatrikona';
+        return 'Own Sign';
+      }
       if (signId === 12) return 'Debilitated';
-      if (signId === 3 || signId === 6) return 'Own Sign';
+      if (signId === 3) return 'Own Sign';
       break;
     case 'Jupiter':
       if (signId === 4) return 'Exalted';
       if (signId === 10) return 'Debilitated';
-      if (signId === 9 || signId === 12) return 'Own Sign';
+      if (signId === 9) return degInSign <= 10 ? 'Moolatrikona' : 'Own Sign';
+      if (signId === 12) return 'Own Sign';
       break;
     case 'Venus':
       if (signId === 12) return 'Exalted';
       if (signId === 6) return 'Debilitated';
-      if (signId === 2 || signId === 7) return 'Own Sign';
+      if (signId === 7) return degInSign <= 15 ? 'Moolatrikona' : 'Own Sign';
+      if (signId === 2) return 'Own Sign';
       break;
     case 'Saturn':
       if (signId === 7) return 'Exalted';
       if (signId === 1) return 'Debilitated';
-      if (signId === 10 || signId === 11) return 'Own Sign';
+      if (signId === 11) return degInSign <= 20 ? 'Moolatrikona' : 'Own Sign';
+      if (signId === 10) return 'Own Sign';
       break;
   }
   return 'Normal';
+}
+
+/**
+ * Calculates Baladi Avastha based on degree in sign and odd/even nature
+ */
+function calculateBaladiAvastha(degInSign: number, signId: number): {
+  avastha: 'Bala' | 'Kumara' | 'Yuva' | 'Vriddha' | 'Mrita';
+  descHi: string;
+} {
+  const isOdd = signId % 2 !== 0;
+  let avastha: 'Bala' | 'Kumara' | 'Yuva' | 'Vriddha' | 'Mrita' = 'Yuva';
+  let descHi = '';
+
+  if (isOdd) {
+    if (degInSign < 6) {
+      avastha = 'Bala';
+      descHi = 'बाल्यावस्था (अल्प बल, ~25% फल)';
+    } else if (degInSign < 12) {
+      avastha = 'Kumara';
+      descHi = 'कुमारावस्था (मध्यम बल, ~50% फल)';
+    } else if (degInSign < 18) {
+      avastha = 'Yuva';
+      descHi = 'युवावस्था (पूर्ण बल, 100% समर्थ)';
+    } else if (degInSign < 24) {
+      avastha = 'Vriddha';
+      descHi = 'वृद्धावस्था (क्षीण बल, ~15% फल)';
+    } else {
+      avastha = 'Mrita';
+      descHi = 'मृतावस्था (नगण्य बल)';
+    }
+  } else {
+    if (degInSign < 6) {
+      avastha = 'Mrita';
+      descHi = 'मृतावस्था (नगण्य बल)';
+    } else if (degInSign < 12) {
+      avastha = 'Vriddha';
+      descHi = 'वृद्धावस्था (क्षीण बल, ~15% फल)';
+    } else if (degInSign < 18) {
+      avastha = 'Yuva';
+      descHi = 'युवावस्था (पूर्ण बल, 100% समर्थ)';
+    } else if (degInSign < 24) {
+      avastha = 'Kumara';
+      descHi = 'कुमारावस्था (मध्यम बल, ~50% फल)';
+    } else {
+      avastha = 'Bala';
+      descHi = 'बाल्यावस्था (अल्प बल, ~25% फल)';
+    }
+  }
+  return { avastha, descHi };
+}
+
+/**
+ * Checks Digbala (Directional Strength)
+ */
+function checkDigbala(planetName: string, houseNumber: number): boolean {
+  switch (planetName) {
+    case 'Jupiter':
+    case 'Mercury':
+      return houseNumber === 1;
+    case 'Venus':
+    case 'Moon':
+      return houseNumber === 4;
+    case 'Saturn':
+      return houseNumber === 7;
+    case 'Sun':
+    case 'Mars':
+      return houseNumber === 10;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Checks combustion (अस्त) relative to the Sun
+ */
+function checkCombustion(planetName: string, planetLon: number, sunLon: number, isRetrograde: boolean): boolean {
+  if (['Sun', 'Rahu', 'Ketu'].includes(planetName)) return false;
+  let dist = Math.abs(planetLon - sunLon);
+  if (dist > 180) dist = 360 - dist;
+
+  let combustionOrb = 15;
+  switch (planetName) {
+    case 'Moon': combustionOrb = 12; break;
+    case 'Mars': combustionOrb = 17; break;
+    case 'Mercury': combustionOrb = isRetrograde ? 12 : 14; break;
+    case 'Jupiter': combustionOrb = 11; break;
+    case 'Venus': combustionOrb = isRetrograde ? 8 : 10; break;
+    case 'Saturn': combustionOrb = 15; break;
+  }
+  return dist <= combustionOrb;
+}
+
+/**
+ * Calculates Badhaka House & Badhakesh for the Ascendant
+ */
+function calculateBadhaka(ascSignId: number, cusps: CuspData[], masterPlanets: MasterPlanetDetails[]): BadhakaInfo {
+  let modality: 'Movable' | 'Fixed' | 'Dual' = 'Movable';
+  let badhakaHouseNum = 11;
+
+  if ([1, 4, 7, 10].includes(ascSignId)) {
+    modality = 'Movable';
+    badhakaHouseNum = 11;
+  } else if ([2, 5, 8, 11].includes(ascSignId)) {
+    modality = 'Fixed';
+    badhakaHouseNum = 9;
+  } else {
+    modality = 'Dual';
+    badhakaHouseNum = 7;
+  }
+
+  const badhakaCusp = cusps.find((c) => (c.houseNumber || (c as any).cuspNumber) === badhakaHouseNum);
+  const badhakeshPlanet = badhakaCusp?.signLord || '';
+  const badhakeshObj = masterPlanets.find((p) => (p.name || '').toLowerCase() === (badhakeshPlanet || '').toLowerCase());
+  const badhakeshPlacedIn = badhakeshObj ? badhakeshObj.d1House : badhakaHouseNum;
+
+  return {
+    lagnaModality: modality,
+    badhakaHouseNumber: badhakaHouseNum,
+    badhakeshPlanet,
+    badhakeshPlacedInHouse: badhakeshPlacedIn,
+    summaryHi: `${modality} लग्न के लिए बाधक भाव ${badhakaHouseNum}वां है, जिसके स्वामी (बाधकेश) ${badhakeshPlanet} हैं और वे ${badhakeshPlacedIn}वें भाव में स्थित हैं।`,
+  };
+}
+
+/**
+ * Pre-computes Node Representation (Rahu & Ketu as shadow agents)
+ */
+function calculateNodeRepresentation(
+  nodeName: 'Rahu' | 'Ketu',
+  allPlanets: MasterPlanetDetails[],
+  aspects: AspectDetails[]
+): NodeRepresentation {
+  const nodeObj = allPlanets.find((p) => p.name === nodeName);
+  const nodeHouse = nodeObj?.d1House || 1;
+  const starLord = nodeObj?.starLord || '';
+  const signLord = nodeObj?.signLord || '';
+
+  // 1. Conjunct planets (in same house)
+  const conjunctPlanets = allPlanets
+    .filter((p) => p.name !== nodeName && p.d1House === nodeHouse)
+    .map((p) => p.name);
+
+  // 2. Aspecting planets (whose aspect hits nodeHouse)
+  const aspectingPlanets = aspects
+    .filter((a) => a.planet !== nodeName && a.aspectHouses.includes(nodeHouse))
+    .map((a) => a.planet);
+
+  // Ordered agents of representation (Conjunct -> Aspecting -> Star Lord -> Sign Lord)
+  const representedAgents = Array.from(new Set([
+    ...conjunctPlanets,
+    ...aspectingPlanets,
+    starLord,
+    signLord,
+  ])).filter(Boolean);
+
+  const summaryHi = `${nodeName} छाया ग्रह होने के कारण अपने युति ग्रह (${conjunctPlanets.join(', ') || 'कोई नहीं'}), दृष्टि प्रदाता (${aspectingPlanets.join(', ') || 'कोई नहीं'}), नक्षत्र स्वामी (${starLord}) और राशि स्वामी (${signLord}) के पूर्ण प्रतिनिधि (Agent) के रूप में फल प्रदान करेंगे।`;
+
+  return {
+    node: nodeName,
+    signLord,
+    starLord,
+    conjunctPlanets,
+    aspectingPlanets,
+    representedAgents,
+    summaryHi,
+  };
 }
 
 /**
@@ -296,6 +499,9 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
   const planetaryAspects: AspectDetails[] = [];
   const masterPlanets: MasterPlanetDetails[] = [];
 
+  const sunObj = kpMatrix.planets.find((p) => p.name === 'Sun');
+  const sunLon = sunObj ? sunObj.longitude : 0;
+
   for (const p of kpMatrix.planets) {
     const pSignId = resolveSignId(p.signId || p.signName, p.longitude);
     // D1 House from Lagna Sign
@@ -315,9 +521,13 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
       });
     }
 
+    const degInSign = ((p.longitude % 30) + 30) % 30;
     const d9Sign = shodashvarga?.D9?.placements[p.name]?.signId;
-    const dignity = evaluatePlanetDignity(p.name, pSignId, d9Sign);
+    const dignity = evaluatePlanetDignity(p.name, pSignId, degInSign, d9Sign);
     const aspectInfo = calculateSpecialAspects(p.name, d1House);
+    const isCombust = checkCombustion(p.name, p.longitude, sunLon, Boolean(p.isRetrograde));
+    const avasthaInfo = calculateBaladiAvastha(degInSign, pSignId);
+    const hasDigbala = checkDigbala(p.name, d1House);
 
     planetaryAspects.push({
       planet: p.name,
@@ -334,7 +544,11 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
       hasBhavaShift,
       shiftDescription: shiftDesc,
       isUntenanted: untenantedPlanets.includes(p.name),
+      isCombust,
       dignity,
+      baladiAvastha: avasthaInfo.avastha,
+      avasthaDescriptionHi: avasthaInfo.descHi,
+      hasDigbala,
       specialAspectHouses: aspectInfo.houses,
     });
   }
@@ -424,6 +638,15 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
   const moonSignId = resolveSignId(moonPlanet?.signId || moonPlanet?.signName, moonPlanet?.longitude);
   const liveGochar = evaluateGochar(ascSignId, moonSignId);
 
+  // 12. Badhaka House & Badhakesh Identification
+  const badhakaInfo = calculateBadhaka(ascSignId, kpMatrix.cusps, masterPlanets);
+
+  // 13. Pre-computed Node Representation (Rahu & Ketu Agents)
+  const nodeRepresentation = {
+    rahu: calculateNodeRepresentation('Rahu', masterPlanets, planetaryAspects),
+    ketu: calculateNodeRepresentation('Ketu', masterPlanets, planetaryAspects),
+  };
+
   const masterKundli: MasterKundliJSON = {
     meta: {
       name: input.name || 'Jataka',
@@ -453,6 +676,8 @@ export function generateMasterKundli(input: ChartInput): MasterKundliJSON {
     fourFoldSignificators,
     untenantedPlanets,
     bhavaShifts,
+    badhakaInfo,
+    nodeRepresentation,
     conjunctionsByHouse,
     planetaryAspects,
     houseLordships,
