@@ -7,6 +7,7 @@
 
 import * as Astronomy from 'astronomy-engine';
 import { resolveSignId } from './parashari-evaluator';
+import { gocharTransitCache } from './cache-manager';
 
 export interface TransitPlanetInfo {
   name: string;
@@ -181,6 +182,12 @@ export function evaluateGochar(
   const cleanLagnaSignId = resolveSignId(natalLagnaSignId);
   const cleanMoonSignId = resolveSignId(natalMoonSignId);
   const dateStr = targetDate.toISOString().slice(0, 10);
+  const hourBlock = Math.floor(targetDate.getHours() / 6);
+  const cacheKey = `gochar:${cleanLagnaSignId}_${cleanMoonSignId}_${dateStr}_${hourBlock}`;
+
+  const cached = gocharTransitCache.get(cacheKey);
+  if (cached) return cached;
+
   const time = Astronomy.MakeTime(targetDate);
   const t = time.ut / 36525.0; // Centuries from J2000.0
 
@@ -379,7 +386,7 @@ export function evaluateGochar(
     `• द्वि-गोचर फल: ${doubleTransitSummaryHi}`,
   ];
 
-  return {
+  const result: GocharEvaluationResult = {
     dateStr,
     transitPlanets,
     sadeSati: {
@@ -416,4 +423,7 @@ export function evaluateGochar(
     summaryTextEn: summaryLinesEn.join('\n'),
     summaryTextHi: summaryLinesHi.join('\n'),
   };
+
+  gocharTransitCache.set(cacheKey, result, 6 * 60 * 60 * 1000);
+  return result;
 }

@@ -310,7 +310,7 @@ export default function KundliForm() {
               value={localInput.name}
               onChange={(e) => setLocalInput({ ...localInput, name: e.target.value })}
               placeholder={language === 'hi' ? 'नाम लिखें (उदा. राहुल शर्मा)' : 'e.g. Rahul Verma'}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
             />
           </div>
 
@@ -323,7 +323,7 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, gender: e.target.value as 'male' | 'female' | 'other' })
               }
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
             >
               <option value="male">{t('male', language)}</option>
               <option value="female">{t('female', language)}</option>
@@ -344,7 +344,7 @@ export default function KundliForm() {
               required
               value={localInput.dateOfBirth}
               onChange={(e) => setLocalInput({ ...localInput, dateOfBirth: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
             />
           </div>
 
@@ -359,7 +359,7 @@ export default function KundliForm() {
               step="1"
               value={localInput.timeOfBirth}
               onChange={(e) => setLocalInput({ ...localInput, timeOfBirth: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
             />
           </div>
         </div>

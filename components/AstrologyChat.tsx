@@ -177,6 +177,7 @@ export default function AstrologyChat() {
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -200,7 +201,7 @@ export default function AstrologyChat() {
         behavior: 'smooth',
       });
     }
-  }, [chatMessages, isLoading]);
+  }, [chatMessages, isLoading, streamingText]);
 
   // Voice Recognition Handler
   const toggleSpeechRecognition = () => {
@@ -265,6 +266,7 @@ export default function AstrologyChat() {
     addChatMessage(userMsg);
     if (!customPrompt) setInputMessage('');
     setIsLoading(true);
+    setStreamingText('');
 
     try {
       const res = await fetch('/api/gemini/kp-predict', {
@@ -277,6 +279,7 @@ export default function AstrologyChat() {
           messages: [...chatMessages, userMsg],
           presetQuery: promptToSend,
           language,
+          stream: true,
         }),
       });
 
@@ -286,14 +289,55 @@ export default function AstrologyChat() {
         throw new Error(errDetail);
       }
 
-      const data = await res.json();
-      const modelMsg: GeminiConsultMessage = {
-        role: 'model',
-        content: data.reply || data.text || 'Unable to generate prediction response.',
-        timestamp: new Date().toISOString(),
-        debugInfo: data.debug || data.debugInfo,
-      };
-      addChatMessage(modelMsg);
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/event-stream') && res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith('data: ')) {
+              const dataStr = trimmed.slice(6).trim();
+              if (dataStr === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.text) {
+                  accumulated += parsed.text;
+                  setStreamingText(accumulated);
+                }
+              } catch (e) {
+                // Ignore split JSON
+              }
+            }
+          }
+        }
+
+        if (accumulated.trim()) {
+          addChatMessage({
+            role: 'model',
+            content: accumulated.trim(),
+            timestamp: new Date().toISOString(),
+          });
+        }
+        setStreamingText('');
+      } else {
+        const data = await res.json();
+        const modelMsg: GeminiConsultMessage = {
+          role: 'model',
+          content: data.reply || data.text || 'Unable to generate prediction response.',
+          timestamp: new Date().toISOString(),
+          debugInfo: data.debug || data.debugInfo,
+        };
+        addChatMessage(modelMsg);
+      }
     } catch (err: unknown) {
       console.error(err);
       const errMsg = err instanceof Error ? err.message : String(err);
@@ -316,6 +360,7 @@ export default function AstrologyChat() {
       });
     } finally {
       setIsLoading(false);
+      setStreamingText('');
     }
   };
 
@@ -518,31 +563,42 @@ export default function AstrologyChat() {
           );
         })}
 
-        {isLoading && (
-          <div className="flex items-start gap-3">
+        {streamingText && (
+          <div className="flex items-start gap-3 animate-fade-in">
+            <PanditJiIcon size={28} />
+            <div className="max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed bg-slate-100 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 border border-amber-500/30 shadow-sm">
+              <div className="whitespace-pre-wrap">{streamingText}</div>
+              <span className="inline-block w-1.5 h-3 ml-1 bg-amber-500 animate-pulse rounded-full align-middle" />
+            </div>
+          </div>
+        )}
+
+        {isLoading && !streamingText && (
+          <div className="flex items-start gap-3 animate-fade-in">
             <PanditJiIcon size={28} />
             <div className="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 border border-slate-200 dark:border-slate-800">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" />
-              {language === 'hi' ? 'पंडित जी गणना कर रहे हैं...' : 'Consulting astrological calculations...'}
+              {language === 'hi' ? 'Astro Gemini गणना कर रहे हैं...' : 'Astro Gemini is evaluating kundli coordinates...'}
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input bar with Voice Recognition */}
+      {/* Sticky Mobile Input Bar with Debouncing & 44px Touch Targets */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSend();
         }}
-        className="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-900/40"
+        className="sticky bottom-0 z-20 p-2.5 sm:p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md"
       >
         <button
           type="button"
+          disabled={isLoading}
           onClick={toggleSpeechRecognition}
           title={isListening ? 'Stop listening' : 'Start voice input'}
-          className={`p-2.5 rounded-xl border transition ${
+          className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border transition disabled:opacity-50 ${
             isListening
               ? 'bg-red-500 text-white border-red-600 animate-pulse'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:text-amber-500'
@@ -554,6 +610,7 @@ export default function AstrologyChat() {
         <input
           type="text"
           value={inputMessage}
+          disabled={isLoading}
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder={
             isListening
@@ -564,13 +621,13 @@ export default function AstrologyChat() {
               ? 'अपनी शंका पूछें (उदा. क्या मुझे इस वर्ष पदोन्नति मिलेगी?)...'
               : 'Ask specific question (e.g., When will I get a job promotion?)...'
           }
-          className="flex-1 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+          className="flex-1 min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition disabled:opacity-60"
         />
 
         <button
           type="submit"
           disabled={!inputMessage.trim() || isLoading}
-          className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-amber-500/20"
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-amber-500/20"
         >
           <Send className="w-4 h-4" />
         </button>

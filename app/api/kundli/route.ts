@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { calculateExactKP, calculateSwephKPChart } from '@/lib/swephKpEngine';
+import { kundliCalculationCache } from '@/lib/cache-manager';
 
 export async function POST(request: Request) {
   try {
@@ -28,8 +29,15 @@ export async function POST(request: Request) {
     const lon = Number(body.lon ?? body.longitude ?? 0);
     const timezone = body.timezone !== undefined ? Number(body.timezone) : 5.5;
 
-    // 3. 100% Free, Open-Source & Fast WebAssembly Swiss Ephemeris KP Calculation
-    const chart: any = await calculateExactKP(dateStr, timeStr, lat, lon, timezone);
+    // 3. Fast In-Memory Deterministic LRU Cache lookup
+    const cacheKey = `sweph:${dateStr}_${timeStr}_${lat.toFixed(4)}_${lon.toFixed(4)}_${timezone}`;
+    let chart: any = kundliCalculationCache.get(cacheKey);
+
+    if (!chart) {
+      // 100% Free, Open-Source & Fast WebAssembly Swiss Ephemeris KP Calculation
+      chart = await calculateExactKP(dateStr, timeStr, lat, lon, timezone);
+      kundliCalculationCache.set(cacheKey, chart);
+    }
 
     // Array of degrees for compatibility
     const cuspsArray = chart.cuspsList ? chart.cuspsList.map((c: any) => c.longitude) : [];

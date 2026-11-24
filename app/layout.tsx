@@ -4,11 +4,11 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Astro Gemini | Authentic Vedic & KP Astrology Platform',
-    template: '%s | Astro Gemini Vedic Astrology',
+    default: 'Astro Gemini - Logic-Based KP & Vedic Astrology',
+    template: '%s | Astro Gemini - Logic-Based KP & Vedic Astrology',
   },
   description:
-    'Generate authentic Vedic D1 Lagna Kundli, Bhava Chalit chart, Vimshottari Dasha, Real-time Planetary Transits (Gochar), and accurate AI predictions with Astro Gemini. Free personalized horoscope consultation.',
+    'Astro Gemini provides authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
   keywords: [
     'Vedic Astrology',
     'KP Astrology',
@@ -86,26 +86,40 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'Astro Gemini Vedic Astrology',
-    applicationCategory: 'LifestyleApplication',
-    operatingSystem: 'All',
-    url: 'https://vedic-ai-astrology.vercel.app',
-    description:
-      'High-precision Vedic and KP Astrology Kundli generation with Astro Gemini AI consultation, 10-year life forecasts, and transit evaluations.',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'INR',
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'Astro Gemini - Logic-Based KP & Vedic Astrology',
+      applicationCategory: 'LifestyleApplication',
+      operatingSystem: 'All',
+      url: 'https://vedic-ai-astrology.vercel.app',
+      description:
+        'High-precision Vedic and KP Astrology Kundli generation with Astro Gemini AI consultation, 10-year life forecasts, and transit evaluations.',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'INR',
+      },
     },
-    author: {
-      '@type': 'Person',
-      name: 'Astro Gemini (Sandeep Tripathi)',
-      jobTitle: 'Vedic Astrologer & Astrological Data Scientist',
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ProfessionalService',
+      name: 'Astro Gemini Vedic Astrology Consultation',
+      image: 'https://vedic-ai-astrology.vercel.app/images/pandit-ji.jpg',
+      url: 'https://vedic-ai-astrology.vercel.app',
+      priceRange: 'Free / ₹0',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'IN',
+      },
+      founder: {
+        '@type': 'Person',
+        name: 'Astro Gemini (Sandeep Tripathi)',
+        jobTitle: 'Vedic Astrologer & Astrological Data Scientist',
+      },
     },
-  };
+  ];
 
   return (
     <html lang="hi" suppressHydrationWarning className="overflow-x-hidden max-w-full w-full">

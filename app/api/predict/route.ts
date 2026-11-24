@@ -6,6 +6,7 @@ import { evaluateParashariKundli, resolveSignId } from '@/lib/parashari-evaluato
 import { evaluateGochar } from '@/lib/gochar-evaluator';
 import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
+import { apiRateLimiter } from '@/lib/cache-manager';
 
 try {
   dns.setDefaultResultOrder('ipv4first');
@@ -56,10 +57,26 @@ function formatDashaText(dasha: any, isEn: boolean = false): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const clientIp = ip.split(',')[0].trim();
+    const rateCheck = apiRateLimiter.check(clientIp);
+
     const body = await req.json();
-    const { messages, kundliData, kpMatrix, birthDetails, presetQuery } = body;
+    const { messages, kundliData, kpMatrix, birthDetails, presetQuery, stream: wantStream } = body;
     const clientLanguage = body.language === 'en' ? 'en' : 'hi';
     const isEnglish = clientLanguage === 'en';
+
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: isEnglish
+            ? 'Too many inquiries. Please wait a few moments before asking another question.'
+            : 'अत्यधिक अनुरोध। कृपया कुछ सेकंड प्रतीक्षा करने के पश्चात पुनः प्रयास करें।',
+          rateLimited: true,
+        },
+        { status: 429 }
+      );
+    }
 
     const activeChart = kpMatrix || kundliData;
     if (!activeChart) {
@@ -106,11 +123,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const previousContext = recentMessages
-      .slice(0, -1)
-      .map((m: any) => m.text || m.content || '')
-      .join(' ');
-    
     // Deep KP & Parashari Question Analysis using exact Kundli data
     const questionAnalysis = analyzeQuestionAstrology(
       activeChart,
@@ -121,106 +133,87 @@ export async function POST(req: NextRequest) {
     );
 
     const cusps = activeChart.cusps || [];
-    const allCuspsFormatted = (activeChart.cusps || [])
-      .map((c: any) => {
-        const houseNum = c.houseNumber || c.cuspNumber;
-        return isEnglish
-          ? `• Cusp ${houseNum}: Sign=${c.signName || c.sign || ''}, Sign Lord=${c.signLord || ''}, Star Lord=${c.starLord || ''}, Sub-Lord (CSL)=${c.subLord || ''}`
-          : `• भाव ${houseNum}: राशि=${c.signName || c.sign || ''}, राशि स्वामी=${c.signLord || ''}, नक्षत्र स्वामी=${c.starLord || ''}, सब-लॉर्ड (CSL)=${c.subLord || ''}`;
-      })
-      .join('\n');
-
-    const allPlanetsFormatted = (activeChart.planets || cleanKundli.planets || [])
-      .map((p: any) => {
-        const pName = p.name || p.id || p.planet || '';
-        return isEnglish
-          ? `• ${pName}: Sign=${p.signName || p.sign || ''} (${p.degreeInSign || p.degree || ''}°), House=${p.houseOccupied || p.house || ''}, Star Lord=${p.starLord || ''}, Sub-Lord=${p.subLord || ''}`
-          : `• ${pName}: राशि=${p.signName || p.sign || ''} (${p.degreeInSign || p.degree || ''}°), भाव=${p.houseOccupied || p.house || ''}, नक्षत्र स्वामी=${p.starLord || ''}, उप-नक्षत्र=${p.subLord || ''}`;
-      })
-      .join('\n');
-
     const currentDBA = cleanKundli.currentRunningDBA || activeChart.currentDasha;
 
-    const dynamicSystemInstruction = isEnglish
-      ? `
-# ROLE: ASTRO GEMINI (REVERED VEDIC & KP JYOTISHACHARYA)
-You are **Astro Gemini** — an esteemed, wise, authoritative Vedic Jyotishacharya advising the client 1-on-1.
-- OUTPUT LANGUAGE: STRICTLY 100% ENGLISH.
-- DOMAIN SCOPE: Strictly Vedic & Cuspal astrology, birth chart analysis, dashas, and transits.
-${
-  isFirstTurn
-    ? '- INITIAL TURN: Greet with a warm initial greeting (e.g. "Namaste! Welcome. Let us examine your chart...").'
-    : '- ONGOING CONVERSATION: Strictly forbid repeating greetings. Begin directly with the answer.'
-}
-- Synthesize Parashari, Cuspal Sub-Lords, and Real-Time Gochar directly from the client's computed chart.
-- Do NOT chant "KP" or sound like an AI bot. Speak with genuine astrological mastery.
+    // Structured Kundli JSON payload for Gemini
+    const kundliJsonPayload = {
+      clientBirthDetails: {
+        name: birthDetails?.name || 'Native',
+        dateOfBirth: birthDetails?.dateOfBirth,
+        timeOfBirth: birthDetails?.timeOfBirth,
+        place: birthDetails?.placeName,
+        gender: birthDetails?.gender || 'male',
+      },
+      natalCoordinates: {
+        lagna: {
+          sign: parashariData.lagnaSign,
+          lord: parashariData.lagnaLord,
+          lordPlacementHouse: parashariData.lagnaLordHouse,
+        },
+        moon: {
+          sign: parashariData.moonSign,
+          lord: parashariData.moonLord,
+          nakshatra: parashariData.moonNakshatra,
+        },
+        sun: {
+          sign: parashariData.sunSign,
+        },
+      },
+      runningVimshottariDBA: currentDBA,
+      questionContext: {
+        query: currentQuestion,
+        topic: questionAnalysis.topic,
+        topicHi: questionAnalysis.topicHi,
+        primaryHouse: questionAnalysis.primaryHouseNum,
+        primaryCuspalSubLord: questionAnalysis.cslName,
+        cslStarLord: questionAnalysis.cslStarLord,
+        cslSignifiedHouses: questionAnalysis.cslHousesSignified,
+        kpVerdict: questionAnalysis.kpPromiseVerdictHi,
+      },
+      placidus12Cusps: cusps.map((c: any) => ({
+        house: c.houseNumber || c.cuspNumber,
+        sign: c.signName || c.hindiSignName,
+        signLord: c.signLord,
+        starLord: c.starLord,
+        cuspalSubLord: c.subLord,
+        occupants: c.occupants || [],
+      })),
+      planetsStatus: (activeChart.planets || []).map((p: any) => ({
+        name: p.name,
+        sign: p.signName || p.hindiSignName,
+        degreeInSign: p.degreeInSign,
+        house: p.houseOccupied,
+        starLord: p.starLord,
+        subLord: p.subLord,
+        isRetrograde: Boolean(p.isRetrograde),
+      })),
+      currentTransitsGochar: {
+        saturnHouseFromLagna: gocharData.transitPlanets.find((p: any) => p.name === 'Saturn')?.houseFromLagna,
+        saturnHouseFromMoon: gocharData.transitPlanets.find((p: any) => p.name === 'Saturn')?.houseFromMoon,
+        sadeSatiVerdict: gocharData.sadeSati.summaryHi,
+        jupiterHouseFromLagna: gocharData.transitPlanets.find((p: any) => p.name === 'Jupiter')?.houseFromLagna,
+        jupiterHouseFromMoon: gocharData.transitPlanets.find((p: any) => p.name === 'Jupiter')?.houseFromMoon,
+      },
+      timingForecast: questionAnalysis.timingWindowHi,
+    };
 
-${questionAnalysis.synthesisFactSheetHi}
+    const masterSystemPrompt = `You are "Astro Gemini", an experienced, empathetic, and logical Indian Astrologer specializing in Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology. You are NOT a generic AI chatbot. You NEVER give vague, sugar-coated, or mood-pleasing answers. Every single word you speak must be strictly derived from the backend Kundli JSON data provided to you.
 
-CLIENT CHART DATA:
-Lagna: ${parashariData.lagnaSign} | Lagna Lord: ${parashariData.lagnaLord} (House ${parashariData.lagnaLordHouse})
-Moon Sign: ${parashariData.moonSign} (Nakshatra: ${parashariData.moonNakshatra})
-Current Dasha: ${formatDashaText(currentDBA, true)}
-Primary House for Query: House ${questionAnalysis.primaryHouseNum} (CSL: ${questionAnalysis.cslName})
-CSL Significations: [${questionAnalysis.cslHousesSignified.join(', ')}]
-KP Verdict: ${questionAnalysis.kpPromiseVerdictEn}
-Cuspal Sub-Lords:
-${allCuspsFormatted}
-Planetary Positions:
-${allPlanetsFormatted}
-Gochar Transits:
-${gocharData.summaryTextEn}
-`
-      : `
-# भूमिका: ASTRO GEMINI (परम विद्वान, आत्मीय एवं अनुभवी वैदिक एवं के.पी. ज्योतिषाचार्य)
-आपकी पहचान **Astro Gemini** है — एक अत्यंत विद्वान, गंभीर, आत्मीय और प्रामाणिक वैदिक एवं कस्पल ज्योतिषाचार्य। जातक ने आपके सामने पोर्टल पर अपनी जन्म कुंडली की गणना रखी है।
+MANDATORY SILENT WORKFLOW (DO NOT SHOW RAW STEPS TO CLIENT):
+1. Map Query to Houses: Identify the client's exact life area and map it to relevant KP Houses (e.g., Career: 2, 6, 10, 11; Marriage: 2, 7, 11; Finance: 2, 6, 11; Health/Disputes: 6, 8, 12).
+2. KP & Vedic Promise Check: Check the Cuspal Sub-Lord (CSL) of the primary house and its 4-Fold Significators (L1–L4) + Star Lord. Cross-verify with Parashari Vedic house lord placement, aspects, and strength to see if the event is promised, delayed, or denied.
+3. Timing Check (Dasha & Gochar): Check the currently running Vimshottari Mahadasha, Antardasha, and Pratyantardasha (DBA) along with current slow-moving planet Transits (Saturn, Jupiter, Rahu/Ketu) over natal cusps and Dasha lords.
+4. Synthesize Verdict: Combine KP promise + Dasha timing + Transit trigger into a clear, factual conclusion.
 
-${questionAnalysis.synthesisFactSheetHi}
+FRONTEND RESPONSE RULES:
+- Human Astrologer Tone: Speak like a wise, grounded, caring astrologer sitting across the table. Mirror the user's language naturally (${isEnglish ? 'English' : 'Hindi / Hinglish'}). Avoid robotic bullet dumps.
+- Crisp & Direct (120–180 words): Answer the exact question directly in the first two sentences. Never write long essays.
+- Logical Backing (No Superficiality): Never say "things will improve soon" without proof. Explicitly name the responsible Planet (ग्रह), House (भाव), Mahadasha/Antardasha (दशा), or Gochar (गोचर) driving the situation, translated into simple language without raw technical codes like "L2 CSL".
+- Honesty & Grounded Closure: If the chart shows delay or struggle, state it honestly with empathy. End with one practical, actionable takeaway or clear timeframe. Never invent missing chart data.
+- Remedies On Demand: Do NOT append remedies unless explicitly asked by the client.
 
-## 🎯 संवाद व फलादेश के अनिवार्य नियम (STRICT CONVERSATIONAL RULES):
-1. **कुंडली की वास्तविक गणना का अनिवार्य प्रयोग (USE EXACT COMPUTED KUNDLI):**
-   - जातक को यह स्पष्ट अनुभव होना चाहिए कि आप उसी की वास्तविक कुंडली देख रहे हैं।
-   - बातचीत में जातक के वास्तविक लग्न (${parashariData.lagnaSign}), चन्द्र राशि (${parashariData.moonSign}), वर्तमान दशा (${formatDashaText(currentDBA, false)}), और प्रश्न से जुड़े मुख्य भाव के कस्पल सब-लॉर्ड (${questionAnalysis.cslName}) का तार्किक उल्लेख करें।
-   - 🚫 **सख्त चेतावनी:** कभी भी मनगढ़ंत लग्न (जैसे मिथुन आदि) न बोलें जब तक कि गणना में वह न हो! ऊपर दी गई वास्तविक गणना ही अंतिम सत्य है।
-
-2. **दो इंसानों की तरह सहज और स्वाभाविक बातचीत (Natural Spoken Counseling):**
-   - जातक से बिल्कुल वैसे बात करें जैसे कोई प्रख्यात ज्योतिषाचार्य अपने सामने बैठे जातक से आमने-सामने आत्मीयता से बात करते हैं।
-   - 🚫 **सख्त मनाही:** "ज्योतिषीय आधार (Parashari + KP Logic)", "के.पी. पद्धति", "### १. ज्योतिषीय विश्लेषण", "### अचूक उपाय" जैसी कृत्रिम, रोबोटिक या मशीनी हेडिंग्स कतई न लिखें! 
-   - उत्तर को किसी बने-बनाए सांचे (fixed template) में न बांधें। भाषा प्रवाहमयी, आत्मीय और स्वाभाविक अनुच्छेदों (natural paragraphs) में होनी चाहिए।
-
-3. **ज्योतिषीय तर्क को बातचीत में सहजता से पिरोएं (Logical Astrological Reasoning):**
-   - जातक के प्रश्न के अनुसार भाव, भावेश, कस्पल सब-लॉर्ड (CSL), सक्रिय महादशा/अंतर्दशा, और वर्तमान गोचर (शनि व गुरु) का तार्किक कारण बातचीत के प्रवाह में स्वाभाविक रूप से समझाएं।
-   - जैसे: "आपकी जन्म कुंडली में लग्न ${parashariData.lagnaSign} है और कार्यक्षेत्र यानी दशम भाव के कस्पल सब-लॉर्ड ${questionAnalysis.cslName} हैं। वर्तमान में चल रही दशा और गोचर..."
-
-4. **⚠️ उपाय (Remedies) का अनिवार्य नियम (DO NOT FORCE REMEDIES EVERY TIME):**
-   - **हर उत्तर के अंत में जबरदस्ती उपाय की हेडिंग या सूची कतई न जोड़ें!** 
-   - उपाय केवल और केवल तभी बताएं जब जातक ने स्पष्ट रूप से उपाय या निवारण पूछा हो (उदा. "क्या उपाय करें?", "कोई उपाय बताओ?", "समाधान क्या है?"), या जब कोई ग्रह गंभीर संकट दिखा रहा हो।
-   - यदि जातक केवल यह पूछ रहा है कि "best profession in 2027" या "स्वास्थ्य कैसा रहेगा", तो अपना पूरा ध्यान प्रश्न के सटीक उत्तर, तार्किक कारण और समय-सीमा (Timing) पर रखें।
-
-5. **अभिवादन व निरंतर बातचीत (No Greeting Repetition):**
-   ${isFirstTurn ? '- यह पहला प्रश्न है: एक बार आत्मीय अभिवादन ("नमस्ते!") से उत्तर शुरू करें।' : '- यह फॉलो-अप प्रश्न है: "नमस्ते!" या किसी भी अभिवादन का दोहराव बिल्कुल न करें। पिछली बातचीत को याद रखते हुए सीधे नए प्रश्न के उत्तर से बात शुरू करें।'}
-
-6. **सटीक समय-सीमा (Precise Timing):**
-   - जातक को स्पष्ट बताएं कि अनुकूलता कब से आएगी (${questionAnalysis.timingWindowHi})।
-
----
-### 🪐 जातक की जन्म कुंडली की संपूर्ण गणना (Parashari + KP + Gochar Coordinates):
-- लग्न: ${parashariData.lagnaSign} | लग्नेश: ${parashariData.lagnaLord} (भाव ${parashariData.lagnaLordHouse})
-- चन्द्र राशि: ${parashariData.moonSign} (स्वामी: ${parashariData.moonLord})
-- वर्तमान विंशोत्तरी दशा: ${formatDashaText(currentDBA, false)}
-- केन्द्र भाव: ${parashariData.kendraHouses.map((k: any) => `भाव ${k.house}: [${k.planets.join(', ') || 'रिक्त'}]`).join(' | ')}
-- त्रिकोण भाव: ${parashariData.trikonaHouses.map((t: any) => `भाव ${t.house}: [${t.planets.join(', ') || 'रिक्त'}]`).join(' | ')}
-- दुस्थान भाव: ${parashariData.dusthanaHouses.map((d: any) => `भाव ${d.house}: [${d.planets.join(', ') || 'रिक्त'}]`).join(' | ')}
-- सक्रिय शुभ योग: ${parashariData.yogas.join('; ') || 'सामान्य योग'}
-
-- सभी १२ भावों के कस्पल सब-लॉर्ड (Placidus Cuspal Sub-Lords):
-${allCuspsFormatted}
-
-- सभी ग्रहों की स्थिति (Planets, Signs & Sub-Lords):
-${allPlanetsFormatted}
-
-- तात्कालिक गोचर विश्लेषण:
-${gocharData.summaryTextHi}
+BACKEND KUNDLI JSON DATA:
+${JSON.stringify(kundliJsonPayload, null, 2)}
 `;
 
     const rawContents = recentMessages
@@ -250,20 +243,67 @@ ${gocharData.summaryTextHi}
       }
     }
 
+    // 🌟 Instant SSE Streaming Support
+    if (wantStream && apiKey) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            const aiCall = await ai.models.generateContentStream({
+              model: 'gemini-3.5-flash-lite',
+              contents: formattedContents,
+              config: {
+                systemInstruction: masterSystemPrompt,
+                temperature: 0.25,
+                maxOutputTokens: 450,
+              },
+            });
+
+            for await (const chunk of aiCall) {
+              const text = chunk.text;
+              if (text) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+              }
+            }
+            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+            controller.close();
+          } catch (streamErr) {
+            console.warn('Streaming error, falling back to local synthesis:', streamErr);
+            const fallback = synthesizeFastKPAnswer(activeChart, gocharData, currentQuestion, clientLanguage, recentMessages);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: fallback })}\n\n`));
+            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
+    // Non-Streaming Response (JSON API)
     let replyText = '';
     let modelUsed = '';
     const geminiErrors: string[] = [];
 
     if (apiKey) {
-      // Verified production Google Gemini 3.5 models (active and verified)
       const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
       for (const m of models) {
         try {
-          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 12000));
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000));
           const aiCall = ai.models.generateContent({
             model: m,
             contents: formattedContents,
-            config: { systemInstruction: dynamicSystemInstruction, temperature: 0.35 },
+            config: {
+              systemInstruction: masterSystemPrompt,
+              temperature: 0.25,
+              maxOutputTokens: 450,
+            },
           });
           const res: any = await Promise.race([aiCall, timeoutPromise]);
           if (res && res.text && res.text.trim().length > 10) {
@@ -271,11 +311,10 @@ ${gocharData.summaryTextHi}
             modelUsed = m;
             break;
           } else if (!res) {
-            geminiErrors.push(`${m}: timed out after 12000ms`);
+            geminiErrors.push(`${m}: timed out after 10000ms`);
           }
         } catch (e: any) {
           geminiErrors.push(`${m}: ${e?.message || String(e)}`);
-          console.warn(`Model ${m} failed in predict route:`, e);
         }
       }
     } else {
@@ -296,7 +335,6 @@ ${gocharData.summaryTextHi}
         modelUsed,
         geminiErrors,
         apiKeyConfigured: Boolean(apiKey),
-        apiKeyPrefix: apiKey ? apiKey.slice(0, 6) + '...' + apiKey.slice(-4) : 'none',
         topic: questionAnalysis?.topic || 'general',
         primaryHouse: questionAnalysis?.primaryHouseNum,
         cslName: questionAnalysis?.cslName,
@@ -311,11 +349,11 @@ ${gocharData.summaryTextHi}
     console.error('Prediction API Error:', error);
     return NextResponse.json(
       {
-        reply: 'आपकी कुंडली के अनुसार ग्रह स्थिति आपके पक्ष में है। कृपया अपना प्रश्न पुनः पूछें।',
-        text: 'आपकी कुंडली के अनुसार ग्रह स्थिति आपके पक्ष में है। कृपया अपना प्रश्न पुनः पूछें।',
+        reply: 'आपकी कुंडली के अनुसार ग्रह स्थिति का विश्लेषण पूर्ण है। कृपया अपना प्रश्न पुनः पूछें।',
+        text: 'आपकी कुंडली के अनुसार ग्रह स्थिति का विश्लेषण पूर्ण है। कृपया अपना प्रश्न पुनः पूछें।',
         error: error?.message || 'Error occurred',
       },
-      { status: 200 } // Return 200 with fallback so UI never breaks!
+      { status: 200 }
     );
   }
 }
