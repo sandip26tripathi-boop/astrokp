@@ -173,7 +173,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
 }
 
 export default function AstrologyChat() {
-  const { kpMatrix, language, chatMessages, addChatMessage, clearChat } = useAstrologyStore();
+  const { input, kpMatrix, language, chatMessages, addChatMessage, clearChat } = useAstrologyStore();
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -271,6 +271,7 @@ export default function AstrologyChat() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          birthDetails: input,
           kpMatrix,
           kundliData: kpMatrix,
           messages: [...chatMessages, userMsg],
@@ -420,6 +421,30 @@ export default function AstrologyChat() {
             {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
+      </div>
+
+      {/* Active Kundli Calculation HUD Status Bar */}
+      <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/20 text-[11px] flex flex-wrap items-center justify-between gap-2 text-slate-700 dark:text-slate-300">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            {input.name ? `${input.name} की कुंडली:` : (language === 'hi' ? 'सक्रिय कुंडली गणना:' : 'Active Kundli Grounding:')}
+          </span>
+          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+            लग्न: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'}</strong>
+          </span>
+          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+            चन्द्र: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'}</strong>
+          </span>
+          <span className="hidden sm:inline bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+            {formatDashaDisplay(kpMatrix?.currentDasha)}
+          </span>
+        </div>
+        {input.dateOfBirth && (
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+            {input.dateOfBirth} | {input.timeOfBirth || '12:00'} | {input.placeName || 'भारत'}
+          </div>
+        )}
       </div>
 
       {/* Preset Inquiry Chips */}

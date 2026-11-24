@@ -12,6 +12,7 @@
  */
 
 import { KPMatrix, CuspData, PlanetPosition } from '@/types/astrology';
+import { resolveSignId, SIGN_NAMES_HI, SIGN_LORDS } from './parashari-evaluator';
 
 const HINDI_PLANET_NAMES: Record<string, string> = {
   Sun: 'सूर्य',
@@ -95,17 +96,25 @@ export function synthesizeFastKPAnswer(
   const mahaHi = HINDI_PLANET_NAMES[mahaRaw] || mahaRaw;
   const antarHi = HINDI_PLANET_NAMES[antarRaw] || antarRaw;
 
-  // Lagna & Moon
-  const lagnaSign = c1?.signName || 'Scorpio';
-  const lagnaSignHi = HINDI_RASHI_NAMES[lagnaSign] || lagnaSign;
-  const lagnaLord = c1?.signLord || 'Mars';
-  const lagnaLordHi = HINDI_PLANET_NAMES[lagnaLord] || lagnaLord;
+  // Lagna & Moon - dynamically resolved to exact chart data
+  const ascSignId = resolveSignId(
+    c1?.signId || c1?.signName || c1?.hindiSignName,
+    c1?.longitude || kpMatrix?.ascendant
+  );
+  const lagnaSign = c1?.signName || 'Aries';
+  const lagnaSignHi = SIGN_NAMES_HI[ascSignId - 1] || 'मेष (Aries)';
+  const lagnaLord = c1?.signLord || SIGN_LORDS[ascSignId] || 'Mars';
+  const lagnaLordHi = SIGN_LORDS[ascSignId] || HINDI_PLANET_NAMES[lagnaLord] || lagnaLord;
 
   const moonP = planets.find(
     (p) => (p.name || '').toLowerCase() === 'moon' || (p.id || '').toLowerCase() === 'moon'
   );
+  const moonSignId = resolveSignId(
+    moonP?.signId || moonP?.signName || moonP?.hindiSignName,
+    moonP?.longitude
+  );
   const moonSign = moonP?.signName || lagnaSign;
-  const moonSignHi = HINDI_RASHI_NAMES[moonSign] || moonSign;
+  const moonSignHi = SIGN_NAMES_HI[moonSignId - 1] || lagnaSignHi;
 
   // CSL names
   const c1CslHi = HINDI_PLANET_NAMES[c1?.subLord || 'Mars'] || c1?.subLord || 'मंगल';

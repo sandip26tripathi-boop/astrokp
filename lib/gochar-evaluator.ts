@@ -6,6 +6,7 @@
  */
 
 import * as Astronomy from 'astronomy-engine';
+import { resolveSignId } from './parashari-evaluator';
 
 export interface TransitPlanetInfo {
   name: string;
@@ -177,6 +178,8 @@ export function evaluateGochar(
   natalMoonSignId: number = 1,
   targetDate: Date = new Date()
 ): GocharEvaluationResult {
+  const cleanLagnaSignId = resolveSignId(natalLagnaSignId);
+  const cleanMoonSignId = resolveSignId(natalMoonSignId);
   const dateStr = targetDate.toISOString().slice(0, 10);
   const time = Astronomy.MakeTime(targetDate);
   const t = time.ut / 36525.0; // Centuries from J2000.0
@@ -236,8 +239,8 @@ export function evaluateGochar(
     const subLord = getSubLord(siderealDeg);
 
     // Compute house relative to natal Lagna and natal Moon
-    const houseFromLagna = ((signId - natalLagnaSignId + 12) % 12) + 1;
-    const houseFromMoon = ((signId - natalMoonSignId + 12) % 12) + 1;
+    const houseFromLagna = ((signId - cleanLagnaSignId + 12) % 12) + 1;
+    const houseFromMoon = ((signId - cleanMoonSignId + 12) % 12) + 1;
     const isFavorable = isTransitFavorableFromMoon(item.name, houseFromMoon);
 
     transitPlanets.push({

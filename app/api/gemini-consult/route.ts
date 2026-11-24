@@ -5,6 +5,7 @@ import { extractCleanKPJson, classifyQuestionTopic, isAstrologicalQuery } from '
 import { evaluateParashariKundli } from '@/lib/parashari-evaluator';
 import { evaluateGochar } from '@/lib/gochar-evaluator';
 import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
+import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
 
 // Enforce IPv4 on Windows to prevent Undici IPv6 connect timeouts to Google APIs
 try {
@@ -57,7 +58,7 @@ function formatDashaText(dasha: any, isEn: boolean = false): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { messages, kundliData, kpMatrix, presetQuery } = body;
+    const { messages, kundliData, kpMatrix, birthDetails, presetQuery } = body;
     const clientLanguage = body.language === 'en' ? 'en' : 'hi';
     const isEnglish = clientLanguage === 'en';
 
@@ -89,17 +90,8 @@ export async function POST(req: NextRequest) {
     // Full Parashari Evaluation (पराशरी ज्योतिष विश्लेषण)
     const parashariData = evaluateParashariKundli(activeChart);
 
-    // Extract Natal Lagna and Natal Moon Sign ID for Gochar Calculation
-    const ascSignId = activeChart.cusps?.[0]?.signId || 1;
-    const moonPlanet = (activeChart.planets || []).find(
-      (p: any) =>
-        (p.name || '').toLowerCase() === 'moon' ||
-        (p.id || '').toLowerCase() === 'moon'
-    );
-    const moonSignId = moonPlanet?.signId || 1;
-
     // Evaluate Real-Time Gochar (तात्कालिक गोचर गणना)
-    const gocharData = evaluateGochar(ascSignId, moonSignId, new Date());
+    const gocharData = evaluateGochar(parashariData.lagnaSignId, parashariData.moonSignId, new Date());
 
     // Key cuspal data for high-precision focus
     const cusps = activeChart.cusps || [];
