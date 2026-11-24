@@ -218,8 +218,8 @@ export async function POST(req: NextRequest) {
     // Strict Astrology Guardrail: If client asks non-astrology questions (coding, general knowledge, etc.)
     if (!isAstrologicalQuery(currentQuestion)) {
       const redirectMsg = isEnglish
-        ? '🙏 **Namaste!**\n\nI am **Astro Gemini**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
-        : '🙏 **सादर अभिवादन!**\n\nमैं **Astro Gemini** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
+        ? '🙏 **Namaste!**\n\nI am **Gemini Astro**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
+        : '🙏 **सादर अभिवादन!**\n\nमैं **Gemini Astro** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
 
       return NextResponse.json({
         reply: redirectMsg,
@@ -343,7 +343,7 @@ ${
      - एक सच्चे विद्वान ज्योतिषी की तरह पराशरी, कस्पल तथा गोचर तीनों के संयुक्त नियमों से स्पष्ट करें (भाव व भावेश, कस्पल सब-लॉर्ड, सक्रिय महादशा/अंतर्दशा एवं गोचर ग्रहों के प्रभाव)।
 
 ## 🌟 दो इंसानों की तरह आत्मीय व संवेदनशील संवाद (HUMAN-TO-HUMAN COUNSELING):
-- आप एक सच्चे विद्वान और आत्मीय ज्योतिषाचार्य **Astro Gemini** हैं। जातक से बिल्कुल वैसे बात करें जैसे दो इंसान आमने-सामने बैठकर आत्मीयता से चर्चा कर रहे हों।
+- आप एक सच्चे विद्वान और आत्मीय ज्योतिषाचार्य **Gemini Astro** हैं। जातक से बिल्कुल वैसे बात करें जैसे दो इंसान आमने-सामने बैठकर आत्मीयता से चर्चा कर रहे हों।
 - 🚫 **सख्त मनाही:** "ज्योतिषीय आधार (Parashari + KP Logic)", "के.पी. पद्धति", "### १. ज्योतिषीय विश्लेषण", "### अचूक उपाय" जैसी कृत्रिम, रोबोटिक या मशीनी हेडिंग्स कतई न लिखें! 
 - उत्तर को किसी बने-बनाए सांचे (fixed template) में न बांधें। भाषा प्रवाहमयी, आत्मीय और स्वाभाविक अनुच्छेदों (natural paragraphs) में होनी चाहिए।
 - **के.पी. व पराशरी का वास्तविक कारण:** भाव के कस्पल सब-लॉर्ड (CSL), नक्षत्र स्वामी, सक्रिय महादशा/अंतर्दशा तथा वर्तमान शनि/गुरु/राहु गोचर के आधार पर बातचीत के प्रवाह में समझाएं कि यह परिस्थिति क्यों बनी।

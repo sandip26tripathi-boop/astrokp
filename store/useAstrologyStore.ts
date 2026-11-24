@@ -79,7 +79,7 @@ export const useAstrologyStore = create<AstrologyState>()(
       chatMessages: [
         {
           role: 'model',
-          content: 'नमस्ते! मैं Astro Gemini हूँ। आप क्या मार्गदर्शन चाहते हैं?',
+          content: 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?',
           timestamp: '2026-01-01T00:00:00.000Z',
         },
       ],
@@ -277,8 +277,8 @@ export const useAstrologyStore = create<AstrologyState>()(
               role: 'model',
               content:
                 lang === 'hi'
-                  ? 'नमस्ते! मैं Astro Gemini हूँ। आप क्या मार्गदर्शन चाहते हैं?'
-                  : 'Namaste! I am Astro Gemini. What guidance do you seek?',
+                  ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                  : 'Namaste! I am Gemini Astro. What guidance do you seek?',
               timestamp: new Date().toISOString(),
             },
           ],

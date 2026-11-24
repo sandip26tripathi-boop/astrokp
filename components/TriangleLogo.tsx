@@ -25,7 +25,7 @@ export default function TriangleLogo({ className = '', size = 'md' }: TriangleLo
   return (
     <div
       className={`relative flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/60 border border-amber-500/40 shadow-md shadow-amber-500/20 overflow-hidden group transition-all duration-300 hover:border-amber-400 hover:shadow-amber-500/30 ${containerSizes[size]} ${className}`}
-      aria-label="Astro Gemini Premium Astrology Upward Triangle Logo"
+      aria-label="Gemini Astro Premium Astrology Upward Triangle Logo"
     >
       {/* Subtle ambient cosmic background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.22),transparent_70%)] pointer-events-none" />

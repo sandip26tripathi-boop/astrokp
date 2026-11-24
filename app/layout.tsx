@@ -4,15 +4,15 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Astro Gemini - Logic-Based KP & Vedic Astrology',
-    template: '%s | Astro Gemini - Logic-Based KP & Vedic Astrology',
+    default: 'Gemini Astro - Logic-Based KP & Vedic Astrology',
+    template: '%s | Gemini Astro - Logic-Based KP & Vedic Astrology',
   },
   description:
-    'Astro Gemini provides authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
+    'Gemini Astro provides authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
   keywords: [
     'Vedic Astrology',
     'KP Astrology',
-    'Astro Gemini',
+    'Gemini Astro',
     'Kundli Generator',
     'Janam Kundali',
     'Horoscope Predictions',
@@ -26,25 +26,25 @@ export const metadata: Metadata = {
     'Career Astrology',
     'BTR Birth Time Rectification',
   ],
-  authors: [{ name: 'Astro Gemini & Pandit Sandeep Tripathi' }],
-  creator: 'Astro Gemini',
-  publisher: 'Astro Gemini Vedic AI',
+  authors: [{ name: 'Gemini Astro & Pandit Sandeep Tripathi' }],
+  creator: 'Gemini Astro',
+  publisher: 'Gemini Astro Vedic AI',
   metadataBase: new URL('https://vedic-ai-astrology.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Astro Gemini | Authentic Vedic & KP Astrology Platform',
+    title: 'Gemini Astro | Authentic Vedic & KP Astrology Platform',
     description:
       'High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
     url: 'https://vedic-ai-astrology.vercel.app',
-    siteName: 'Astro Gemini Vedic AI',
+    siteName: 'Gemini Astro Vedic AI',
     images: [
       {
         url: '/images/pandit-ji.jpg',
         width: 800,
         height: 800,
-        alt: 'Astro Gemini - Vedic Astrologer',
+        alt: 'Gemini Astro - Vedic Astrologer',
       },
     ],
     locale: 'hi_IN',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Astro Gemini | Authentic Vedic Astrology & Kundli',
+    title: 'Gemini Astro | Authentic Vedic Astrology & Kundli',
     description:
       'Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
     images: ['/images/pandit-ji.jpg'],
@@ -90,12 +90,12 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Astro Gemini - Logic-Based KP & Vedic Astrology',
+      name: 'Gemini Astro - Logic-Based KP & Vedic Astrology',
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'All',
       url: 'https://vedic-ai-astrology.vercel.app',
       description:
-        'High-precision Vedic and KP Astrology Kundli generation with Astro Gemini AI consultation, 10-year life forecasts, and transit evaluations.',
+        'High-precision Vedic and KP Astrology Kundli generation with Gemini Astro AI consultation, 10-year life forecasts, and transit evaluations.',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -105,7 +105,7 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: 'Astro Gemini Vedic Astrology Consultation',
+      name: 'Gemini Astro Vedic Astrology Consultation',
       image: 'https://vedic-ai-astrology.vercel.app/images/pandit-ji.jpg',
       url: 'https://vedic-ai-astrology.vercel.app',
       priceRange: 'Free / ₹0',
@@ -115,7 +115,7 @@ export default function RootLayout({
       },
       founder: {
         '@type': 'Person',
-        name: 'Astro Gemini (Sandeep Tripathi)',
+        name: 'Gemini Astro (Sandeep Tripathi)',
         jobTitle: 'Vedic Astrologer & Astrological Data Scientist',
       },
     },

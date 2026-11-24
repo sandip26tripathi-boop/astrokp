@@ -349,7 +349,7 @@ export default function AstrologyChatbot() {
           <PanditJiIcon size={40} />
           <div>
             <h3 className="text-sm font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
-              {language === 'hi' ? 'Astro Gemini (वैदिक ज्योतिषाचार्य)' : 'Astro Gemini (Vedic Astrologer)'}
+              {language === 'hi' ? 'Gemini Astro (वैदिक ज्योतिषाचार्य)' : 'Gemini Astro (Vedic Astrologer)'}
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">

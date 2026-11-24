@@ -8,6 +8,7 @@ import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
 import { apiRateLimiter } from '@/lib/cache-manager';
 import { generateMasterKundli, MasterKundliJSON } from '@/lib/master-kundli-engine';
+import { extractQueriedTargetDate, getDashaForDate } from '@/lib/dasha-date-resolver';
 import { ChartInput } from '@/types/astrology';
 
 try {
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
     const gocharData = evaluateGochar(parashariData.lagnaSignId, parashariData.moonSignId, new Date());
 
     const rawMessages = messages && messages.length > 0 ? messages : [];
-    const recentMessages = rawMessages.slice(-10);
+    const recentMessages = rawMessages.slice(-6); // Maintain last 6 turns context
     const userTurnsCount = recentMessages.filter(
       (m: any) => m.role === 'user' || (!m.role && m.content)
     ).length;
@@ -152,13 +153,13 @@ export async function POST(req: NextRequest) {
     // Strict Astrology Guardrail: Reject non-astrology / bot inquiries
     if (!isAstrologicalQuery(currentQuestion)) {
       const redirectMsg = isEnglish
-        ? '🙏 **Namaste!**\n\nI am **Astro Gemini**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
-        : '🙏 **सादर अभिवादन!**\n\nमैं **Astro Gemini** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
+        ? '🙏 **Namaste!**\n\nI am **Gemini Astro**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
+        : '🙏 **सादर अभिवादन!**\n\nमैं **Gemini Astro** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
 
       return NextResponse.json({
         reply: redirectMsg,
         text: redirectMsg,
-        model: 'Astro-Gemini-Guardrail',
+        model: 'Gemini-Astro-Guardrail',
         debug: { topic: 'Off-Topic Redirection', isAstrological: false },
       });
     }
@@ -194,10 +195,14 @@ export async function POST(req: NextRequest) {
       masterKundli = generateMasterKundli(bInput);
     }
 
-    const cusps = activeChart.cusps || [];
-    const currentDBA = cleanKundli.currentRunningDBA || activeChart.currentDasha || masterKundli.dashaHierarchy;
+    // Historical & Target Date Resolution (e.g., 2014, 2028, next year)
+    const dateParse = extractQueriedTargetDate(currentQuestion);
+    const queriedDateDasha = getDashaForDate(masterKundli.full120YearDashaTimeline, dateParse.targetDate);
 
-    // Structured Master Kundli JSON payload for Gemini context injection
+    const cusps = activeChart.cusps || [];
+    const currentDBA = masterKundli.dashaHierarchy;
+
+    // Structured Master Kundli JSON payload for Gemini Astro context injection
     const kundliJsonPayload = {
       clientBirthDetails: {
         name: birthDetails?.name || masterKundli.meta.name,
@@ -205,6 +210,27 @@ export async function POST(req: NextRequest) {
         timeOfBirth: birthDetails?.timeOfBirth || masterKundli.meta.timeOfBirth,
         place: birthDetails?.placeName || masterKundli.meta.placeName,
         gender: birthDetails?.gender || 'male',
+      },
+      dateAndDashaLock: {
+        userQueriedYear: dateParse.yearMentioned,
+        isSpecificDateQueried: !queriedDateDasha.isCurrent,
+        queriedDateDasha: {
+          targetDate: queriedDateDasha.targetDate,
+          mahadasha: queriedDateDasha.planetMD,
+          antardasha: queriedDateDasha.planetAD,
+          pratyantardasha: queriedDateDasha.planetPD,
+          periodSummaryHi: queriedDateDasha.periodDescription,
+          isPast: queriedDateDasha.isPast,
+          isFuture: queriedDateDasha.isFuture,
+          isCurrentToday: queriedDateDasha.isCurrent,
+        },
+        currentRunningDashaToday: {
+          mahadasha: currentDBA.mahadasha.planet,
+          antardasha: currentDBA.antardasha.planet,
+          pratyantardasha: currentDBA.pratyantardasha.planet,
+          sookshmaDasha: currentDBA.sookshmaDasha.planet,
+        },
+        full120YearMahadashaRoadmap: masterKundli.fullMahadashaSummary,
       },
       natalCoordinates: {
         lagna: {
@@ -223,7 +249,6 @@ export async function POST(req: NextRequest) {
           sign: parashariData.sunSign,
         },
       },
-      runningVimshottariDBA: currentDBA,
       questionContext: {
         query: currentQuestion,
         topic: questionAnalysis.topic,
@@ -234,6 +259,10 @@ export async function POST(req: NextRequest) {
         cslSignifiedHouses: questionAnalysis.cslHousesSignified,
         kpVerdict: questionAnalysis.kpPromiseVerdictHi,
       },
+      bhavaShiftsBetweenRashiAndChalit: masterKundli.bhavaShifts,
+      conjunctionsPerHouseYuti: masterKundli.conjunctionsByHouse,
+      specialPlanetaryAspectsDrishti: masterKundli.planetaryAspects,
+      houseLordshipsBhavaBhavesh: masterKundli.houseLordships,
       placidus12Cusps: cusps.map((c: any) => ({
         house: c.houseNumber || c.cuspNumber,
         sign: c.signName || c.hindiSignName,
@@ -254,14 +283,18 @@ export async function POST(req: NextRequest) {
         D9_Navamsha: masterKundli.shodashvarga?.D9?.placements || {},
         D10_Dashamsha: masterKundli.shodashvarga?.D10?.placements || {},
       },
-      planetsStatus: (activeChart.planets || []).map((p: any) => ({
+      planetsStatus: masterKundli.planets.map((p) => ({
         name: p.name,
         sign: p.signName || p.hindiSignName,
+        d1House: p.d1House,
+        bhavaChalitHouse: p.bhavaChalitHouse,
+        hasBhavaShift: p.hasBhavaShift,
         degreeInSign: p.degreeInSign,
-        house: p.houseOccupied,
         starLord: p.starLord,
         subLord: p.subLord,
+        dignity: p.dignity,
         isRetrograde: Boolean(p.isRetrograde),
+        isUntenanted: p.isUntenanted,
       })),
       currentTransitsGochar: {
         saturnHouseFromLagna: gocharData.transitPlanets.find((p: any) => p.name === 'Saturn')?.houseFromLagna,
@@ -269,22 +302,31 @@ export async function POST(req: NextRequest) {
         sadeSatiVerdict: gocharData.sadeSati.summaryHi,
         jupiterHouseFromLagna: gocharData.transitPlanets.find((p: any) => p.name === 'Jupiter')?.houseFromLagna,
         jupiterHouseFromMoon: gocharData.transitPlanets.find((p: any) => p.name === 'Jupiter')?.houseFromMoon,
+        doubleTransitActivation: masterKundli.liveGochar.doubleTransitHouses,
       },
       timingForecast: questionAnalysis.timingWindowHi,
     };
 
-    const masterSystemPrompt = `You are "Astro Gemini", an experienced, empathetic, and logical Indian Astrologer specializing in Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology. You are NOT a generic AI chatbot. You NEVER give vague, sugar-coated, or mood-pleasing answers. Every single word you speak must be strictly derived from the backend Kundli JSON data provided to you.
+    const masterSystemPrompt = `You are "Gemini Astro", an authoritative, empathetic, and deeply logical Indian Astrologer mastering both Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology. You NEVER guess, generalize, or give mood-pleasing answers. Every single conclusion must come strictly from the client's Backend Master Kundli JSON.
 
-MANDATORY SILENT WORKFLOW (DO NOT PRINT RAW JSON OR TABLES):
-1. Map the user's question to relevant KP Houses (e.g., Career: 2, 6, 10, 11; Marriage: 2, 7, 11; Finance: 2, 6, 11; Health/Disputes: 6, 8, 12).
-2. Inspect the Cuspal Sub-Lord (CSL) of the primary house, its Star Lord, and 4-Fold Significators (L1–L4) to determine if the event is promised, delayed, or denied.
-3. Cross-verify with Vedic D1/D9/D10 strength, Ashtakvarga bindus, and Current Dasha (MD/AD/PD) + Live Transit (Gochar) to determine exact timing.
+MANDATORY SILENT ANALYSIS PIPELINE (DO NOT SHOW RAW JSON, TABLES, OR TECHNICAL CODES TO CLIENT):
+1. Date & Dasha Lock: Check if the client is asking about a past date/year (e.g., 2014), the present, or a future period. Lock onto the exact queriedDateDasha and fullMahadashaSummary from the JSON. Never confuse current Dasha with past or future Dasha.
+2. Apply Core KP Astrology Rules:
+   - Map the query to Event-Forming Houses vs. Negating Houses (e.g., Career/Promotion: 2, 6, 10, 11 vs 5, 8, 12; Marriage: 2, 7, 11 vs 1, 6, 10; Wealth: 2, 6, 11 vs 5, 8, 12; Health/Dispute: 6, 8, 12 vs 1, 5, 11; Foreign/Travel: 3, 9, 12; Property/Vehicle: 4, 11, 12).
+   - Inspect the Cuspal Sub-Lord (CSL) of the primary house: check its Star Lord (source of results) and Sub-Lord (final approval/denial) via 4-Fold Significators (L1–L4).
+   - Account for Bhava Chalit house shifts, Untenanted planets (strong direct results), and Retrograde planets (delays/re-attempts unless in the star of a direct planet).
+   - For immediate timing or uncertain birth details, cross-verify with current Ruling Planets (RP).
+3. Cross-Verify with Core Parashari Vedic Rules:
+   - Evaluate House & Lord (भाव और भावेश): Where is the house lord placed (Kendra/Trikona vs Dusthana 6/8/12), and is it exalted, debilitated, combust, or Vargottama?
+   - Check Yuti (Conjunctions) and Drishti (Aspects)—especially Saturn's 3/7/10, Mars's 4/7/8, and Jupiter's 5/7/9 aspects on the house or house lord.
+   - Check Divisional Strength (D9 Navamsha / D10 Dashamsha) and Sarvashtakvarga (SAV) points (28+ strong, <25 weak) for the relevant house.
+4. Confirm Timing via DBA + Double Transit: Match running Mahadasha-Antardasha-Pratyantardasha significations with Live Gochar (Saturn & Jupiter Double Transit) to pinpoint exact timing.
 
 FRONTEND RESPONSE RULES:
-- Speak like a wise, grounded, caring human astrologer sitting across the table. Mirror the user's language naturally (${isEnglish ? 'English' : 'Hindi, English, or Hinglish'}).
-- Keep responses crisp and direct (120–180 words)—answer the question directly in the first two sentences.
-- Back every claim with clear astrological logic—explicitly naming the responsible Planet (ग्रह), Star Lord / Sub-Lord, House (भाव), Running Dasha (दशा), and Transit (गोचर) in simple words without raw technical codes like "L2 CSL".
-- Be honest if the chart shows struggle or delay, and close with one practical, actionable takeaway.
+- Human Astrologer Persona: Speak like a wise, caring, grounded astrologer sitting across the table. Mirror the user's language naturally (${isEnglish ? 'English' : 'Hindi, English, or Hinglish'}). For follow-up questions, build directly on previous context without repeating the same intro.
+- Direct & Concise (130–190 words): Deliver the exact verdict in the first two sentences. Never write long essays or robotic bullet lists.
+- Logical Proof in Simple Words: Explain why this is happening by naturally naming the responsible Planet (ग्रह), House/Lord (भाव/भावेश), Aspect/Conjunction (दृष्टि/युति), Mahadasha/Antardasha (दशा), and Transit (गोचर)—translating technical KP/Vedic logic into clear, everyday language without raw codes like "L2 CSL".
+- Honesty & Grounded Closure: If the chart indicates delay, struggle, or denial, state it honestly with empathy and end with one practical, actionable takeaway.
 - Remedies On Demand: Do NOT append remedies unless explicitly asked by the client.
 
 BACKEND KUNDLI JSON DATA:
@@ -330,7 +372,7 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
               config: {
                 systemInstruction: masterSystemPrompt,
                 temperature: 0.2,
-                maxOutputTokens: 450,
+                maxOutputTokens: 480,
               },
             });
 
@@ -377,7 +419,7 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
             config: {
               systemInstruction: masterSystemPrompt,
               temperature: 0.2,
-              maxOutputTokens: 450,
+              maxOutputTokens: 480,
             },
           });
           const res: any = await Promise.race([aiCall, timeoutPromise]);

@@ -69,7 +69,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
         {/* Cover / Header Section */}
         <div className="text-center pb-8 border-b-2 border-amber-500/40">
           <div className="inline-block px-3 py-1 mb-2 rounded-full text-xs font-bold tracking-widest text-amber-700 bg-amber-100 uppercase">
-            ASTRO GEMINI • ASTRONOMICAL DOSSIER
+            GEMINI ASTRO • ASTRONOMICAL DOSSIER
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-slate-950">
             {input.name || 'Client Kundli'}
@@ -422,7 +422,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
 
         {/* Footer */}
         <div className="pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
-          Generated automatically by Astro Gemini • Developed by Sandeep K Tripathi • Certified Astrological Algorithm
+          Generated automatically by Gemini Astro • Developed by Sandeep K Tripathi • Certified Astrological Algorithm
         </div>
       </div>
     </div>

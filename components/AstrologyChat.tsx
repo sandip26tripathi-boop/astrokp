@@ -439,7 +439,7 @@ export default function AstrologyChat() {
           <PanditJiIcon size={40} />
           <div>
             <h3 className="text-sm font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
-              {language === 'hi' ? 'Astro Gemini (पंडित जी परामर्श)' : 'Astro Gemini (Vedic AI Consult)'}
+              {language === 'hi' ? 'Gemini Astro (पंडित जी परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -578,7 +578,7 @@ export default function AstrologyChat() {
             <PanditJiIcon size={28} />
             <div className="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 border border-slate-200 dark:border-slate-800">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" />
-              {language === 'hi' ? 'Astro Gemini गणना कर रहे हैं...' : 'Astro Gemini is evaluating kundli coordinates...'}
+              {language === 'hi' ? 'Gemini Astro गणना कर रहे हैं...' : 'Gemini Astro is evaluating kundli coordinates...'}
             </div>
           </div>
         )}
