@@ -264,43 +264,47 @@ export default function Home() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/images/sandeep-tripathi.jpg"
-                    alt="Sandeep K Tripathi"
+                    alt={language === 'hi' ? 'संदीप के. त्रिपाठी' : 'Sandeep K. Tripathi'}
                     className="w-full h-full object-cover rounded-xl"
                   />
                 </div>
                 <div className="absolute -bottom-2 -right-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold shadow-md uppercase tracking-wider">
-                  FOUNDER
+                  {language === 'hi' ? 'संस्थापक' : 'FOUNDER'}
                 </div>
               </div>
 
               {/* Developer Info */}
               <div className="flex-1 space-y-2">
                 <h3 className="text-xl sm:text-2xl font-bold font-serif text-slate-900 dark:text-white">
-                  Developed by Sandeep K Tripathi
+                  {language === 'hi'
+                    ? 'संरचना एवं परिकल्पना: संदीप के. त्रिपाठी'
+                    : 'Architected by Sandeep K. Tripathi'}
                 </h3>
                 <p className="text-xs sm:text-sm font-semibold gold-gradient-text tracking-wide">
-                  AstroVastu Researcher & Educator
+                  {language === 'hi'
+                    ? 'एस्ट्रो-वास्तु शोधकर्ता, शिक्षक एवं ऐप डेवलपर'
+                    : 'AstroVastu Researcher, Educator & App Developer'}
                 </p>
 
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
                   {language === 'hi'
-                    ? 'प्रामाणिक वैदिक एवं पराशरी ज्योतिष, खगोल-विज्ञान और वास्तु शास्त्र के सूक्ष्म ऊर्जा संतुलन के गहन शोध पर आधारित यह आधुनिक ज्योतिषीय मंच विकसित किया गया है। इसका उद्देश्य प्राचीन ऋषियों के गणितीय सिद्धांतों को आधुनिक तकनीकी बुद्धिमत्ता के साथ जोड़कर जनसाधारण को सटीक और प्रामाणिक ज्योतिषीय मार्गदर्शन उपलब्ध कराना है।'
-                    : 'Engineered through dedicated research in authentic Vedic & Parashari astrology, astronomy, and AstroVastu energy balances. Conceived by Sandeep K Tripathi to harmonize ancient mathematical precision with modern intelligent computing for truthful cosmic guidance.'}
+                    ? 'शास्त्रीय वैदिक, के.पी. (KP) एवं पाराशरी ज्योतिष तथा वास्तु ऊर्जा संतुलन में वर्षों के गहन शोध पर आधारित। संदीप के. त्रिपाठी द्वारा निर्मित यह प्रणाली प्राचीन खगोलीय गणित और आधुनिक कंप्यूटिंग का समन्वय करती है—जो जीवन और व्यवसाय के महत्वपूर्ण निर्णयों के लिए तर्कसंगत और सटीक मार्गदर्शन प्रदान करती है।'
+                    : 'Built upon years of rigorous research in classical Vedic, KP, and Parashari astrology alongside spatial energy dynamics (AstroVastu). Conceived by Sandeep K. Tripathi to bridge ancient astronomical mathematics with modern computational intelligence—delivering structured, logic-driven insights for strategic life and executive decisions.'}
                 </p>
 
                 {/* Expertise Badges */}
                 <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                   <span className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
                     <span>🔭</span>
-                    <span>Vedic Astrology Precision</span>
+                    <span>{language === 'hi' ? 'वैदिक व के.पी. ज्योतिष अनुसंधान' : 'Vedic & KP Astrological Research'}</span>
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
                     <span>🏛️</span>
-                    <span>AstroVastu Energy Research</span>
+                    <span>{language === 'hi' ? 'एस्ट्रो-वास्तु ऊर्जा संतुलन' : 'AstroVastu Energy Dynamics'}</span>
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
                     <span>📚</span>
-                    <span>Vedic Astrology Educator</span>
+                    <span>{language === 'hi' ? 'शोधकर्ता एवं शिक्षक' : 'Researcher & Educator'}</span>
                   </span>
                 </div>
               </div>

@@ -77,8 +77,8 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     unlockReport: 'Unlock Full 15-Page Dossier',
   },
   hi: {
-    appTitle: 'एस्ट्रो जेमिनी',
-    appSubtitle: 'सटीक वैदिक व पराशरी ज्योतिष एवं ए.आई. ज्योतिषी',
+    appTitle: 'Gemini Astro',
+    appSubtitle: 'सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     ayanamsa: 'अयनांश',
     kpNewAyanamsa: 'वैदिक मानक अयनांश',
     kpOldAyanamsa: 'पारंपरिक अयनांश',

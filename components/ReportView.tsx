@@ -414,18 +414,24 @@ export default function ReportView({ onClose }: ReportViewProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/sandeep-tripathi.jpg"
-                alt="Sandeep K Tripathi"
+                alt={language === 'hi' ? 'संदीप के. त्रिपाठी' : 'Sandeep K. Tripathi'}
                 className="w-7 h-7 rounded-full object-cover border border-amber-400"
               />
-              <span className="font-semibold text-amber-900">Developed by Sandeep K Tripathi</span>
+              <span className="font-semibold text-amber-900">
+                {language === 'hi' ? 'संरचना एवं परिकल्पना: संदीप के. त्रिपाठी' : 'Architected by Sandeep K. Tripathi'}
+              </span>
             </div>
-            <span>AstroVastu Researcher & Educator</span>
+            <span>
+              {language === 'hi' ? 'एस्ट्रो-वास्तु शोधकर्ता, शिक्षक एवं ऐप डेवलपर' : 'AstroVastu Researcher, Educator & App Developer'}
+            </span>
           </div>
         </div>
 
         {/* Footer */}
         <div className="pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
-          Generated automatically by Gemini Astro • Developed by Sandeep K Tripathi • Certified Astrological Algorithm
+          {language === 'hi'
+            ? 'Gemini Astro द्वारा स्वतः निर्मित • संरचना एवं परिकल्पना: संदीप के. त्रिपाठी • प्रमाणित ज्योतिषीय एल्गोरिथम'
+            : 'Generated automatically by Gemini Astro • Architected by Sandeep K. Tripathi • Certified Astrological Algorithm'}
         </div>
       </div>
     </div>

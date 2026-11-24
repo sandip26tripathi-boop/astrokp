@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     'Career Astrology',
     'BTR Birth Time Rectification',
   ],
-  authors: [{ name: 'Gemini Astro & Pandit Sandeep Tripathi' }],
+  authors: [{ name: 'Gemini Astro & Sandeep K. Tripathi' }],
   creator: 'Gemini Astro',
   publisher: 'Gemini Astro Vedic AI',
   metadataBase: new URL('https://vedic-ai-astrology.vercel.app'),
@@ -121,8 +121,8 @@ export default function RootLayout({
       },
       founder: {
         '@type': 'Person',
-        name: 'Gemini Astro (Sandeep Tripathi)',
-        jobTitle: 'Vedic Astrologer & Astrological Data Scientist',
+        name: 'Gemini Astro (Sandeep K. Tripathi)',
+        jobTitle: 'AstroVastu Researcher, Educator & App Developer',
       },
     },
   ];

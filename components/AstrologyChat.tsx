@@ -439,7 +439,7 @@ export default function AstrologyChat() {
           <PanditJiIcon size={40} />
           <div>
             <h3 className="text-sm font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
-              {language === 'hi' ? 'Gemini Astro (पंडित जी परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
+              {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
