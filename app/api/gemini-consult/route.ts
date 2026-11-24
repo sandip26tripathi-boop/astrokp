@@ -224,7 +224,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         reply: redirectMsg,
         text: redirectMsg,
-        model: 'Astro-Gemini-Guardrail',
+        model: 'Gemini-Astro-Guardrail',
         debug: { topic: 'Off-Topic Redirection', isAstrological: false },
       });
     }
@@ -479,7 +479,7 @@ ${gocharData.summaryTextHi}
         clientLanguage,
         recentMessages
       );
-      modelUsed = 'Astro-Gemini-Synthesis-Engine (High-Speed Local)';
+      modelUsed = 'Gemini-Astro-Synthesis-Engine (High-Speed Local)';
     }
 
     const debugData = {

@@ -120,7 +120,7 @@ export default function AdminLeadsPage() {
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `astro-gemini-client-leads-${new Date().toISOString().slice(0, 10)}.csv`
+      `gemini-astro-client-leads-${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
