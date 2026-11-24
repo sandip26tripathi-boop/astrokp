@@ -392,13 +392,41 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
       }
     }
 
-    // 🌟 Instant SSE Streaming Support
+    // 🌟 Instant SSE Streaming Support with Abort & Timeout Protection for High Concurrency
     if (wantStream && apiKey) {
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
+          let isClosed = false;
+          const safeClose = () => {
+            if (!isClosed) {
+              isClosed = true;
+              try {
+                controller.close();
+              } catch (_) {}
+            }
+          };
+
+          const safeEnqueue = (data: Uint8Array) => {
+            if (!isClosed && !req.signal?.aborted) {
+              try {
+                controller.enqueue(data);
+              } catch (_) {
+                isClosed = true;
+              }
+            }
+          };
+
+          req.signal?.addEventListener('abort', () => {
+            safeClose();
+          });
+
           try {
-            const aiCall = await ai.models.generateContentStream({
+            // Race the stream initiation against a 12s timeout
+            const streamTimeout = new Promise<null>((_, reject) =>
+              setTimeout(() => reject(new Error('Stream initiation timeout')), 12000)
+            );
+            const aiCallPromise = ai.models.generateContentStream({
               model: 'gemini-3.5-flash-lite',
               contents: formattedContents,
               config: {
@@ -408,20 +436,25 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
               },
             });
 
+            const aiCall: any = await Promise.race([aiCallPromise, streamTimeout]);
+
             for await (const chunk of aiCall) {
+              if (req.signal?.aborted || isClosed) break;
               const text = chunk.text;
               if (text) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+                safeEnqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
               }
             }
-            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-            controller.close();
+            safeEnqueue(encoder.encode(`data: [DONE]\n\n`));
+            safeClose();
           } catch (streamErr) {
             console.warn('Streaming error, falling back to local synthesis:', streamErr);
-            const fallback = synthesizeFastKPAnswer(activeChart, gocharData, currentQuestion, clientLanguage, recentMessages);
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: fallback })}\n\n`));
-            controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-            controller.close();
+            if (!req.signal?.aborted && !isClosed) {
+              const fallback = synthesizeFastKPAnswer(activeChart, gocharData, currentQuestion, clientLanguage, recentMessages);
+              safeEnqueue(encoder.encode(`data: ${JSON.stringify({ text: fallback })}\n\n`));
+              safeEnqueue(encoder.encode(`data: [DONE]\n\n`));
+            }
+            safeClose();
           }
         },
       });

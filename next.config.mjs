@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   experimental: {
-    serverComponentsExternalPackages: ['@kuntay/swisseph', 'swisseph'],
+    serverComponentsExternalPackages: ['@kuntay/swisseph', 'swisseph', 'sweph-wasm'],
   },
 };
 

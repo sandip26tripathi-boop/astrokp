@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { geoSearchCache } from '@/lib/cache-manager';
 
 interface GeoPlaceResult {
   name: string;
@@ -127,6 +128,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(TOP_CURATED_CITIES.slice(0, 8));
   }
 
+  // Check in-memory Geo Cache first for sub-millisecond response under high concurrency
+  const cachedGeo = geoSearchCache.get(`geo:${query.toLowerCase()}`);
+  if (cachedGeo) {
+    return NextResponse.json(cachedGeo);
+  }
+
   // 1. Check curated list first for instantaneous matching
   const localMatches = TOP_CURATED_CITIES.filter(
     (c) =>
@@ -139,6 +146,7 @@ export async function GET(req: NextRequest) {
     const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8`;
     const response = await fetch(photonUrl, {
       headers: { 'User-Agent': 'AstroGemini/1.0' },
+      signal: AbortSignal.timeout(3500),
       next: { revalidate: 3600 },
     });
 
@@ -179,11 +187,15 @@ export async function GET(req: NextRequest) {
         return true;
       });
 
-      return NextResponse.json(combined.slice(0, 10));
+      const finalResults = combined.slice(0, 10);
+      geoSearchCache.set(`geo:${query.toLowerCase()}`, finalResults);
+      return NextResponse.json(finalResults);
     }
   } catch (err) {
     console.warn('Photon Geocoding API failed, falling back to local matches:', err);
   }
 
-  return NextResponse.json(localMatches.length > 0 ? localMatches : TOP_CURATED_CITIES.slice(0, 8));
+  const fallback = localMatches.length > 0 ? localMatches : TOP_CURATED_CITIES.slice(0, 8);
+  geoSearchCache.set(`geo:${query.toLowerCase()}`, fallback, 30 * 60 * 1000); // 30 mins for fallback
+  return NextResponse.json(fallback);
 }

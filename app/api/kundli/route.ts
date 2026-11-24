@@ -31,20 +31,7 @@ export async function POST(request: Request) {
     const lon = Number(body.lon ?? body.longitude ?? 0);
     const timezone = body.timezone !== undefined ? Number(body.timezone) : 5.5;
 
-    // 3. Fast In-Memory Deterministic LRU Cache lookup
-    const cacheKey = `sweph:${dateStr}_${timeStr}_${lat.toFixed(4)}_${lon.toFixed(4)}_${timezone}`;
-    let chart: any = kundliCalculationCache.get(cacheKey);
-
-    if (!chart) {
-      // 100% Free, Open-Source & Fast WebAssembly Swiss Ephemeris KP Calculation
-      chart = await calculateExactKP(dateStr, timeStr, lat, lon, timezone);
-      kundliCalculationCache.set(cacheKey, chart);
-    }
-
-    // Array of degrees for compatibility
-    const cuspsArray = chart.cuspsList ? chart.cuspsList.map((c: any) => c.longitude) : [];
-
-    // Master Kundli Calculation
+    // Master Kundli Calculation (Pure TS, 100% thread-safe & stateless)
     const chartInput: ChartInput = {
       name: body.name || 'Jataka',
       gender: body.gender || 'male',
@@ -61,9 +48,79 @@ export async function POST(request: Request) {
     };
     const masterKundli = generateMasterKundli(chartInput);
 
+    // 3. Fast In-Memory Deterministic LRU Cache lookup
+    const cacheKey = `sweph:${dateStr}_${timeStr}_${lat.toFixed(4)}_${lon.toFixed(4)}_${timezone}`;
+    let chart: any = kundliCalculationCache.get(cacheKey);
+
+    if (!chart) {
+      try {
+        // 100% Free, Open-Source & Fast WebAssembly Swiss Ephemeris KP Calculation
+        chart = await calculateExactKP(dateStr, timeStr, lat, lon, timezone);
+        kundliCalculationCache.set(cacheKey, chart);
+      } catch (swephErr) {
+        console.warn('WASM calculateExactKP error, activating pure TS fallback:', swephErr);
+        // Resilient Fallback Engine: synthesize compatible chart structure from masterKundli
+        const cuspsData: Record<string, any> = {};
+        const cuspsList: any[] = [];
+        masterKundli.cusps.forEach((c, idx) => {
+          const cuspObj = {
+            houseNumber: c.houseNumber || idx + 1,
+            longitude: c.longitude,
+            signName: c.signName,
+            rashiName: c.signName,
+            signLord: c.signLord,
+            starLord: c.starLord,
+            subLord: c.subLord,
+            subSubLord: c.subSubLord,
+          };
+          cuspsData[`Cusp_${c.houseNumber || idx + 1}`] = cuspObj;
+          cuspsList.push(cuspObj);
+        });
+
+        const planetsData: Record<string, any> = {};
+        const planetKeyMap: Record<string, string> = {
+          Sun: 'Surya', Moon: 'Chandra', Mars: 'Mangal', Mercury: 'Budh',
+          Jupiter: 'Guru', Venus: 'Shukra', Saturn: 'Shani', Rahu: 'Rahu', Ketu: 'Ketu'
+        };
+
+        masterKundli.planets.forEach((p) => {
+          const pObj = {
+            planetEn: p.name,
+            longitude: p.longitude,
+            signName: p.signName,
+            signLord: p.signLord,
+            starLord: p.starLord,
+            subLord: p.subLord,
+            subSubLord: p.subSubLord,
+            isRetrograde: Boolean(p.isRetrograde),
+            houseOccupied: p.houseOccupied,
+          };
+          planetsData[p.name] = pObj;
+          if (planetKeyMap[p.name]) {
+            planetsData[planetKeyMap[p.name]] = pObj;
+          }
+        });
+
+        chart = {
+          engine: 'master-astronomy-fail-safe',
+          jd: masterKundli.meta.julianDay,
+          ascendant: masterKundli.ascendant,
+          lagna: masterKundli.ascendant,
+          cusps: cuspsData,
+          cuspsList,
+          cuspsDetail: cuspsList,
+          planets: planetsData,
+        };
+        kundliCalculationCache.set(cacheKey, chart);
+      }
+    }
+
+    // Array of degrees for compatibility
+    const cuspsArray = chart.cuspsList ? chart.cuspsList.map((c: any) => c.longitude) : [];
+
     return NextResponse.json({
       success: true,
-      engine: 'sweph-wasm',
+      engine: chart.engine || 'sweph-wasm',
       jd: chart.jd,
       meta: {
         dateStr,
@@ -99,10 +156,15 @@ export async function GET(request: Request) {
   const tz = parseFloat(searchParams.get('tz') || '5.5');
 
   try {
-    const chart: any = await calculateExactKP(dateStr, timeStr, lat, lon, tz);
+    const cacheKey = `sweph:${dateStr}_${timeStr}_${lat.toFixed(4)}_${lon.toFixed(4)}_${tz}`;
+    let chart: any = kundliCalculationCache.get(cacheKey);
+    if (!chart) {
+      chart = await calculateExactKP(dateStr, timeStr, lat, lon, tz);
+      kundliCalculationCache.set(cacheKey, chart);
+    }
     return NextResponse.json({
       success: true,
-      engine: 'sweph-wasm',
+      engine: chart.engine || 'sweph-wasm',
       ...chart
     });
   } catch (err: any) {
