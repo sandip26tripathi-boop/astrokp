@@ -273,21 +273,21 @@ export default function BTRWorkspace() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-white/80 dark:bg-cosmic-card/90 backdrop-blur-xl border border-amber-500/20 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
+    <div className="w-full max-w-full overflow-hidden bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] rounded-2xl p-4 sm:p-6 shadow-sandalwood space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#E4D5B7] dark:border-[#443525]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-            <Sliders className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525] flex items-center justify-center shrink-0">
+            <Sliders className="w-5 h-5 text-[#B87314]" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-2">
               {language === 'hi' ? 'स्वचालित जन्म समय परिशोधन (Automatic KP BTR)' : 'Automatic Birth Time Rectification (BTR)'}
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525]">
                 10-Event Logic
               </span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-[#5C4D3C] dark:text-[#D8C39E] mt-0.5">
               {language === 'hi'
                 ? 'नीचे दिए गए १० प्रश्नों में से किन्हीं भी ३ का उत्तर दें; के.पी. गणितीय सूत्रों से जन्म समय स्वतः सही हो जाएगा।'
                 : 'Answer ANY 3 of the 10 life events below to auto-rectify your birth time down to seconds.'}

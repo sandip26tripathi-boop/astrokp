@@ -47,25 +47,25 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/80 dark:bg-cosmic-obsidian/90 border-b border-amber-500/20 dark:border-amber-500/20 transition-colors shadow-sm">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#FFFDF7]/95 dark:bg-[#1A140E]/95 border-b border-[#E4D5B7] dark:border-[#443525] transition-colors shadow-sandalwood">
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2">
           {/* Logo & Brand */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <TriangleLogo size="sm" />
             <div>
               <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="font-serif font-black text-sm sm:text-xl tracking-tight gold-gradient-text">
+                <span className="font-serif font-black text-sm sm:text-xl tracking-tight text-[#231A12] dark:text-[#FFFDF7]">
                   Gemini Astro
                 </span>
-                <span className="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                <span className="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.2 rounded bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525]">
                   PRO
                 </span>
               </div>
               <div className="hidden sm:block">
-                <p className="text-[9.5px] sm:text-[10px] font-medium text-slate-600 dark:text-slate-400 leading-tight">
+                <p className="text-[9.5px] sm:text-[10px] font-medium text-[#5C4D3C] dark:text-[#D8C39E] leading-tight">
                   Astronomical Precision Meets Cosmic Intelligence.
                 </p>
-                <p className="text-[8.5px] sm:text-[9px] font-medium text-amber-600 dark:text-amber-400/90 leading-tight">
+                <p className="text-[8.5px] sm:text-[9px] font-medium text-[#5C4D3C] dark:text-[#D4AF37]/90 leading-tight">
                   सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
                 </p>
               </div>
@@ -75,14 +75,14 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
           {/* Action Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Language Switcher */}
-            <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-0.5 sm:p-1">
+            <div className="flex items-center rounded-xl bg-[#F3E8D2] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] p-0.5 sm:p-1">
               <button
                 type="button"
                 onClick={() => setLanguage('en')}
                 className={`px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-semibold rounded-lg transition ${
                   language === 'en'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                    : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
                 }`}
               >
                 EN
@@ -92,8 +92,8 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
                 onClick={() => setLanguage('hi')}
                 className={`px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-semibold rounded-lg transition ${
                   language === 'hi'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                    : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
                 }`}
               >
                 हिं
@@ -104,7 +104,7 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
             <button
               type="button"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-amber-400 hover:scale-105 transition"
+              className="p-1.5 sm:p-2 rounded-xl bg-[#F3E8D2] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] text-[#5C4D3C] dark:text-[#D4AF37] hover:scale-105 transition"
               aria-label="Toggle Theme"
             >
               {mounted ? (
@@ -118,9 +118,9 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
             <button
               type="button"
               onClick={onOpenReport}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 transition"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F3E8D2] dark:bg-[#2A1F16] hover:bg-[#E4D5B7] dark:hover:bg-[#443525] text-[#231A12] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] transition"
             >
-              <Download className="w-3.5 h-3.5 text-amber-500" />
+              <Download className="w-3.5 h-3.5 text-[#B87314]" />
               <span>{t('exportPdf', language)}</span>
             </button>
 
@@ -129,13 +129,13 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-1.5 p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 transition text-xs font-semibold"
+                className="flex items-center gap-1.5 p-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-[#B87314]/10 hover:bg-[#B87314]/20 text-[#B87314] dark:text-[#D4AF37] border border-[#B87314]/30 transition text-xs font-semibold"
                 title={user.email}
               >
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className="w-6 h-6 rounded-full border border-amber-500"
+                  className="w-6 h-6 rounded-full border border-[#B87314]"
                 />
                 <span className="hidden sm:inline max-w-[80px] truncate">{user.name.split(' ')[0]}</span>
               </button>
@@ -143,7 +143,7 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#F3E8D2] dark:bg-[#2A1F16] hover:bg-[#E4D5B7] dark:hover:bg-[#443525] text-[#231A12] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] transition"
               >
                 {/* Google G Icon */}
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
@@ -173,11 +173,11 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               <button
                 type="button"
                 onClick={handleLockedClick}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-800 hover:border-amber-500/40 hover:text-slate-700 dark:hover:text-slate-300 transition shadow-sm group"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#F3E8D2] dark:bg-[#2A1F16] text-[#8A7967] border border-[#E4D5B7] dark:border-[#443525] hover:border-[#D4AF37] hover:text-[#5C4D3C] transition shadow-sm group"
                 title={language === 'hi' ? 'प्रीमियम सुविधाएं (शीघ्र उपलब्ध)' : 'Premium Features (Coming Soon)'}
                 aria-label="Premium Features - Locked"
               >
-                <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500/80 group-hover:scale-110 transition-transform" />
+                <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#B87314] group-hover:scale-110 transition-transform" />
                 <span className="hidden sm:inline font-medium">
                   {language === 'hi' ? 'प्रीमियम सुविधा' : 'Premium'}
                 </span>

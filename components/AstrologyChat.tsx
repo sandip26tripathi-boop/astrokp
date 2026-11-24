@@ -59,14 +59,14 @@ function parseInlineMarkdown(text: string): React.ReactNode {
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
-        <strong key={index} className="font-bold text-slate-950 dark:text-amber-200">
+        <strong key={index} className="font-bold text-[#231A12] dark:text-[#D4AF37]">
           {part.slice(2, -2)}
         </strong>
       );
     }
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
       return (
-        <em key={index} className="italic text-slate-800 dark:text-amber-100">
+        <em key={index} className="italic text-[#5C4D3C] dark:text-[#D8C39E]">
           {part.slice(1, -1)}
         </em>
       );
@@ -115,7 +115,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
       elements.push(
         <div
           key={`h-${i}`}
-          className="font-bold text-amber-600 dark:text-amber-400 mt-2.5 mb-1 text-sm sm:text-base border-b border-amber-500/20 pb-0.5"
+          className="font-bold text-[#B87314] dark:text-[#D4AF37] mt-2.5 mb-1 text-sm sm:text-base border-b border-[#E4D5B7] dark:border-[#443525] pb-0.5"
         >
           {title}
         </div>
@@ -127,7 +127,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
       const bulletText = trimmed.substring(2);
       elements.push(
         <div key={`b-${i}`} className="flex items-start gap-1.5 my-0.5 pl-0.5">
-          <span className="text-amber-500 font-bold shrink-0">•</span>
+          <span className="text-[#B87314] font-bold shrink-0">•</span>
           <span className="flex-1 leading-relaxed">{parseInlineMarkdown(bulletText)}</span>
         </div>
       );
@@ -142,13 +142,13 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
   }
 
   return (
-    <div className="space-y-1 text-sm sm:text-base leading-relaxed text-slate-800 dark:text-slate-100">
+    <div className="space-y-1 text-sm sm:text-base leading-relaxed text-[#231A12] dark:text-[#FAF4E6]">
       {elements}
 
       {followUpQuestions.length > 0 && onSelectQuestion && (
-        <div className="mt-3 pt-2 border-t border-amber-500/20">
-          <div className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+        <div className="mt-3 pt-2 border-t border-[#E4D5B7] dark:border-[#443525]">
+          <div className="text-xs sm:text-sm font-bold text-[#B87314] dark:text-[#D4AF37] mb-1.5 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-[#B87314]" />
             <span>सुझाए गए प्रश्न (क्लिक करके पूछें):</span>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -157,10 +157,10 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
                 key={qIdx}
                 type="button"
                 onClick={() => onSelectQuestion(q)}
-                className="text-left px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-slate-800 dark:text-amber-100 text-xs sm:text-sm font-medium transition flex items-center justify-between group shadow-sm"
+                className="text-left px-3 py-2 rounded-xl bg-[#F3E8D2] hover:bg-[#E4D5B7] dark:bg-[#2A1F16] dark:hover:bg-[#443525] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] text-xs sm:text-sm font-medium transition flex items-center justify-between group shadow-sm"
               >
                 <span>{q}</span>
-                <span className="text-amber-500 group-hover:translate-x-0.5 transition-transform text-xs sm:text-sm">
+                <span className="text-[#B87314] group-hover:translate-x-0.5 transition-transform text-xs sm:text-sm">
                   →
                 </span>
               </button>
@@ -453,20 +453,20 @@ export default function AstrologyChat() {
 
   return (
     <div
-      className={`w-full max-w-full overflow-hidden bg-white/80 dark:bg-cosmic-card/90 backdrop-blur-xl border border-amber-500/20 dark:border-amber-500/30 rounded-2xl shadow-xl flex flex-col transition-all duration-300 ${
+      className={`w-full max-w-full overflow-hidden bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] rounded-2xl shadow-sandalwood flex flex-col transition-all duration-300 ${
         isExpanded ? 'min-h-[750px]' : 'min-h-[580px]'
       }`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div className="p-4 border-b border-[#E4D5B7] dark:border-[#443525] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <PanditJiIcon size={40} />
           <div>
-            <h3 className="text-base sm:text-lg font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-2">
               {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#4A6B53] animate-pulse" />
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E]">
               {language === 'hi' ? 'वैदिक, पराशरी एवं नक्षत्र आधारित प्रामाणिक फलादेश' : 'Vedic & Parashari Astrological Guidance'}
             </p>
           </div>
@@ -477,7 +477,7 @@ export default function AstrologyChat() {
             type="button"
             onClick={clearChat}
             title="Clear Chat History"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-[#8A7967] hover:text-[#C2592B] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] transition"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -485,7 +485,7 @@ export default function AstrologyChat() {
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             title={isExpanded ? 'Collapse' : 'Expand'}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-[#8A7967] hover:text-[#231A12] dark:hover:text-[#FFFDF7] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] transition"
           >
             {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -493,31 +493,31 @@ export default function AstrologyChat() {
       </div>
 
       {/* Active Kundli Calculation HUD Status Bar */}
-      <div className="px-4 py-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/20 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2 text-slate-700 dark:text-slate-300">
+      <div className="px-4 py-2.5 bg-[#F3E8D2] dark:bg-[#1A140E] border-b border-[#E4D5B7] dark:border-[#443525] text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2 text-[#231A12] dark:text-[#FFFDF7]">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span className="font-semibold text-[#B87314] dark:text-[#D4AF37] flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-[#B87314]" />
             {input.name ? `${input.name} की कुंडली:` : (language === 'hi' ? 'सक्रिय कुंडली गणना:' : 'Active Kundli Grounding:')}
           </span>
-          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
-            लग्न: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'}</strong>
+          <span className="bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
+            लग्न: <strong className="text-[#231A12] dark:text-[#D4AF37]">{kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'}</strong>
           </span>
-          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
-            चन्द्र: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'}</strong>
+          <span className="bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
+            चन्द्र: <strong className="text-[#231A12] dark:text-[#D4AF37]">{kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'}</strong>
           </span>
-          <span className="hidden sm:inline bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
+          <span className="hidden sm:inline bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
             {formatDashaDisplay(kpMatrix?.currentDasha)}
           </span>
         </div>
         {input.dateOfBirth && (
-          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <div className="text-xs text-[#5C4D3C] dark:text-[#D8C39E] font-medium">
             {input.dateOfBirth} | {input.timeOfBirth || '12:00'} | {input.placeName || 'भारत'}
           </div>
         )}
       </div>
 
       {/* Preset Inquiry Chips */}
-      <div className="p-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 overflow-x-auto">
+      <div className="p-3 border-b border-[#E4D5B7] dark:border-[#443525] bg-[#FAF4E6]/50 dark:bg-[#1A140E]/30 overflow-x-auto">
         <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
           {PRESET_CHIPS.map((chip) => {
             const Icon = chip.icon;
@@ -530,9 +530,9 @@ export default function AstrologyChat() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleSend(prompt)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500/60 text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition disabled:opacity-50 text-xs sm:text-sm shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] hover:border-[#D4AF37] text-[#231A12] dark:text-[#FFFDF7] hover:text-[#B87314] font-medium transition disabled:opacity-50 text-xs sm:text-sm shadow-sm hover:bg-[#F3E8D2]"
               >
-                <Icon className="w-3.5 h-3.5 text-amber-500" />
+                <Icon className="w-3.5 h-3.5 text-[#B87314]" />
                 <span>{label}</span>
               </button>
             );
@@ -550,7 +550,7 @@ export default function AstrologyChat() {
               className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
             >
               {isUser ? (
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold bg-amber-500 text-slate-950">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold bg-[#B87314] text-[#FFFDF7]">
                   <User className="w-4 h-4" />
                 </div>
               ) : (
@@ -560,8 +560,8 @@ export default function AstrologyChat() {
               <div
                 className={`max-w-[88%] sm:max-w-[85%] rounded-2xl p-3.5 sm:p-4 text-sm sm:text-base leading-relaxed ${
                   isUser
-                    ? 'bg-amber-500/15 dark:bg-amber-500/20 text-slate-900 dark:text-amber-100 border border-amber-500/30'
-                    : 'bg-slate-100 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800'
+                    ? 'bg-[#F3E8D2] dark:bg-[#2A1F16] text-[#231A12] dark:text-[#FFFDF7] border border-[#D8C39E] dark:border-[#443525]'
+                    : 'bg-[#FFFDF7] dark:bg-[#1A140E] text-[#231A12] dark:text-[#FAF4E6] border border-[#E4D5B7] dark:border-[#443525] shadow-sm'
                 }`}
               >
                 {isUser ? (
@@ -572,7 +572,7 @@ export default function AstrologyChat() {
                 <div
                   suppressHydrationWarning
                   className={`text-[10.5px] sm:text-xs mt-1.5 ${
-                    isUser ? 'text-amber-700 dark:text-amber-400' : 'text-slate-400'
+                    isUser ? 'text-[#8A7967]' : 'text-[#8A7967]'
                   }`}
                 >
                   {isMounted && msg.timestamp
@@ -590,9 +590,9 @@ export default function AstrologyChat() {
         {streamingText && (
           <div className="flex items-start gap-3 animate-fade-in">
             <PanditJiIcon size={28} />
-            <div className="max-w-[88%] sm:max-w-[85%] rounded-2xl p-3.5 sm:p-4 text-sm sm:text-base leading-relaxed bg-slate-100 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 border border-amber-500/30 shadow-sm">
+            <div className="max-w-[88%] sm:max-w-[85%] rounded-2xl p-3.5 sm:p-4 text-sm sm:text-base leading-relaxed bg-[#FFFDF7] dark:bg-[#1A140E] text-[#231A12] dark:text-[#FAF4E6] border border-[#E4D5B7] dark:border-[#443525] shadow-sm">
               <div className="whitespace-pre-wrap">{streamingText}</div>
-              <span className="inline-block w-1.5 h-3 ml-1 bg-amber-500 animate-pulse rounded-full align-middle" />
+              <span className="inline-block w-1.5 h-3 ml-1 bg-[#B87314] animate-pulse rounded-full align-middle" />
             </div>
           </div>
         )}
@@ -600,8 +600,8 @@ export default function AstrologyChat() {
         {isLoading && !streamingText && (
           <div className="flex items-start gap-3 animate-fade-in">
             <PanditJiIcon size={28} />
-            <div className="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 flex items-center gap-2 border border-slate-200 dark:border-slate-800">
-              <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
+            <div className="bg-[#FFFDF7] dark:bg-[#1A140E] rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E] flex items-center gap-2 border border-[#E4D5B7] dark:border-[#443525]">
+              <Sparkles className="w-4 h-4 text-[#B87314] animate-spin" />
               <span>{language === 'hi' ? 'Gemini Astro गणना कर रहे हैं...' : 'Gemini Astro is evaluating kundli coordinates...'}</span>
             </div>
           </div>
@@ -615,7 +615,7 @@ export default function AstrologyChat() {
           e.preventDefault();
           handleSend();
         }}
-        className="sticky bottom-0 z-20 p-2.5 sm:p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md"
+        className="sticky bottom-0 z-20 p-2.5 sm:p-3 border-t border-[#E4D5B7] dark:border-[#443525] flex items-center gap-2 bg-[#FFFDF7]/95 dark:bg-[#1A140E]/95 backdrop-blur-md"
       >
         <button
           type="button"
@@ -624,8 +624,8 @@ export default function AstrologyChat() {
           title={isListening ? 'Stop listening' : 'Start voice input'}
           className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border transition disabled:opacity-50 ${
             isListening
-              ? 'bg-red-500 text-white border-red-600 animate-pulse'
-              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:text-amber-500'
+              ? 'bg-[#C2592B] text-white border-[#C2592B] animate-pulse'
+              : 'bg-[#FFFDF7] dark:bg-[#231A12] text-[#5C4D3C] dark:text-[#D8C39E] border-[#E4D5B7] dark:border-[#443525] hover:text-[#B87314]'
           }`}
         >
           {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -646,13 +646,13 @@ export default function AstrologyChat() {
               ? 'अपनी शंका पूछें (उदा. क्या मुझे इस वर्ष पदोन्नति मिलेगी?)...'
               : 'Ask specific question (e.g., When will I get a job promotion?)...'
           }
-          className="flex-1 min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+          className="flex-1 min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-xl bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] text-base sm:text-xs text-[#231A12] dark:text-[#FFFDF7] placeholder:text-[#8A7967] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
         />
 
         <button
           type="submit"
           disabled={!inputMessage.trim() || isLoading}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-amber-500/20"
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#B87314] hover:bg-[#9A5E0D] text-[#FFFDF7] font-bold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-[#B87314]/25"
         >
           <Send className="w-4 h-4" />
         </button>

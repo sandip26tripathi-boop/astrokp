@@ -232,19 +232,19 @@ export default function KundliForm() {
   );
 
   return (
-    <div className="w-full max-w-full overflow-hidden relative bg-white/80 dark:bg-cosmic-card/90 backdrop-blur-xl border border-amber-500/20 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl shadow-amber-500/5">
+    <div className="w-full max-w-full overflow-hidden relative bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] rounded-2xl p-4 sm:p-6 shadow-sandalwood">
       {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between pb-5 border-b border-slate-200 dark:border-slate-800 gap-3">
+      <div className="flex flex-wrap items-center justify-between pb-5 border-b border-[#E4D5B7] dark:border-[#443525] gap-3">
         <div className="flex items-center space-x-3">
           <TriangleLogo size="md" />
           <div>
-            <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold font-serif text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-2">
               {t('birthDetails', language)}
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525] font-semibold">
                 Live Geocoding Active
               </span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-[#5C4D3C] dark:text-[#D8C39E]">
               High-Precision Placidus Semi-Arc Cusps & Auto-Timezone
             </p>
           </div>
@@ -254,9 +254,9 @@ export default function KundliForm() {
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F3E8D2] hover:bg-[#E4D5B7] text-[#231A12] dark:bg-[#2A1F16] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] transition-all"
           >
-            <Bookmark className="w-3.5 h-3.5" />
+            <Bookmark className="w-3.5 h-3.5 text-[#B87314]" />
             {savedNotice ? 'Saved!' : t('saveCurrent', language)}
           </button>
 
@@ -264,7 +264,7 @@ export default function KundliForm() {
             <button
               type="button"
               onClick={() => setShowSavedList(!showSavedList)}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F3E8D2] dark:bg-[#2A1F16] text-[#231A12] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] hover:bg-[#E4D5B7] transition"
             >
               {t('savedKundlis', language)} ({savedCharts.length})
             </button>
@@ -300,8 +300,8 @@ export default function KundliForm() {
         {/* Name & Gender */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-amber-500" />
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-[#B87314]" />
               {t('fullName', language)}
             </label>
             <input
@@ -310,12 +310,12 @@ export default function KundliForm() {
               value={localInput.name}
               onChange={(e) => setLocalInput({ ...localInput, name: e.target.value })}
               placeholder={language === 'hi' ? 'नाम लिखें (उदा. राहुल शर्मा)' : 'e.g. Rahul Verma'}
-              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5">
               {t('gender', language)}
             </label>
             <select
@@ -323,7 +323,7 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, gender: e.target.value as 'male' | 'female' | 'other' })
               }
-              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             >
               <option value="male">{t('male', language)}</option>
               <option value="female">{t('female', language)}</option>
@@ -335,8 +335,8 @@ export default function KundliForm() {
         {/* Date & Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-amber-500" />
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#B87314]" />
               {t('dateOfBirth', language)}
             </label>
             <input
@@ -344,13 +344,13 @@ export default function KundliForm() {
               required
               value={localInput.dateOfBirth}
               onChange={(e) => setLocalInput({ ...localInput, dateOfBirth: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             />
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-500" />
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#B87314]" />
               {t('timeOfBirth', language)} (24-Hour)
             </label>
             <input
@@ -359,7 +359,7 @@ export default function KundliForm() {
               step="1"
               value={localInput.timeOfBirth}
               onChange={(e) => setLocalInput({ ...localInput, timeOfBirth: e.target.value })}
-              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             />
           </div>
         </div>
@@ -367,8 +367,8 @@ export default function KundliForm() {
         {/* Dynamic Place Autocomplete & GPS Detection */}
         <div className="relative">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-amber-500" />
+            <label className="text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#B87314]" />
               {t('birthPlace', language)}
             </label>
 
@@ -376,7 +376,7 @@ export default function KundliForm() {
               type="button"
               onClick={handleDetectCurrentLocation}
               disabled={isDetectingLocation}
-              className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-500 flex items-center gap-1 transition"
+              className="text-[11px] font-semibold text-[#B87314] hover:text-[#9A5E0D] dark:text-[#D4AF37] flex items-center gap-1 transition"
             >
               {isDetectingLocation ? (
                 <>
@@ -404,39 +404,39 @@ export default function KundliForm() {
                   ? 'जन्म स्थान खोजें (उदा. दिल्ली, मुंबई, इंदौर, भोपाल, लखनऊ, लंदन...)'
                   : 'Search ANY city, town or village (e.g. Delhi, Mumbai, London)...'
               }
-              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full pl-10 pr-10 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-[#8A7967] absolute left-3.5 top-3.5" />
 
             {isSearchingPlaces && (
-              <Loader2 className="w-4 h-4 text-amber-500 animate-spin absolute right-3.5 top-3" />
+              <Loader2 className="w-4 h-4 text-[#B87314] animate-spin absolute right-3.5 top-3.5" />
             )}
           </div>
 
           {/* Autocomplete Dropdown List */}
           {showCityDropdown && cityResults.length > 0 && (
-            <div className="absolute z-30 w-full mt-1.5 max-h-56 overflow-y-auto rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl py-1 divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="absolute z-30 w-full mt-1.5 max-h-56 overflow-y-auto rounded-xl bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] shadow-2xl py-1 divide-y divide-[#E4D5B7] dark:divide-[#443525]">
               {cityResults.map((city, idx) => (
                 <button
                   type="button"
                   key={idx}
                   onClick={() => selectCity(city)}
-                  className="w-full px-3.5 py-2.5 text-left text-xs flex items-center justify-between hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition"
+                  className="w-full px-3.5 py-2.5 text-left text-xs flex items-center justify-between hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] text-[#231A12] dark:text-[#FFFDF7] transition"
                 >
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-[#B87314] shrink-0" />
                     <div>
-                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">
+                      <span className="font-semibold text-[#231A12] dark:text-[#FFFDF7] block">
                         {city.name}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-[#5C4D3C] dark:text-[#D8C39E]">
                         {city.state ? `${city.state}, ` : ''}{city.country}
                       </span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                  <div className="text-right shrink-0 font-mono text-[10px] text-[#5C4D3C] dark:text-[#D8C39E]">
                     <div>{city.latitude.toFixed(2)}°N, {city.longitude.toFixed(2)}°E</div>
-                    <div className="text-amber-600 dark:text-amber-400 font-bold">
+                    <div className="text-[#B87314] dark:text-[#D4AF37] font-bold">
                       UTC {city.timezone >= 0 ? `+${city.timezone}` : city.timezone}
                     </div>
                   </div>
@@ -445,16 +445,16 @@ export default function KundliForm() {
             </div>
           )}
           {/* Active coordinates status badge */}
-          <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-            <span>📍 Lat: <strong className="text-amber-500">{Number(localInput.latitude).toFixed(2)}°</strong>, Lon: <strong className="text-amber-500">{Number(localInput.longitude).toFixed(2)}°</strong>, TZ: <strong className="text-amber-500">{Number(localInput.timezone) >= 0 ? `+${localInput.timezone}` : localInput.timezone}</strong></span>
-            <span className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">✓ Active Coordinates</span>
+          <div className="mt-1.5 flex items-center justify-between text-[11px] text-[#5C4D3C] dark:text-[#D8C39E] font-mono">
+            <span>📍 Lat: <strong className="text-[#B87314] dark:text-[#D4AF37]">{Number(localInput.latitude).toFixed(2)}°</strong>, Lon: <strong className="text-[#B87314] dark:text-[#D4AF37]">{Number(localInput.longitude).toFixed(2)}°</strong>, TZ: <strong className="text-[#B87314] dark:text-[#D4AF37]">{Number(localInput.timezone) >= 0 ? `+${localInput.timezone}` : localInput.timezone}</strong></span>
+            <span className="text-[10px] text-[#4A6B53] font-semibold flex items-center gap-1">✓ Active Coordinates</span>
           </div>
         </div>
 
         {/* Lat / Lon / Timezone coordinates preview with manual adjustment */}
-        <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
+        <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-[#F3E8D2]/40 dark:bg-[#1A140E]/60 border border-[#E4D5B7] dark:border-[#443525] text-[11px] text-[#5C4D3C] dark:text-[#D8C39E]">
           <div>
-            <span className="text-slate-400 block">{t('latitude', language)}</span>
+            <span className="text-[#8A7967] block">{t('latitude', language)}</span>
             <input
               type="number"
               step="0.0001"
@@ -462,11 +462,11 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, latitude: parseFloat(e.target.value) || 0 })
               }
-              className="w-full bg-transparent font-mono text-slate-900 dark:text-amber-400 font-semibold focus:outline-none"
+              className="w-full bg-transparent font-mono text-[#231A12] dark:text-[#D4AF37] font-semibold focus:outline-none"
             />
           </div>
           <div>
-            <span className="text-slate-400 block">{t('longitude', language)}</span>
+            <span className="text-[#8A7967] block">{t('longitude', language)}</span>
             <input
               type="number"
               step="0.0001"
@@ -474,11 +474,11 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, longitude: parseFloat(e.target.value) || 0 })
               }
-              className="w-full bg-transparent font-mono text-slate-900 dark:text-amber-400 font-semibold focus:outline-none"
+              className="w-full bg-transparent font-mono text-[#231A12] dark:text-[#D4AF37] font-semibold focus:outline-none"
             />
           </div>
           <div>
-            <span className="text-slate-400 block">{t('timezone', language)}</span>
+            <span className="text-[#8A7967] block">{t('timezone', language)}</span>
             <input
               type="number"
               step="0.25"
@@ -486,7 +486,7 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, timezone: parseFloat(e.target.value) || 0 })
               }
-              className="w-full bg-transparent font-mono text-slate-900 dark:text-amber-400 font-semibold focus:outline-none"
+              className="w-full bg-transparent font-mono text-[#231A12] dark:text-[#D4AF37] font-semibold focus:outline-none"
             />
           </div>
         </div>
@@ -494,8 +494,8 @@ export default function KundliForm() {
         {/* Ayanamsa & Horary Switch */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-[#B87314]" />
               {t('ayanamsa', language)}
             </label>
             <select
@@ -503,7 +503,7 @@ export default function KundliForm() {
               onChange={(e) =>
                 setLocalInput({ ...localInput, ayanamsa: e.target.value as AyanamsaType })
               }
-              className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
             >
               <option value="KP_NEW">{t('kpNewAyanamsa', language)}</option>
               <option value="KP_OLD">{t('kpOldAyanamsa', language)}</option>
@@ -513,15 +513,15 @@ export default function KundliForm() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <label className="text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#B87314]" />
                 {t('horaryToggle', language)}
               </label>
               <input
                 type="checkbox"
                 checked={localInput.isHorary}
                 onChange={(e) => setLocalInput({ ...localInput, isHorary: e.target.checked })}
-                className="w-4 h-4 rounded text-amber-500 focus:ring-amber-400 cursor-pointer"
+                className="w-4 h-4 rounded text-[#B87314] focus:ring-[#D4AF37] cursor-pointer"
               />
             </div>
 
@@ -538,17 +538,17 @@ export default function KundliForm() {
                       horaryNumber: Math.min(249, Math.max(1, parseInt(e.target.value, 10) || 1)),
                     })
                   }
-                  className="w-full px-3.5 py-2 text-sm rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-900 dark:text-amber-200 font-semibold focus:outline-none"
+                  className="w-full px-3.5 py-2 text-sm rounded-xl bg-[#F3E8D2] border border-[#B87314]/40 text-[#231A12] dark:text-[#FFFDF7] font-semibold focus:outline-none"
                 />
                 {currentHorarySeg && (
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400 leading-tight">
+                  <p className="text-[10px] text-[#B87314] dark:text-[#D4AF37] leading-tight">
                     Seed #{currentHorarySeg.number}: Sign {currentHorarySeg.sign} ({currentHorarySeg.signLord}) •
                     Star {currentHorarySeg.star} ({currentHorarySeg.starLord}) • Sub-Lord: <strong>{currentHorarySeg.subLord}</strong>
                   </p>
                 )}
               </div>
             ) : (
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 py-2">
+              <p className="text-[11px] text-[#5C4D3C] dark:text-[#D8C39E] py-2">
                 Standard Natal Horoscope calculated from exact Local Mean Time & Placidus Cusps.
               </p>
             )}
@@ -559,7 +559,7 @@ export default function KundliForm() {
         <button
           type="submit"
           disabled={isGenerating}
-          className="w-full mt-3 py-3.5 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
+          className="w-full mt-3 py-3.5 px-6 rounded-xl font-bold text-sm sm:text-base bg-[#B87314] hover:bg-[#9A5E0D] text-[#FFFDF7] shadow-lg shadow-[#B87314]/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
         >
           {isGenerating ? (
             <>

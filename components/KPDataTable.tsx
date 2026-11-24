@@ -26,15 +26,15 @@ export default function KPDataTable() {
     kpMatrix;
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-white/80 dark:bg-cosmic-card/90 backdrop-blur-xl border border-amber-500/20 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl">
+    <div className="w-full max-w-full overflow-hidden bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] rounded-2xl p-4 sm:p-6 shadow-sandalwood">
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-wrap items-center gap-2 pb-4 border-b border-[#E4D5B7] dark:border-[#443525]">
         <button
           onClick={() => setActiveTab('planets')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
             activeTab === 'planets'
-              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+              : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16]'
           }`}
         >
           <Compass className="w-4 h-4" />
@@ -45,8 +45,8 @@ export default function KPDataTable() {
           onClick={() => setActiveTab('cusps')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
             activeTab === 'cusps'
-              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+              : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16]'
           }`}
         >
           <Layers className="w-4 h-4" />

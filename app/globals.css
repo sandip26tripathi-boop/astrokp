@@ -4,19 +4,21 @@
 
 @layer base {
   :root {
-    --background: 248 250 252;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-border: 226 232 240;
-    --accent-gold: 217 119 6;
+    --background: 250 244 230;     /* #FAF4E6 Warm Sandalwood Ivory */
+    --foreground: 35 26 18;        /* #231A12 Deep Espresso Charcoal */
+    --card: 255 253 247;           /* #FFFDF7 Pure Cream Silk */
+    --card-border: 228 213 183;    /* #E4D5B7 Warm Sand Border */
+    --accent-gold: 184 115 20;     /* #B87314 Royal Saffron-Gold */
+    --accent-metallic: 212 175 55; /* #D4AF37 Antique Metallic Gold */
   }
 
   .dark {
-    --background: 11 15 25;
-    --foreground: 248 250 252;
-    --card: 19 27 46;
-    --card-border: 30 41 59;
-    --accent-gold: 245 158 11;
+    --background: 26 20 14;        /* #1A140E Warm Sandalwood Espresso */
+    --foreground: 250 244 230;     /* #FAF4E6 Sandalwood Ivory */
+    --card: 35 26 18;              /* #231A12 Deep Espresso Card */
+    --card-border: 68 53 37;       /* #443525 Warm Sandalwood Border */
+    --accent-gold: 212 175 55;     /* #D4AF37 Metallic Gold */
+    --accent-metallic: 184 115 20;
   }
 
   html,
@@ -27,47 +29,58 @@
   }
 
   body {
-    @apply bg-ivory-bg text-ivory-text dark:bg-cosmic-obsidian dark:text-slate-100 transition-colors duration-300 font-sans antialiased selection:bg-amber-500 selection:text-black;
+    @apply bg-sandalwood-bg text-sandalwood-text dark:bg-cosmic-obsidian dark:text-sandalwood-bg transition-colors duration-300 font-sans antialiased selection:bg-[#B87314] selection:text-[#FFFDF7];
   }
 }
 
-/* Custom Cosmic Scrollbar */
+/* Custom Sandalwood & Gold Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(11, 15, 25, 0.4);
+  background: rgba(243, 232, 210, 0.4);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(245, 158, 11, 0.3);
+  background: rgba(184, 115, 20, 0.35);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 158, 11, 0.6);
+  background: rgba(184, 115, 20, 0.65);
 }
 
-/* Glassmorphism Classes */
+/* Sandalwood Vastu Card & Glass Classes */
+.sandalwood-card {
+  background: #FFFDF7;
+  border: 1px solid #E4D5B7;
+  box-shadow: 0 4px 20px -2px rgba(74, 53, 28, 0.06);
+}
+
+.sandalwood-panel {
+  background: #F3E8D2;
+  border: 1px solid #E4D5B7;
+}
+
 .cosmic-glass {
-  background: rgba(19, 27, 46, 0.7);
+  background: rgba(35, 26, 18, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.25);
 }
 
 .cosmic-glass-light {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 253, 247, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(217, 119, 6, 0.25);
+  border: 1px solid rgba(228, 213, 183, 0.8);
 }
 
-/* Gold Text Gradient */
+/* Royal Saffron & Antique Gold Gradient Text */
 .gold-gradient-text {
-  background: linear-gradient(135deg, #F59E0B 0%, #FDE047 50%, #D97706 100%);
+  background: linear-gradient(135deg, #B87314 0%, #D4AF37 50%, #9A5E0D 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

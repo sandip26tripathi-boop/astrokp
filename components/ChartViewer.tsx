@@ -85,17 +85,17 @@ export default function ChartViewer() {
     return (
       <svg
         viewBox="0 0 400 400"
-        className="w-full h-full drop-shadow-2xl rounded-2xl overflow-hidden border border-amber-500/30 bg-slate-50 dark:bg-[#070b14]"
+        className="w-full h-full drop-shadow-md rounded-2xl overflow-hidden border border-[#E4D5B7] dark:border-[#443525] bg-[#FFFDF7] dark:bg-[#1A140E]"
       >
         <defs>
           <linearGradient id={`goldStroke-${mode}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F59E0B" />
-            <stop offset="50%" stopColor="#FDE047" />
-            <stop offset="100%" stopColor="#D97706" />
+            <stop offset="0%" stopColor="#B87314" />
+            <stop offset="50%" stopColor="#D4AF37" />
+            <stop offset="100%" stopColor="#9A5E0D" />
           </linearGradient>
           <radialGradient id={`houseGlow-${mode}`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="#B87314" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#B87314" stopOpacity="0.0" />
           </radialGradient>
         </defs>
 
@@ -106,33 +106,33 @@ export default function ChartViewer() {
           width="392"
           height="392"
           fill="none"
-          stroke={`url(#goldStroke-${mode})`}
-          strokeWidth="2.5"
+          stroke="#B87314"
+          strokeWidth="1.5"
         />
 
         {/* Diagonals */}
-        <line x1="4" y1="4" x2="396" y2="396" stroke={`url(#goldStroke-${mode})`} strokeWidth="1.5" />
-        <line x1="396" y1="4" x2="4" y2="396" stroke={`url(#goldStroke-${mode})`} strokeWidth="1.5" />
+        <line x1="4" y1="4" x2="396" y2="396" stroke="#B87314" strokeWidth="1.5" />
+        <line x1="396" y1="4" x2="4" y2="396" stroke="#B87314" strokeWidth="1.5" />
 
         {/* Inner Diamond */}
         <polygon
           points="200,4 396,200 200,396 4,200"
           fill="none"
-          stroke={`url(#goldStroke-${mode})`}
-          strokeWidth="2"
+          stroke="#B87314"
+          strokeWidth="1.5"
         />
 
         {/* House 1 (Top diamond) */}
         <polygon
           points="200,4 300,104 200,200 100,104"
           fill={selectedHouse === 1 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(1)}
         />
-        <text x="200" y="32" textAnchor="middle" className="text-[12px] fill-amber-500 font-extrabold">
+        <text x="200" y="32" textAnchor="middle" className="text-[12px] fill-[#8A7967] font-extrabold">
           {mode === 'rashi' ? ascSignId : cusps[0]?.signId}
         </text>
-        <text x="200" y="52" textAnchor="middle" className="text-[11px] font-bold fill-slate-900 dark:fill-amber-300">
+        <text x="200" y="52" textAnchor="middle" className="text-[11px] font-bold fill-[#231A12] dark:fill-[#FAF4E6]">
           {ascCusp.formattedSignDMS}
         </text>
         <g transform="translate(200, 115)">
@@ -143,10 +143,10 @@ export default function ChartViewer() {
         <polygon
           points="4,4 200,4 100,104"
           fill={selectedHouse === 2 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(2)}
         />
-        <text x="100" y="26" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="100" y="26" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(2) : cusps[1]?.signId}
         </text>
         <g transform="translate(100, 60)">
@@ -157,10 +157,10 @@ export default function ChartViewer() {
         <polygon
           points="4,4 100,104 4,200"
           fill={selectedHouse === 3 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(3)}
         />
-        <text x="25" y="80" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="25" y="80" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(3) : cusps[2]?.signId}
         </text>
         <g transform="translate(45, 125)">
@@ -171,10 +171,10 @@ export default function ChartViewer() {
         <polygon
           points="4,200 100,104 200,200 100,296"
           fill={selectedHouse === 4 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(4)}
         />
-        <text x="35" y="205" textAnchor="middle" className="text-[12px] fill-amber-500 font-extrabold">
+        <text x="35" y="205" textAnchor="middle" className="text-[12px] fill-[#8A7967] font-extrabold">
           {mode === 'rashi' ? getHouseRashi(4) : cusps[3]?.signId}
         </text>
         <g transform="translate(105, 200)">
@@ -185,10 +185,10 @@ export default function ChartViewer() {
         <polygon
           points="4,200 100,296 4,396"
           fill={selectedHouse === 5 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(5)}
         />
-        <text x="25" y="325" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="25" y="325" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(5) : cusps[4]?.signId}
         </text>
         <g transform="translate(45, 275)">
@@ -199,10 +199,10 @@ export default function ChartViewer() {
         <polygon
           points="4,396 100,296 200,396"
           fill={selectedHouse === 6 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(6)}
         />
-        <text x="100" y="382" textAnchor="middle" className="text-[12px] fill-amber-500 font-extrabold">
+        <text x="100" y="382" textAnchor="middle" className="text-[12px] fill-[#8A7967] font-extrabold">
           {mode === 'rashi' ? getHouseRashi(6) : cusps[5]?.signId}
         </text>
         <g transform="translate(100, 340)">
@@ -213,10 +213,10 @@ export default function ChartViewer() {
         <polygon
           points="200,200 100,296 200,396 300,296"
           fill={selectedHouse === 7 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(7)}
         />
-        <text x="200" y="380" textAnchor="middle" className="text-[12px] fill-amber-500 font-extrabold">
+        <text x="200" y="380" textAnchor="middle" className="text-[12px] fill-[#8A7967] font-extrabold">
           {mode === 'rashi' ? getHouseRashi(7) : cusps[6]?.signId}
         </text>
         <g transform="translate(200, 285)">
@@ -227,10 +227,10 @@ export default function ChartViewer() {
         <polygon
           points="200,396 300,296 396,396"
           fill={selectedHouse === 8 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(8)}
         />
-        <text x="300" y="382" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="300" y="382" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(8) : cusps[7]?.signId}
         </text>
         <g transform="translate(300, 340)">
@@ -241,10 +241,10 @@ export default function ChartViewer() {
         <polygon
           points="300,296 396,200 396,396"
           fill={selectedHouse === 9 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(9)}
         />
-        <text x="375" y="325" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="375" y="325" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(9) : cusps[8]?.signId}
         </text>
         <g transform="translate(355, 275)">
@@ -255,10 +255,10 @@ export default function ChartViewer() {
         <polygon
           points="200,200 300,104 396,200 300,296"
           fill={selectedHouse === 10 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(10)}
         />
-        <text x="365" y="205" textAnchor="middle" className="text-[12px] fill-amber-500 font-extrabold">
+        <text x="365" y="205" textAnchor="middle" className="text-[12px] fill-[#8A7967] font-extrabold">
           {mode === 'rashi' ? getHouseRashi(10) : cusps[9]?.signId}
         </text>
         <g transform="translate(295, 200)">
@@ -269,10 +269,10 @@ export default function ChartViewer() {
         <polygon
           points="300,104 396,4 396,200"
           fill={selectedHouse === 11 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(11)}
         />
-        <text x="375" y="80" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="375" y="80" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(11) : cusps[10]?.signId}
         </text>
         <g transform="translate(355, 125)">
@@ -283,10 +283,10 @@ export default function ChartViewer() {
         <polygon
           points="200,4 396,4 300,104"
           fill={selectedHouse === 12 ? `url(#houseGlow-${mode})` : 'transparent'}
-          className="cursor-pointer hover:fill-amber-500/10 transition"
+          className="cursor-pointer hover:fill-[#B87314]/10 transition"
           onClick={() => setSelectedHouse(12)}
         />
-        <text x="300" y="26" textAnchor="middle" className="text-[11px] fill-amber-500 font-bold">
+        <text x="300" y="26" textAnchor="middle" className="text-[11px] fill-[#8A7967] font-bold">
           {mode === 'rashi' ? getHouseRashi(12) : cusps[11]?.signId}
         </text>
         <g transform="translate(300, 60)">
@@ -297,15 +297,15 @@ export default function ChartViewer() {
   };
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-white/80 dark:bg-cosmic-card/90 backdrop-blur-xl border border-amber-500/20 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl">
+    <div className="w-full max-w-full overflow-hidden bg-[#FFFDF7] dark:bg-[#231A12] border border-[#E4D5B7] dark:border-[#443525] rounded-2xl p-4 sm:p-6 shadow-sandalwood">
       {/* Top Controls */}
-      <div className="flex flex-wrap items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 gap-3">
+      <div className="flex flex-wrap items-center justify-between pb-4 border-b border-[#E4D5B7] dark:border-[#443525] gap-3">
         <div className="flex items-center gap-2">
-          <Layers className="w-5 h-5 text-amber-500" />
-          <h3 className="text-lg font-bold font-serif text-slate-900 dark:text-white">
+          <Layers className="w-5 h-5 text-[#B87314]" />
+          <h3 className="text-lg font-bold font-serif text-[#231A12] dark:text-[#FFFDF7]">
             {t('chartViewer', language)}
           </h3>
-          <span className="text-xs px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20">
+          <span className="text-xs px-2.5 py-0.5 rounded-md bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] font-semibold border border-[#E4D5B7] dark:border-[#443525]">
             {chartMode === 'dual'
               ? (language === 'hi' ? 'D1 लग्न + भाव चलित (Dual)' : 'D1 Lagna + Bhava Chalit')
               : chartMode === 'rashi'
@@ -317,14 +317,14 @@ export default function ChartViewer() {
         {/* Mode & Style Switchers */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Dual vs Rashi vs Bhava Mode */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+          <div className="flex items-center p-1 rounded-xl bg-[#F3E8D2] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] text-xs font-semibold">
             <button
               type="button"
               onClick={() => setChartMode('dual')}
               className={`px-3 py-1 rounded-lg transition ${
                 chartMode === 'dual'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
               }`}
             >
               {language === 'hi' ? 'दोनों (D1 + भाव चलित)' : 'Dual View'}
@@ -334,8 +334,8 @@ export default function ChartViewer() {
               onClick={() => setChartMode('rashi')}
               className={`px-2.5 py-1 rounded-lg transition ${
                 chartMode === 'rashi'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
               }`}
             >
               D1 Lagna
@@ -345,8 +345,8 @@ export default function ChartViewer() {
               onClick={() => setChartMode('bhava')}
               className={`px-2.5 py-1 rounded-lg transition ${
                 chartMode === 'bhava'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
               }`}
             >
               Bhava Chalit
@@ -354,14 +354,14 @@ export default function ChartViewer() {
           </div>
 
           {/* North vs South Style */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center p-1 rounded-xl bg-[#F3E8D2] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525]">
             <button
               type="button"
               onClick={() => setChartStyle('north')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 chartStyle === 'north'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
               }`}
             >
               {t('northIndian', language)}
@@ -371,8 +371,8 @@ export default function ChartViewer() {
               onClick={() => setChartStyle('south')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 chartStyle === 'south'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#B87314] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#5C4D3C] dark:text-[#D8C39E] hover:text-[#231A12] dark:hover:text-[#FFFDF7]'
               }`}
             >
               {t('southIndian', language)}
@@ -387,7 +387,7 @@ export default function ChartViewer() {
         <div className="space-y-6 mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
             {/* Chart 1: D1 Lagna / Rashi Chart */}
-            <div className="flex flex-col items-center p-3 sm:p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/40 border border-amber-500/20">
+            <div className="flex flex-col items-center p-3 sm:p-4 rounded-2xl bg-[#FAF4E6]/50 dark:bg-[#1A140E]/60 border border-[#E4D5B7] dark:border-[#443525]">
               <div className="w-full flex items-center justify-between mb-3 px-1">
                 <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" />
@@ -580,7 +580,7 @@ function renderHousePlanets(
               x="0"
               y="0"
               textAnchor="middle"
-              className="text-[11px] font-extrabold fill-slate-900 dark:fill-amber-300 group-hover:fill-amber-500 drop-shadow-sm transition select-none"
+              className="text-[11px] font-extrabold fill-[#231A12] dark:fill-[#FAF4E6] group-hover:fill-[#B87314] drop-shadow-sm transition select-none"
             >
               {label}
               {p.isRetrograde && !['Rahu', 'Ketu'].includes(p.name) ? 'ᴿ' : ''}
@@ -619,22 +619,22 @@ function renderSouthIndianBoxes(
 
   return (
     <g>
-      <rect x="4" y="4" width="392" height="392" fill="none" stroke="#F59E0B" strokeWidth="2" />
-      <line x1="102" y1="4" x2="102" y2="396" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="200" y1="4" x2="200" y2="102" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="200" y1="298" x2="200" y2="396" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="298" y1="4" x2="298" y2="396" stroke="#F59E0B" strokeWidth="1" />
+      <rect x="4" y="4" width="392" height="392" fill="none" stroke="#B87314" strokeWidth="1.5" />
+      <line x1="102" y1="4" x2="102" y2="396" stroke="#B87314" strokeWidth="1" />
+      <line x1="200" y1="4" x2="200" y2="102" stroke="#B87314" strokeWidth="1" />
+      <line x1="200" y1="298" x2="200" y2="396" stroke="#B87314" strokeWidth="1" />
+      <line x1="298" y1="4" x2="298" y2="396" stroke="#B87314" strokeWidth="1" />
 
-      <line x1="4" y1="102" x2="396" y2="102" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="4" y1="200" x2="102" y2="200" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="298" y1="200" x2="396" y2="200" stroke="#F59E0B" strokeWidth="1" />
-      <line x1="4" y1="298" x2="396" y2="298" stroke="#F59E0B" strokeWidth="1" />
+      <line x1="4" y1="102" x2="396" y2="102" stroke="#B87314" strokeWidth="1" />
+      <line x1="4" y1="200" x2="102" y2="200" stroke="#B87314" strokeWidth="1" />
+      <line x1="298" y1="200" x2="396" y2="200" stroke="#B87314" strokeWidth="1" />
+      <line x1="4" y1="298" x2="396" y2="298" stroke="#B87314" strokeWidth="1" />
 
       <rect x="104" y="104" width="192" height="192" fill="none" />
-      <text x="200" y="190" textAnchor="middle" className="text-xs font-serif font-bold fill-amber-500">
+      <text x="200" y="190" textAnchor="middle" className="text-xs font-serif font-bold fill-[#B87314]">
         SOUTH INDIAN VEDIC
       </text>
-      <text x="200" y="210" textAnchor="middle" className="text-[10px] fill-slate-400">
+      <text x="200" y="210" textAnchor="middle" className="text-[10px] fill-[#8A7967]">
         {chartMode === 'bhava' ? 'Bhava Chalit Occupants' : 'Rashi (D1) Fixed Signs'}
       </text>
 
