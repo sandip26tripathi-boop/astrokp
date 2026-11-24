@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
         {
-          headers: { 'User-Agent': 'CosmicKP-Astrolabs/1.0' },
+          headers: { 'User-Agent': 'AstroGemini/1.0' },
           next: { revalidate: 86400 },
         }
       );
@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
   try {
     const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8`;
     const response = await fetch(photonUrl, {
-      headers: { 'User-Agent': 'CosmicKP-Astrolabs/1.0' },
+      headers: { 'User-Agent': 'AstroGemini/1.0' },
       next: { revalidate: 3600 },
     });
 

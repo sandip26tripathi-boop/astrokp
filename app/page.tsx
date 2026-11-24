@@ -218,13 +218,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* Section 4: AstroLabs AI Assistant */}
+        {/* Section 4: Astro Gemini AI Assistant */}
         <div className="w-full space-y-4 pt-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
                 <PanditJiIcon size={28} />
-                {language === 'hi' ? 'AstroLabs (ज्योतिषीय परामर्श)' : 'AstroLabs (Astrological Guidance)'}
+                {language === 'hi' ? 'Astro Gemini (ज्योतिषीय परामर्श)' : 'Astro Gemini (Astrological Guidance)'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Inquires against your computed planetary positions, D1 chart, Cusps, and Dasha periods.
@@ -387,7 +387,7 @@ export default function Home() {
 
       <footer className="w-full border-t border-slate-200 dark:border-slate-800 py-6 text-xs text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-cosmic-obsidian/50">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} AstroLabs. High-Precision Astrological Intelligence. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Astro Gemini. High-Precision Astrological Intelligence. All rights reserved.</p>
           <div className="flex items-center gap-4 text-[11px]">
             <Link
               href="/admin"

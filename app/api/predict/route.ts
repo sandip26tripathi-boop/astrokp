@@ -193,25 +193,41 @@ ${allPlanetsFormatted}
 ${gocharData.summaryTextHi}
 `;
 
-    const formattedContents = recentMessages
+    const rawContents = recentMessages
       .map((msg: any) => ({
         role: (msg.role === 'model' || msg.role === 'assistant') ? 'model' : 'user',
         parts: [{ text: (msg.text || msg.content || '').trim() }],
       }))
       .filter((m: any) => m.parts[0].text.length > 0);
 
-    if (formattedContents.length === 0 || formattedContents[formattedContents.length - 1].role !== 'user') {
-      formattedContents.push({ role: 'user', parts: [{ text: currentQuestion }] });
+    // Strip leading model messages so Google GenAI strictly starts with 'user'
+    while (rawContents.length > 0 && rawContents[0].role === 'model') {
+      rawContents.shift();
+    }
+
+    // Ensure the last message is from the user with current question
+    if (rawContents.length === 0 || rawContents[rawContents.length - 1].role !== 'user') {
+      rawContents.push({ role: 'user', parts: [{ text: currentQuestion }] });
+    }
+
+    // Merge consecutive messages with the same role for strict alternation (user -> model -> user)
+    const formattedContents: any[] = [];
+    for (const item of rawContents) {
+      if (formattedContents.length > 0 && formattedContents[formattedContents.length - 1].role === item.role) {
+        formattedContents[formattedContents.length - 1].parts[0].text += `\n${item.parts[0].text}`;
+      } else {
+        formattedContents.push(item);
+      }
     }
 
     let replyText = '';
     let modelUsed = '';
 
     if (apiKey) {
-      const models = ['gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
       for (const m of models) {
         try {
-          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4500));
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5500));
           const aiCall = ai.models.generateContent({
             model: m,
             contents: formattedContents,
@@ -231,7 +247,7 @@ ${gocharData.summaryTextHi}
 
     // Fail-safe Astrological Synthesis: Instant, zero-hang guaranteed response
     if (!replyText || replyText.trim().length === 0) {
-      replyText = synthesizeFastKPAnswer(activeChart, gocharData, currentQuestion, clientLanguage);
+      replyText = synthesizeFastKPAnswer(activeChart, gocharData, currentQuestion, clientLanguage, recentMessages);
       modelUsed = 'Astro-Gemini-Synthesis-Engine (High-Speed Local)';
     }
 

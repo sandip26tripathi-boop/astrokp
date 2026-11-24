@@ -61,7 +61,7 @@ export default function EventChecklist() {
 ⭐ Sub-Lord: ${item.cuspSubLord} (House ${item.primaryHouse})
 📊 Probability Score: ${item.probabilityScore}% (${item.verdict})
 ⏳ Timing Window: ${item.timingWindow}
-Checked on AstroLabs KP!`;
+Checked on Astro Gemini KP!`;
 
     if (navigator.share) {
       navigator.share({

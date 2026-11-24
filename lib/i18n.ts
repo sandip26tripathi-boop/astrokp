@@ -2,7 +2,7 @@ import { Language } from '@/types/astrology';
 
 export const DICTIONARY: Record<Language, Record<string, string>> = {
   en: {
-    appTitle: 'AstroLabs',
+    appTitle: 'Astro Gemini',
     appSubtitle: 'High-Precision Vedic & Parashari Astrological Intelligence',
     ayanamsa: 'Ayanamsa',
     kpNewAyanamsa: 'Vedic Standard Ayanamsa',
@@ -37,7 +37,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     significatorsTable: '4-Fold Significators (कार्येश)',
     rulingPlanets: 'Ruling Planets (RP)',
     dashaTimeline: 'Vimshottari Dasha Timeline',
-    geminiAstrologer: 'AstroLabs',
+    geminiAstrologer: 'Astro Gemini',
     askAstrologer: 'Ask AI Astrologer anything about this chart...',
     chatPlaceholder: 'e.g., When will I get married according to 7th house and dasha?',
     send: 'Ask Astrologer',
@@ -77,7 +77,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     unlockReport: 'Unlock Full 15-Page Dossier',
   },
   hi: {
-    appTitle: 'एस्ट्रोलैब्स',
+    appTitle: 'एस्ट्रो जेमिनी',
     appSubtitle: 'सटीक वैदिक व पराशरी ज्योतिष एवं ए.आई. ज्योतिषी',
     ayanamsa: 'अयनांश',
     kpNewAyanamsa: 'वैदिक मानक अयनांश',
@@ -112,7 +112,7 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     significatorsTable: '४-स्तरीय कार्येश (Significators)',
     rulingPlanets: 'शासक ग्रह (रूलिंग प्लैनेट्स)',
     dashaTimeline: 'विंशोत्तरी दशा समय-सारणी',
-    geminiAstrologer: 'AstroLabs',
+    geminiAstrologer: 'Astro Gemini',
     askAstrologer: 'इस कुंडली के बारे में ए.आई. ज्योतिषी से पूछें...',
     chatPlaceholder: 'उदा. ७वें भाव एवं दशा के अनुसार विवाह कब होगा?',
     send: 'परामर्श लें',

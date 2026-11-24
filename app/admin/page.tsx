@@ -120,7 +120,7 @@ export default function AdminLeadsPage() {
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `astrolabs-client-leads-${new Date().toISOString().slice(0, 10)}.csv`
+      `astro-gemini-client-leads-${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -147,7 +147,7 @@ export default function AdminLeadsPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base sm:text-lg font-serif font-black gold-gradient-text tracking-tight">
-                  AstroLabs Admin
+                  Astro Gemini Admin
                 </h1>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                   Client Database

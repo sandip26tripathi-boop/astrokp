@@ -4,8 +4,8 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'AstroLabs & Astro Gemini | Authentic Vedic & KP Astrology Platform',
-    template: '%s | AstroLabs Vedic Astrology',
+    default: 'Astro Gemini | Authentic Vedic & KP Astrology Platform',
+    template: '%s | Astro Gemini Vedic Astrology',
   },
   description:
     'Generate authentic Vedic D1 Lagna Kundli, Bhava Chalit chart, Vimshottari Dasha, Real-time Planetary Transits (Gochar), and accurate AI predictions with Astro Gemini. Free personalized horoscope consultation.',
@@ -26,19 +26,19 @@ export const metadata: Metadata = {
     'Career Astrology',
     'BTR Birth Time Rectification',
   ],
-  authors: [{ name: 'AstroLabs & Pandit Sandeep Tripathi' }],
-  creator: 'AstroLabs',
-  publisher: 'AstroLabs Vedic AI',
+  authors: [{ name: 'Astro Gemini & Pandit Sandeep Tripathi' }],
+  creator: 'Astro Gemini',
+  publisher: 'Astro Gemini Vedic AI',
   metadataBase: new URL('https://vedic-ai-astrology.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'AstroLabs | Vedic & KP Astrology Platform by Astro Gemini',
+    title: 'Astro Gemini | Authentic Vedic & KP Astrology Platform',
     description:
       'High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
     url: 'https://vedic-ai-astrology.vercel.app',
-    siteName: 'AstroLabs Vedic AI',
+    siteName: 'Astro Gemini Vedic AI',
     images: [
       {
         url: '/images/pandit-ji.jpg',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AstroLabs & Astro Gemini | Authentic Vedic Astrology & Kundli',
+    title: 'Astro Gemini | Authentic Vedic Astrology & Kundli',
     description:
       'Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
     images: ['/images/pandit-ji.jpg'],
@@ -89,7 +89,7 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'AstroLabs Vedic Astrology',
+    name: 'Astro Gemini Vedic Astrology',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'All',
     url: 'https://vedic-ai-astrology.vercel.app',

@@ -44,7 +44,7 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
             <div>
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-serif font-black text-sm sm:text-xl tracking-tight gold-gradient-text">
-                  AstroLabs
+                  Astro Gemini
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                   PRO

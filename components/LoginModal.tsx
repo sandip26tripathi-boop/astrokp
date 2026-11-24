@@ -238,7 +238,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                   {language === 'hi'
-                    ? 'AstroLabs पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु अपना वास्तविक Gmail दर्ज करें।'
+                    ? 'Astro Gemini पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु अपना वास्तविक Gmail दर्ज करें।'
                     : 'Sign in with your authentic Gmail account to sync your horoscope and receive personalized astrological guidance.'}
                 </p>
               </div>
