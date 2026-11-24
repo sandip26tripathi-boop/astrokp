@@ -39,8 +39,8 @@ import {
 export default function Home() {
   const { kpMatrix, language } = useAstrologyStore();
   const [showReport, setShowReport] = useState(false);
-  const [activeBottomTab, setActiveBottomTab] = useState<'matrix' | 'btr'>('matrix');
-  const [showAstronomicalData, setShowAstronomicalData] = useState(false);
+  const [showCalculations, setShowCalculations] = useState(false);
+  const [activeCalcTab, setActiveCalcTab] = useState<'chart' | 'events' | 'matrix' | 'btr'>('chart');
 
   // Ensure page starts at top
   useEffect(() => {
@@ -83,23 +83,23 @@ export default function Home() {
           </div>
 
           <div className="space-y-1.5 sm:space-y-2">
-            <h1 className="text-xl sm:text-4xl md:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-[1.2] sm:leading-[1.15]">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-snug sm:leading-tight">
               Astronomical Precision Meets{' '}
               <span className="gold-gradient-text">Cosmic Intelligence</span>.
             </h1>
-            <p className="text-sm sm:text-xl md:text-2xl font-serif font-bold text-amber-600 dark:text-amber-400 tracking-wide leading-relaxed">
+            <p className="text-base sm:text-xl md:text-2xl font-serif font-bold text-amber-600 dark:text-amber-400 tracking-wide leading-relaxed">
               सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
             </p>
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed px-1">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed px-1">
             {language === 'hi'
               ? 'वैदिक लग्न चक्र, भाव चलित, विंशोत्तरी महादशा-अंतर्दशा एवं वास्तविक गोचर आधारित १००% प्रामाणिक विश्लेषण व Gemini Astro फलादेश।'
               : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Vimshottari dasha, and real-time verifiable predictions from Gemini Astro.'}
           </p>
 
           {/* Quick Metrics Bar */}
-          <div className="pt-1 sm:pt-2 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
+          <div className="pt-1 sm:pt-2 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
               <span>{language === 'hi' ? 'वैदिक अयनांश' : 'Vedic Ayanamsa'}</span>
@@ -120,54 +120,39 @@ export default function Home() {
           <KundliForm />
         </div>
 
-        {/* Section 2: Interactive Dynamic Chart Visualizer */}
-        <div id="chart-viewer-section" className="w-full space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
-                <Compass className="w-6 h-6 text-amber-500" />
-                {t('chartViewer', language)}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Interactive D1 Lagna & Bhava Chalit Kundli with Real-time Cusp Highlighting
-              </p>
-            </div>
-          </div>
-
-          {/* Full-width Kundli Chart Viewer */}
-          <div className="w-full">
-            <ChartViewer />
-          </div>
-
-          {/* Full-width Event Checklist & Probability Scores */}
-          <div className="w-full pt-2">
-            <EventChecklist />
-          </div>
-        </div>
-
-        {/* Section 3: Astrological Data Tables & BTR Workspace (Hidden by default, opens on click) */}
-        <div className="w-full pt-4">
+        {/* Section 2: Astrological Calculations & Charts Suite (Hidden by default; opens on demand) */}
+        <div id="chart-viewer-section" className="w-full pt-1">
           <div
-            onClick={() => setShowAstronomicalData(!showAstronomicalData)}
-            className="w-full flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-amber-500/20 hover:border-amber-500/40 cursor-pointer transition shadow-md group"
+            onClick={() => setShowCalculations(!showCalculations)}
+            className="w-full flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-amber-500/25 hover:border-amber-500/50 cursor-pointer transition shadow-md group select-none"
           >
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
-                <Layers className="w-6 h-6 text-amber-500 group-hover:rotate-6 transition-transform" />
-                Astronomical Data & Analysis
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Deep dive into Placidus Cuspal details, Sub-Lords, and rectification tools.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20 group-hover:scale-105 transition-transform">
+                <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-xl font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>
+                    {language === 'hi'
+                      ? 'विस्तृत कुंडली चक्र एवं ज्योतिषीय गणनाएं'
+                      : 'Kundli Charts & Astrological Calculations'}
+                  </span>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  {language === 'hi'
+                    ? 'D1 लग्न चक्र, भाव चलित, ग्रह स्थितियां, कस्पल सब-लॉर्ड एवं इवेंट टाइमिंग स्कोर देखने के लिए खोलें'
+                    : 'Click to view D1 Lagna, Bhava Chalit, Placidus Cusps, Planet Longitudes & Event Verification'}
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                {showAstronomicalData
-                  ? (language === 'hi' ? 'क्लिक करके छुपाएं' : 'Click to Collapse')
-                  : (language === 'hi' ? 'विस्तार से देखने के लिए क्लिक करें' : 'Click to Expand')}
+              <span className="text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                {showCalculations
+                  ? (language === 'hi' ? 'गणनाएं छुपाएं ▲' : 'Hide Calculations ▲')
+                  : (language === 'hi' ? 'गणनाएं देखें ▼' : 'View Calculations ▼')}
               </span>
-              {showAstronomicalData ? (
+              {showCalculations ? (
                 <ChevronUp className="w-5 h-5 text-amber-500" />
               ) : (
                 <ChevronDown className="w-5 h-5 text-amber-500" />
@@ -175,39 +160,89 @@ export default function Home() {
             </div>
           </div>
 
-          {showAstronomicalData && (
-            <div className="mt-4 space-y-4 animate-fade-in">
-              {/* Toggle Tabs */}
-              <div className="flex items-center justify-end">
-                <div className="flex items-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1">
+          {showCalculations && (
+            <div className="mt-4 space-y-6 animate-fade-in">
+              {/* Tab Navigation inside calculations */}
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center flex-wrap gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <button
                     type="button"
-                    onClick={() => setActiveBottomTab('matrix')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-                      activeBottomTab === 'matrix'
+                    onClick={() => setActiveCalcTab('chart')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition ${
+                      activeCalcTab === 'chart'
+                        ? 'bg-amber-500 text-slate-950 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Compass className="w-4 h-4" />
+                    <span>{language === 'hi' ? 'कुंडली चक्र (D1 & भाव चलित)' : 'Kundli Charts (D1 & Bhava)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveCalcTab('events')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition ${
+                      activeCalcTab === 'events'
+                        ? 'bg-amber-500 text-slate-950 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{language === 'hi' ? 'इवेंट चेकलिस्ट (Event Scores)' : 'Event Checklist'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveCalcTab('matrix')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition ${
+                      activeCalcTab === 'matrix'
                         ? 'bg-amber-500 text-slate-950 shadow-sm'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <Layers className="w-4 h-4" />
-                    <span>कस्पल व ग्रह तालिकाएं</span>
+                    <span>{language === 'hi' ? 'कस्पल व ग्रह तालिकाएं' : 'Cuspal & Planet Tables'}</span>
                   </button>
+
                   <button
                     type="button"
-                    onClick={() => setActiveBottomTab('btr')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition ${
-                      activeBottomTab === 'btr'
+                    onClick={() => setActiveCalcTab('btr')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition ${
+                      activeCalcTab === 'btr'
                         ? 'bg-amber-500 text-slate-950 shadow-sm'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <Sliders className="w-4 h-4" />
-                    <span>Birth Time Rectification (BTR)</span>
+                    <span>{language === 'hi' ? 'जन्म समय शुद्धि (BTR)' : 'BTR Workspace'}</span>
                   </button>
                 </div>
               </div>
 
-              {activeBottomTab === 'matrix' ? <KPDataTable /> : <BTRWorkspace />}
+              {/* Tab Contents */}
+              {activeCalcTab === 'chart' && (
+                <div className="w-full space-y-4">
+                  <ChartViewer />
+                </div>
+              )}
+
+              {activeCalcTab === 'events' && (
+                <div className="w-full">
+                  <EventChecklist />
+                </div>
+              )}
+
+              {activeCalcTab === 'matrix' && (
+                <div className="w-full">
+                  <KPDataTable />
+                </div>
+              )}
+
+              {activeCalcTab === 'btr' && (
+                <div className="w-full">
+                  <BTRWorkspace />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -220,14 +255,14 @@ export default function Home() {
                 <PanditJiIcon size={28} />
                 {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Astrological Guidance)'}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                 Inquires against your computed planetary positions, D1 chart, Cusps, and Dasha periods.
               </p>
             </div>
 
             <button
               onClick={() => setShowReport(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 transition"
             >
               <Download className="w-3.5 h-3.5" />
               {t('exportPdf', language)}
@@ -246,7 +281,7 @@ export default function Home() {
                 {language === 'hi' ? 'महत्वपूर्ण कानूनी अस्वीकरण (Legal Disclaimer)' : 'Important Legal Disclaimer'}
               </span>
             </div>
-            <p className="text-[11px] sm:text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            <p className="text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {language === 'hi'
                 ? '⚠️ यह रिपोर्ट, कुंडली गणनाएं एवं सभी भविष्यवाणियां आर्टिफिशियल इंटेलिजेंस (AI Generated) तथा वैदिक व कस्पल ज्योतिष के प्रामाणिक गणितीय नियमों पर आधारित एल्गोरिदम द्वारा स्वतः जनरेट की गई हैं। यह केवल शोध, अध्ययन एवं सामान्य मार्गदर्शन के उद्देश्य से प्रस्तुत की गई हैं। किसी भी महत्वपूर्ण जीवन निर्णय, विवाह, करियर, कानूनी या स्वास्थ्य (चिकित्सा) संबंधी मामलों में शत-प्रतिशत सटीक व अंतिम मार्गदर्शन हेतु अनुभवी एवं प्रमाणित विशेषज्ञ ज्योतिषी (Expert Astrologer) से व्यक्तिगत परामर्श अवश्य लें।'
                 : '⚠️ All astrological charts, predictive insights, and analysis presented on this platform are automatically generated through Artificial Intelligence (AI Generated) and algorithmic Vedic principles. They are intended strictly for educational, research, and general exploratory guidance. For life-altering decisions regarding health, relationships, career, legal, or financial matters, please seek individualized consultation from a qualified, certified expert astrologer.'}
@@ -286,14 +321,14 @@ export default function Home() {
                     : 'AstroVastu Researcher, Educator & App Developer'}
                 </p>
 
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+                <p className="text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-relaxed max-w-3xl">
                   {language === 'hi'
                     ? 'शास्त्रीय वैदिक, के.पी. (KP) एवं पाराशरी ज्योतिष के साथ-साथ स्थानिक ऊर्जा विज्ञान (एस्ट्रो-वास्तु) में वर्षों के गहन शोध पर आधारित। संदीप के. त्रिपाठी द्वारा परिकल्पित यह प्रणाली प्राचीन खगोलीय गणित और आधुनिक बुद्धिमत्ता का समन्वय करती है—जो जीवन और व्यवसाय के महत्वपूर्ण निर्णयों के लिए तर्कसंगत और सटीक अंतर्दृष्टि प्रदान करती है।'
                     : 'Built upon years of rigorous research in classical Vedic, KP, and Parashari astrology alongside spatial energy dynamics (AstroVastu). Conceived by Sandeep K. Tripathi to bridge ancient astronomical mathematics with modern computational intelligence—delivering structured, logic-driven insights for strategic life and executive decisions.'}
                 </p>
 
                 {/* Expertise Badges */}
-                <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <span className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
                     <span>🔭</span>
                     <span>{language === 'hi' ? 'वैदिक व के.पी. ज्योतिष अनुसंधान' : 'Vedic & KP Astrological Research'}</span>

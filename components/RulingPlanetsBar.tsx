@@ -64,7 +64,7 @@ export default function RulingPlanetsBar() {
         </div>
 
         {/* Center: Live RP Keys (Horizontally scrollable on mobile) */}
-        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto no-scrollbar py-0.5 text-[10px] sm:text-[11px]">
+        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto no-scrollbar py-0.5 text-xs sm:text-xs font-medium">
           <div className="flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 shrink-0">
             <span className="text-slate-400">{language === 'hi' ? 'वार:' : 'Day:'}</span>
             <strong className="text-amber-300">{liveRP.dayLord}</strong>
@@ -97,7 +97,7 @@ export default function RulingPlanetsBar() {
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-0.5 text-[10px] text-amber-400 hover:underline font-semibold"
+            className="flex items-center gap-0.5 text-xs text-amber-400 hover:underline font-semibold"
           >
             <span className="hidden sm:inline">{isExpanded ? 'Hide Rules' : 'RP Prashna Guide'}</span>
             <span className="sm:hidden">{isExpanded ? '▲' : '▼'}</span>

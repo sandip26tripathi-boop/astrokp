@@ -300,7 +300,7 @@ export default function KundliForm() {
         {/* Name & Gender */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-amber-500" />
               {t('fullName', language)}
             </label>
@@ -315,7 +315,7 @@ export default function KundliForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('gender', language)}
             </label>
             <select
@@ -335,7 +335,7 @@ export default function KundliForm() {
         {/* Date & Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-amber-500" />
               {t('dateOfBirth', language)}
             </label>
@@ -349,7 +349,7 @@ export default function KundliForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
               {t('timeOfBirth', language)} (24-Hour)
             </label>

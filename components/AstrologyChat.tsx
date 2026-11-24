@@ -115,7 +115,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
       elements.push(
         <div
           key={`h-${i}`}
-          className="font-bold text-amber-600 dark:text-amber-400 mt-2.5 mb-1 text-[12.5px] border-b border-amber-500/20 pb-0.5"
+          className="font-bold text-amber-600 dark:text-amber-400 mt-2.5 mb-1 text-sm sm:text-base border-b border-amber-500/20 pb-0.5"
         >
           {title}
         </div>
@@ -142,13 +142,13 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
   }
 
   return (
-    <div className="space-y-0.5 text-xs">
+    <div className="space-y-1 text-sm sm:text-base leading-relaxed text-slate-800 dark:text-slate-100">
       {elements}
 
       {followUpQuestions.length > 0 && onSelectQuestion && (
         <div className="mt-3 pt-2 border-t border-amber-500/20">
-          <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-500" />
+          <div className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>सुझाए गए प्रश्न (क्लिक करके पूछें):</span>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -157,10 +157,10 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
                 key={qIdx}
                 type="button"
                 onClick={() => onSelectQuestion(q)}
-                className="text-left px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-slate-800 dark:text-amber-100 text-[11px] font-medium transition flex items-center justify-between group shadow-sm"
+                className="text-left px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-slate-800 dark:text-amber-100 text-xs sm:text-sm font-medium transition flex items-center justify-between group shadow-sm"
               >
                 <span>{q}</span>
-                <span className="text-amber-500 group-hover:translate-x-0.5 transition-transform text-xs">
+                <span className="text-amber-500 group-hover:translate-x-0.5 transition-transform text-xs sm:text-sm">
                   →
                 </span>
               </button>
@@ -462,11 +462,11 @@ export default function AstrologyChat() {
         <div className="flex items-center gap-3">
           <PanditJiIcon size={40} />
           <div>
-            <h3 className="text-sm font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif text-slate-900 dark:text-white flex items-center gap-2">
               {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               {language === 'hi' ? 'वैदिक, पराशरी एवं नक्षत्र आधारित प्रामाणिक फलादेश' : 'Vedic & Parashari Astrological Guidance'}
             </p>
           </div>
@@ -493,24 +493,24 @@ export default function AstrologyChat() {
       </div>
 
       {/* Active Kundli Calculation HUD Status Bar */}
-      <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/20 text-[11px] flex flex-wrap items-center justify-between gap-2 text-slate-700 dark:text-slate-300">
+      <div className="px-4 py-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/20 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2 text-slate-700 dark:text-slate-300">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-500" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             {input.name ? `${input.name} की कुंडली:` : (language === 'hi' ? 'सक्रिय कुंडली गणना:' : 'Active Kundli Grounding:')}
           </span>
-          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
             लग्न: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'}</strong>
           </span>
-          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+          <span className="bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
             चन्द्र: <strong className="text-slate-900 dark:text-amber-200">{kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'}</strong>
           </span>
-          <span className="hidden sm:inline bg-amber-500/10 dark:bg-amber-500/20 px-2 py-0.5 rounded text-[10.5px]">
+          <span className="hidden sm:inline bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 rounded text-xs">
             {formatDashaDisplay(kpMatrix?.currentDasha)}
           </span>
         </div>
         {input.dateOfBirth && (
-          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {input.dateOfBirth} | {input.timeOfBirth || '12:00'} | {input.placeName || 'भारत'}
           </div>
         )}
@@ -518,7 +518,7 @@ export default function AstrologyChat() {
 
       {/* Preset Inquiry Chips */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30 overflow-x-auto">
-        <div className="flex items-center gap-2 text-xs whitespace-nowrap">
+        <div className="flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap">
           {PRESET_CHIPS.map((chip) => {
             const Icon = chip.icon;
             const label = language === 'hi' ? chip.labelHi : chip.labelEn;
@@ -530,7 +530,7 @@ export default function AstrologyChat() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleSend(prompt)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500/60 text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition disabled:opacity-50 text-[11px]"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-amber-500/60 text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition disabled:opacity-50 text-xs sm:text-sm shadow-sm"
               >
                 <Icon className="w-3.5 h-3.5 text-amber-500" />
                 <span>{label}</span>
@@ -558,10 +558,10 @@ export default function AstrologyChat() {
               )}
 
               <div
-                className={`max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed ${
+                className={`max-w-[88%] sm:max-w-[85%] rounded-2xl p-3.5 sm:p-4 text-sm sm:text-base leading-relaxed ${
                   isUser
                     ? 'bg-amber-500/15 dark:bg-amber-500/20 text-slate-900 dark:text-amber-100 border border-amber-500/30'
-                    : 'bg-slate-100 dark:bg-slate-900/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800'
+                    : 'bg-slate-100 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800'
                 }`}
               >
                 {isUser ? (
@@ -571,7 +571,7 @@ export default function AstrologyChat() {
                 )}
                 <div
                   suppressHydrationWarning
-                  className={`text-[9px] mt-1.5 ${
+                  className={`text-[10.5px] sm:text-xs mt-1.5 ${
                     isUser ? 'text-amber-700 dark:text-amber-400' : 'text-slate-400'
                   }`}
                 >
@@ -590,7 +590,7 @@ export default function AstrologyChat() {
         {streamingText && (
           <div className="flex items-start gap-3 animate-fade-in">
             <PanditJiIcon size={28} />
-            <div className="max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed bg-slate-100 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 border border-amber-500/30 shadow-sm">
+            <div className="max-w-[88%] sm:max-w-[85%] rounded-2xl p-3.5 sm:p-4 text-sm sm:text-base leading-relaxed bg-slate-100 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100 border border-amber-500/30 shadow-sm">
               <div className="whitespace-pre-wrap">{streamingText}</div>
               <span className="inline-block w-1.5 h-3 ml-1 bg-amber-500 animate-pulse rounded-full align-middle" />
             </div>
@@ -600,9 +600,9 @@ export default function AstrologyChat() {
         {isLoading && !streamingText && (
           <div className="flex items-start gap-3 animate-fade-in">
             <PanditJiIcon size={28} />
-            <div className="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 border border-slate-200 dark:border-slate-800">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" />
-              {language === 'hi' ? 'Gemini Astro गणना कर रहे हैं...' : 'Gemini Astro is evaluating kundli coordinates...'}
+            <div className="bg-slate-100 dark:bg-slate-900/80 rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 flex items-center gap-2 border border-slate-200 dark:border-slate-800">
+              <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
+              <span>{language === 'hi' ? 'Gemini Astro गणना कर रहे हैं...' : 'Gemini Astro is evaluating kundli coordinates...'}</span>
             </div>
           </div>
         )}
