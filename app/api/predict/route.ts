@@ -80,13 +80,51 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const activeChart = kpMatrix || kundliData;
+    let activeChart = kpMatrix || kundliData;
+
+    // Automatic calculation trigger if activeChart is missing but birth details are provided
+    if (!activeChart && birthDetails && (birthDetails.dateOfBirth || birthDetails.date)) {
+      const bInput: ChartInput = {
+        name: birthDetails.name || 'Native',
+        gender: (birthDetails.gender || 'male') as 'male' | 'female' | 'other',
+        dateOfBirth: birthDetails.dateOfBirth || birthDetails.date || '1995-10-24',
+        timeOfBirth: birthDetails.timeOfBirth || birthDetails.time || '12:00',
+        placeName: birthDetails.placeName || birthDetails.place || 'Unknown',
+        latitude: Number(birthDetails.latitude ?? birthDetails.lat ?? 28.6139),
+        longitude: Number(birthDetails.longitude ?? birthDetails.lon ?? 77.209),
+        timezone: birthDetails.timezone !== undefined ? Number(birthDetails.timezone) : 5.5,
+        ayanamsa: 'KP_NEW',
+        isHorary: false,
+        horaryNumber: 1,
+        language: clientLanguage,
+      };
+      const computed = generateMasterKundli(bInput);
+      activeChart = {
+        masterKundli: computed,
+        ascendant: computed.ascendant.longitude,
+        cusps: computed.cusps,
+        planets: computed.planets,
+        currentDasha: computed.dashaHierarchy,
+        houseSignificators: computed.fourFoldSignificators ? Object.entries(computed.fourFoldSignificators.L1).map(([_, val], idx) => ({
+          houseNumber: idx + 1,
+          level1: computed.fourFoldSignificators.L1[idx]?.planets || [],
+          level2: computed.fourFoldSignificators.L2[idx]?.planets || [],
+          level3: computed.fourFoldSignificators.L3[idx]?.planets || [],
+          level4: computed.fourFoldSignificators.L4[idx]?.planets || [],
+        })) : [],
+        dateOfBirth: computed.meta.dateOfBirth,
+        timeOfBirth: computed.meta.timeOfBirth,
+        latitude: computed.meta.latitude,
+        longitude: computed.meta.longitude,
+      };
+    }
+
     if (!activeChart) {
       return NextResponse.json(
         {
           error: isEnglish
-            ? 'Kundli data (kundliData / kpMatrix) is missing.'
-            : 'कुंडली डेटा (kundliData / kpMatrix) उपलब्ध नहीं है।',
+            ? 'Kundli data (kundliData / kpMatrix / birthDetails) is missing.'
+            : 'कुंडली डेटा (kundliData / kpMatrix / birthDetails) उपलब्ध नहीं है।',
         },
         { status: 400 }
       );
