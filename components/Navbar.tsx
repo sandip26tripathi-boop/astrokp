@@ -14,8 +14,8 @@ import {
   Compass,
   User,
   LogIn,
+  Lock,
 } from 'lucide-react';
-import MonetizationModal from './MonetizationModal';
 import LoginModal from './LoginModal';
 import TriangleLogo from './TriangleLogo';
 
@@ -26,13 +26,24 @@ interface NavbarProps {
 export default function Navbar({ onOpenReport }: NavbarProps) {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, user } = useAstrologyStore();
-  const [showProModal, setShowProModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [lockedToast, setLockedToast] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleLockedClick = () => {
+    const msg =
+      language === 'hi'
+        ? '🔒 प्रीमियम सुविधाएं वर्तमान में लॉक हैं और जल्द ही शुरू हो रही हैं'
+        : '🔒 Premium features are currently locked and launching soon';
+    setLockedToast(msg);
+    setTimeout(() => {
+      setLockedToast((current) => (current === msg ? null : current));
+    }, 3500);
+  };
 
   return (
     <>
@@ -152,20 +163,42 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               </button>
             )}
 
-            {/* Monetization / Unlock Pro Button */}
-            <button
-              type="button"
-              onClick={() => setShowProModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95 transition"
-            >
-              <Crown className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('proFeature', language)}</span>
-            </button>
+            {/* Locked Premium Features Button */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={handleLockedClick}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-900/90 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-800 hover:border-amber-500/40 hover:text-slate-700 dark:hover:text-slate-300 transition shadow-sm group"
+                title={language === 'hi' ? 'प्रीमियम सुविधाएं (शीघ्र उपलब्ध)' : 'Premium Features (Coming Soon)'}
+                aria-label="Premium Features - Locked"
+              >
+                <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500/80 group-hover:scale-110 transition-transform" />
+                <span className="hidden sm:inline font-medium">
+                  {language === 'hi' ? 'प्रीमियम सुविधा' : 'Premium'}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider">
+                  Soon
+                </span>
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Polite Non-intrusive Toast Notification for Locked Premium */}
+        {lockedToast && (
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 px-4 py-2 rounded-xl bg-slate-900/95 text-white dark:bg-slate-800/95 text-xs font-medium border border-amber-500/40 shadow-2xl backdrop-blur-md flex items-center gap-2 animate-fade-in max-w-[90vw] text-center">
+            <span>{lockedToast}</span>
+            <button
+              type="button"
+              onClick={() => setLockedToast(null)}
+              className="text-slate-400 hover:text-white text-xs ml-1 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </header>
 
-      <MonetizationModal isOpen={showProModal} onClose={() => setShowProModal(false)} />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </>
   );

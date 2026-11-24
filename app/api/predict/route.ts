@@ -7,6 +7,8 @@ import { evaluateGochar } from '@/lib/gochar-evaluator';
 import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
 import { apiRateLimiter } from '@/lib/cache-manager';
+import { generateMasterKundli, MasterKundliJSON } from '@/lib/master-kundli-engine';
+import { ChartInput } from '@/types/astrology';
 
 try {
   dns.setDefaultResultOrder('ipv4first');
@@ -132,23 +134,47 @@ export async function POST(req: NextRequest) {
       birthDetails
     );
 
-    const cusps = activeChart.cusps || [];
-    const currentDBA = cleanKundli.currentRunningDBA || activeChart.currentDasha;
+    // Ensure comprehensive Master Kundli JSON from backend calculation engine
+    let masterKundli: MasterKundliJSON;
+    if (activeChart.masterKundli) {
+      masterKundli = activeChart.masterKundli;
+    } else {
+      const bInput: ChartInput = {
+        name: birthDetails?.name || 'Native',
+        gender: (birthDetails?.gender || 'male') as 'male' | 'female' | 'other',
+        dateOfBirth: birthDetails?.dateOfBirth || activeChart.dateOfBirth || '1995-10-24',
+        timeOfBirth: birthDetails?.timeOfBirth || activeChart.timeOfBirth || '12:00',
+        placeName: birthDetails?.placeName || activeChart.placeName || 'Unknown',
+        latitude: birthDetails?.latitude || activeChart.latitude || 28.6139,
+        longitude: birthDetails?.longitude || activeChart.longitude || 77.209,
+        timezone: birthDetails?.timezone !== undefined ? birthDetails?.timezone : 5.5,
+        ayanamsa: 'KP_NEW',
+        isHorary: false,
+        horaryNumber: 1,
+        language: clientLanguage,
+      };
+      masterKundli = generateMasterKundli(bInput);
+    }
 
-    // Structured Kundli JSON payload for Gemini
+    const cusps = activeChart.cusps || [];
+    const currentDBA = cleanKundli.currentRunningDBA || activeChart.currentDasha || masterKundli.dashaHierarchy;
+
+    // Structured Master Kundli JSON payload for Gemini context injection
     const kundliJsonPayload = {
       clientBirthDetails: {
-        name: birthDetails?.name || 'Native',
-        dateOfBirth: birthDetails?.dateOfBirth,
-        timeOfBirth: birthDetails?.timeOfBirth,
-        place: birthDetails?.placeName,
+        name: birthDetails?.name || masterKundli.meta.name,
+        dateOfBirth: birthDetails?.dateOfBirth || masterKundli.meta.dateOfBirth,
+        timeOfBirth: birthDetails?.timeOfBirth || masterKundli.meta.timeOfBirth,
+        place: birthDetails?.placeName || masterKundli.meta.placeName,
         gender: birthDetails?.gender || 'male',
       },
       natalCoordinates: {
         lagna: {
-          sign: parashariData.lagnaSign,
-          lord: parashariData.lagnaLord,
-          lordPlacementHouse: parashariData.lagnaLordHouse,
+          sign: masterKundli.ascendant.signName,
+          lord: masterKundli.ascendant.signLord,
+          starLord: masterKundli.ascendant.starLord,
+          subLord: masterKundli.ascendant.subLord,
+          degree: masterKundli.ascendant.dms,
         },
         moon: {
           sign: parashariData.moonSign,
@@ -178,6 +204,18 @@ export async function POST(req: NextRequest) {
         cuspalSubLord: c.subLord,
         occupants: c.occupants || [],
       })),
+      fourFoldSignificators: masterKundli.fourFoldSignificators,
+      untenantedPlanets: masterKundli.untenantedPlanets,
+      ashtakvarga: {
+        houseBindusFromLagna: masterKundli.ashtakvarga.savByHouse,
+        primaryHouseBindus: masterKundli.ashtakvarga.savByHouse[questionAnalysis.primaryHouseNum - 1] || 28,
+        totalUniversalBindus: masterKundli.ashtakvarga.totalBindus,
+      },
+      divisionalD1D9D10: {
+        D1_Rashi: masterKundli.shodashvarga?.D1?.placements || {},
+        D9_Navamsha: masterKundli.shodashvarga?.D9?.placements || {},
+        D10_Dashamsha: masterKundli.shodashvarga?.D10?.placements || {},
+      },
       planetsStatus: (activeChart.planets || []).map((p: any) => ({
         name: p.name,
         sign: p.signName || p.hindiSignName,
@@ -199,17 +237,16 @@ export async function POST(req: NextRequest) {
 
     const masterSystemPrompt = `You are "Astro Gemini", an experienced, empathetic, and logical Indian Astrologer specializing in Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology. You are NOT a generic AI chatbot. You NEVER give vague, sugar-coated, or mood-pleasing answers. Every single word you speak must be strictly derived from the backend Kundli JSON data provided to you.
 
-MANDATORY SILENT WORKFLOW (DO NOT SHOW RAW STEPS TO CLIENT):
-1. Map Query to Houses: Identify the client's exact life area and map it to relevant KP Houses (e.g., Career: 2, 6, 10, 11; Marriage: 2, 7, 11; Finance: 2, 6, 11; Health/Disputes: 6, 8, 12).
-2. KP & Vedic Promise Check: Check the Cuspal Sub-Lord (CSL) of the primary house and its 4-Fold Significators (L1–L4) + Star Lord. Cross-verify with Parashari Vedic house lord placement, aspects, and strength to see if the event is promised, delayed, or denied.
-3. Timing Check (Dasha & Gochar): Check the currently running Vimshottari Mahadasha, Antardasha, and Pratyantardasha (DBA) along with current slow-moving planet Transits (Saturn, Jupiter, Rahu/Ketu) over natal cusps and Dasha lords.
-4. Synthesize Verdict: Combine KP promise + Dasha timing + Transit trigger into a clear, factual conclusion.
+MANDATORY SILENT WORKFLOW (DO NOT PRINT RAW JSON OR TABLES):
+1. Map the user's question to relevant KP Houses (e.g., Career: 2, 6, 10, 11; Marriage: 2, 7, 11; Finance: 2, 6, 11; Health/Disputes: 6, 8, 12).
+2. Inspect the Cuspal Sub-Lord (CSL) of the primary house, its Star Lord, and 4-Fold Significators (L1–L4) to determine if the event is promised, delayed, or denied.
+3. Cross-verify with Vedic D1/D9/D10 strength, Ashtakvarga bindus, and Current Dasha (MD/AD/PD) + Live Transit (Gochar) to determine exact timing.
 
 FRONTEND RESPONSE RULES:
-- Human Astrologer Tone: Speak like a wise, grounded, caring astrologer sitting across the table. Mirror the user's language naturally (${isEnglish ? 'English' : 'Hindi / Hinglish'}). Avoid robotic bullet dumps.
-- Crisp & Direct (120–180 words): Answer the exact question directly in the first two sentences. Never write long essays.
-- Logical Backing (No Superficiality): Never say "things will improve soon" without proof. Explicitly name the responsible Planet (ग्रह), House (भाव), Mahadasha/Antardasha (दशा), or Gochar (गोचर) driving the situation, translated into simple language without raw technical codes like "L2 CSL".
-- Honesty & Grounded Closure: If the chart shows delay or struggle, state it honestly with empathy. End with one practical, actionable takeaway or clear timeframe. Never invent missing chart data.
+- Speak like a wise, grounded, caring human astrologer sitting across the table. Mirror the user's language naturally (${isEnglish ? 'English' : 'Hindi, English, or Hinglish'}).
+- Keep responses crisp and direct (120–180 words)—answer the question directly in the first two sentences.
+- Back every claim with clear astrological logic—explicitly naming the responsible Planet (ग्रह), Star Lord / Sub-Lord, House (भाव), Running Dasha (दशा), and Transit (गोचर) in simple words without raw technical codes like "L2 CSL".
+- Be honest if the chart shows struggle or delay, and close with one practical, actionable takeaway.
 - Remedies On Demand: Do NOT append remedies unless explicitly asked by the client.
 
 BACKEND KUNDLI JSON DATA:
@@ -254,7 +291,7 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
               contents: formattedContents,
               config: {
                 systemInstruction: masterSystemPrompt,
-                temperature: 0.25,
+                temperature: 0.2,
                 maxOutputTokens: 450,
               },
             });
@@ -301,7 +338,7 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
             contents: formattedContents,
             config: {
               systemInstruction: masterSystemPrompt,
-              temperature: 0.25,
+              temperature: 0.2,
               maxOutputTokens: 450,
             },
           });

@@ -11,7 +11,6 @@ import BTRWorkspace from '@/components/BTRWorkspace';
 import KPDataTable from '@/components/KPDataTable';
 import AstrologyChat from '@/components/AstrologyChat';
 import ReportView from '@/components/ReportView';
-import MonetizationModal from '@/components/MonetizationModal';
 import PanditJiIcon from '@/components/PanditJiIcon';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
 import { t } from '@/lib/i18n';
@@ -34,12 +33,12 @@ import {
   Sliders,
   GraduationCap,
   BookOpen,
+  Lock,
 } from 'lucide-react';
 
 export default function Home() {
   const { kpMatrix, language } = useAstrologyStore();
   const [showReport, setShowReport] = useState(false);
-  const [showProModal, setShowProModal] = useState(false);
   const [activeBottomTab, setActiveBottomTab] = useState<'matrix' | 'btr'>('matrix');
   const [showAstronomicalData, setShowAstronomicalData] = useState(false);
 
@@ -70,8 +69,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Pro Modal */}
-      <MonetizationModal isOpen={showProModal} onClose={() => setShowProModal(false)} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
         {/* Hero Section */}
@@ -314,21 +311,34 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Section 7: Astrological Modules */}
+        {/* Section 7: Astrological Modules (Locked / Coming Soon) */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 mb-2">
+              <Lock className="w-3 h-3 text-amber-500" />
+              <span>{language === 'hi' ? '🔒 लॉक मॉड्यूल - शीघ्र उपलब्ध' : '🔒 Locked Modules - Coming Soon'}</span>
+            </div>
             <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-white">
               Commercial-Grade Astrological Modules
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Precision calculated using Swiss Ephemeris Placidus cusps and stellar subdivisions.
+              {language === 'hi'
+                ? 'स्विट्जरलैंड एफिमिरिस और प्लासिडस कस्पल गणना पर आधारित व्यावसायिक मॉड्यूल (जल्द लॉन्च हो रहे हैं)।'
+                : 'Enterprise-grade astrological calculation engines (Launching Soon).'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <div className="p-5 rounded-2xl bg-white dark:bg-cosmic-card border border-slate-200 dark:border-slate-800 shadow-sm hover:border-amber-500/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-3">
-                <Briefcase className="w-5 h-5" />
+            {/* Module 1: Corporate & Financial */}
+            <div className="relative p-5 rounded-2xl bg-white/60 dark:bg-cosmic-card/60 border border-slate-200 dark:border-slate-800 shadow-sm opacity-90 select-none">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <Briefcase className="w-5 h-5" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  <Lock className="w-2.5 h-2.5 text-amber-500" />
+                  <span>Locked</span>
+                </span>
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
                 Corporate & Financial Astrology
@@ -336,50 +346,56 @@ export default function Home() {
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
                 B2B executive chart audits, startup incorporation timing, and business partnership analysis.
               </p>
-              <button
-                onClick={() => setShowProModal(true)}
-                className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
-              >
-                Learn More →
-              </button>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                <Lock className="w-3.5 h-3.5 text-amber-500/70" />
+                <span>{language === 'hi' ? 'मॉड्यूल लॉक है • शीघ्र उपलब्ध' : 'Locked • Launching Soon'}</span>
+              </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white dark:bg-cosmic-card border border-slate-200 dark:border-slate-800 shadow-sm hover:border-amber-500/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3">
-                <Heart className="w-5 h-5" />
+            {/* Module 2: Vedic Kundli Matching & Marriage */}
+            <div className="relative p-5 rounded-2xl bg-white/60 dark:bg-cosmic-card/60 border border-slate-200 dark:border-slate-800 shadow-sm opacity-90 select-none">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                  <Heart className="w-5 h-5" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  <Lock className="w-2.5 h-2.5 text-amber-500" />
+                  <span>Locked</span>
+                </span>
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
                 Vedic Kundli Matching & Marriage
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
-                Evaluates mutual planetary compatibility, 7th house promise, and relationship timing
-                beyond traditional Guna Milan.
+                Evaluates mutual planetary compatibility, 7th house promise, and relationship timing beyond traditional Guna Milan.
               </p>
-              <button
-                onClick={() => setShowProModal(true)}
-                className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
-              >
-                Learn More →
-              </button>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                <Lock className="w-3.5 h-3.5 text-amber-500/70" />
+                <span>{language === 'hi' ? 'मॉड्यूल लॉक है • शीघ्र उपलब्ध' : 'Locked • Launching Soon'}</span>
+              </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white dark:bg-cosmic-card border border-slate-200 dark:border-slate-800 shadow-sm hover:border-amber-500/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-3">
-                <TrendingUp className="w-5 h-5" />
+            {/* Module 3: Horary 1–249 Prashna Engine */}
+            <div className="relative p-5 rounded-2xl bg-white/60 dark:bg-cosmic-card/60 border border-slate-200 dark:border-slate-800 shadow-sm opacity-90 select-none">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  <Lock className="w-2.5 h-2.5 text-amber-500" />
+                  <span>Locked</span>
+                </span>
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
                 Horary 1–249 Prashna Engine
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
-                Instant answers to urgent questions without birth time using authentic
-                sub-lord boundary mathematics.
+                Instant answers to urgent questions without birth time using authentic sub-lord boundary mathematics.
               </p>
-              <button
-                onClick={() => setShowProModal(true)}
-                className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
-              >
-                Learn More →
-              </button>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500">
+                <Lock className="w-3.5 h-3.5 text-amber-500/70" />
+                <span>{language === 'hi' ? 'मॉड्यूल लॉक है • शीघ्र उपलब्ध' : 'Locked • Launching Soon'}</span>
+              </div>
             </div>
           </div>
         </div>

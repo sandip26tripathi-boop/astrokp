@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { calculateExactKP, calculateSwephKPChart } from '@/lib/swephKpEngine';
 import { kundliCalculationCache } from '@/lib/cache-manager';
+import { generateMasterKundli } from '@/lib/master-kundli-engine';
+import { ChartInput } from '@/types/astrology';
 
 export async function POST(request: Request) {
   try {
@@ -42,6 +44,23 @@ export async function POST(request: Request) {
     // Array of degrees for compatibility
     const cuspsArray = chart.cuspsList ? chart.cuspsList.map((c: any) => c.longitude) : [];
 
+    // Master Kundli Calculation
+    const chartInput: ChartInput = {
+      name: body.name || 'Jataka',
+      gender: body.gender || 'male',
+      dateOfBirth: dateStr,
+      timeOfBirth: timeStr,
+      placeName: body.placeName || 'Unknown',
+      latitude: lat,
+      longitude: lon,
+      timezone,
+      ayanamsa: body.ayanamsa || (body.mode === 'LAHIRI' ? 'LAHIRI' : 'KP_NEW'),
+      isHorary: false,
+      horaryNumber: 1,
+      language: body.language || 'hi',
+    };
+    const masterKundli = generateMasterKundli(chartInput);
+
     return NextResponse.json({
       success: true,
       engine: 'sweph-wasm',
@@ -59,7 +78,8 @@ export async function POST(request: Request) {
       cusps: chart.cusps,          // Object: { Cusp_1: { ... }, Cusp_2: { ... }, ... }
       cuspsArray: cuspsArray,      // Array: [deg1, deg2, ..., deg12]
       cuspsDetail: chart.cuspsList, // Array of 12 cusp objects with Star Lord, Sub Lord, etc.
-      planets: chart.planets       // Object with both English (Sun, Moon...) and Hindi (Surya, Chandra...)
+      planets: chart.planets,      // Object with both English (Sun, Moon...) and Hindi (Surya, Chandra...)
+      masterKundli,
     });
   } catch (error: any) {
     console.error('Error in /api/kundli route:', error);
