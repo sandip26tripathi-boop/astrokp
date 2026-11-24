@@ -61,9 +61,14 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
                   PRO
                 </span>
               </div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">
-                Vedic Astrology & Astrological AI
-              </p>
+              <div className="hidden sm:block">
+                <p className="text-[9.5px] sm:text-[10px] font-medium text-slate-600 dark:text-slate-400 leading-tight">
+                  Astronomical Precision Meets Cosmic Intelligence.
+                </p>
+                <p className="text-[8.5px] sm:text-[9px] font-medium text-amber-600 dark:text-amber-400/90 leading-tight">
+                  सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+                </p>
+              </div>
             </div>
           </div>
 

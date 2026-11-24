@@ -82,18 +82,15 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-xl sm:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-[1.2] sm:leading-[1.15]">
-            {language === 'hi' ? (
-              <>
-                खगोलीय सटीकता एवं <span className="gold-gradient-text">दैवीय ज्योतिषीय दृष्टि</span>
-              </>
-            ) : (
-              <>
-                Astronomical Precision Meets{' '}
-                <span className="gold-gradient-text">Cosmic Intelligence</span>
-              </>
-            )}
-          </h1>
+          <div className="space-y-1.5 sm:space-y-2">
+            <h1 className="text-xl sm:text-4xl md:text-5xl font-extrabold font-serif tracking-tight text-slate-900 dark:text-white leading-[1.2] sm:leading-[1.15]">
+              Astronomical Precision Meets{' '}
+              <span className="gold-gradient-text">Cosmic Intelligence</span>.
+            </h1>
+            <p className="text-sm sm:text-xl md:text-2xl font-serif font-bold text-amber-600 dark:text-amber-400 tracking-wide leading-relaxed">
+              सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+            </p>
+          </div>
 
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed px-1">
             {language === 'hi'
@@ -402,8 +399,18 @@ export default function Home() {
       </main>
 
       <footer className="w-full border-t border-slate-200 dark:border-slate-800 py-6 text-xs text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-cosmic-obsidian/50">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} Gemini Astro. High-Precision Astrological Intelligence. All rights reserved.</p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="space-y-1">
+            <p className="font-semibold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+              Astronomical Precision Meets Cosmic Intelligence.
+            </p>
+            <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-sm font-medium">
+              सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+            </p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
+              © {new Date().getFullYear()} Gemini Astro. High-Precision Astrological Intelligence. All rights reserved.
+            </p>
+          </div>
           <div className="flex items-center gap-4 text-[11px]">
             <Link
               href="/admin"

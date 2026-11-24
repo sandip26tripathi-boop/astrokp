@@ -68,9 +68,12 @@ export default function ReportView({ onClose }: ReportViewProps) {
       <div className="space-y-8 font-sans">
         {/* Cover / Header Section */}
         <div className="text-center pb-8 border-b-2 border-amber-500/40">
-          <div className="inline-block px-3 py-1 mb-2 rounded-full text-xs font-bold tracking-widest text-amber-700 bg-amber-100 uppercase">
+          <div className="inline-block px-3 py-1 mb-1 rounded-full text-xs font-bold tracking-widest text-amber-700 bg-amber-100 uppercase">
             GEMINI ASTRO • ASTRONOMICAL DOSSIER
           </div>
+          <p className="text-[11px] font-medium text-slate-500 mb-2">
+            Astronomical Precision Meets Cosmic Intelligence • सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+          </p>
           <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-slate-950">
             {input.name || 'Client Kundli'}
           </h1>

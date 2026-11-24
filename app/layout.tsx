@@ -4,15 +4,19 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Gemini Astro - Logic-Based KP & Vedic Astrology',
-    template: '%s | Gemini Astro - Logic-Based KP & Vedic Astrology',
+    default:
+      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+    template:
+      '%s | Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
   },
   description:
-    'Gemini Astro provides authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
+    'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
   keywords: [
     'Vedic Astrology',
     'KP Astrology',
     'Gemini Astro',
+    'Astronomical Precision Meets Cosmic Intelligence',
+    'सटीक खगोलीय गणना गहन ज्योतिषीय समझ',
     'Kundli Generator',
     'Janam Kundali',
     'Horoscope Predictions',
@@ -34,9 +38,10 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'Gemini Astro | Authentic Vedic & KP Astrology Platform',
+    title:
+      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     description:
-      'High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
+      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
     url: 'https://vedic-ai-astrology.vercel.app',
     siteName: 'Gemini Astro Vedic AI',
     images: [
@@ -52,9 +57,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Gemini Astro | Authentic Vedic Astrology & Kundli',
+    title:
+      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     description:
-      'Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
+      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
     images: ['/images/pandit-ji.jpg'],
   },
   robots: {
@@ -90,12 +96,12 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Gemini Astro - Logic-Based KP & Vedic Astrology',
+      name: 'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'All',
       url: 'https://vedic-ai-astrology.vercel.app',
       description:
-        'High-precision Vedic and KP Astrology Kundli generation with Gemini Astro AI consultation, 10-year life forecasts, and transit evaluations.',
+        'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision Vedic and KP Astrology Kundli generation with Gemini Astro AI consultation, 10-year life forecasts, and transit evaluations.',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -105,7 +111,7 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: 'Gemini Astro Vedic Astrology Consultation',
+      name: 'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
       image: 'https://vedic-ai-astrology.vercel.app/images/pandit-ji.jpg',
       url: 'https://vedic-ai-astrology.vercel.app',
       priceRange: 'Free / ₹0',
