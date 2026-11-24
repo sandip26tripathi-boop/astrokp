@@ -187,11 +187,26 @@ export default function AstrologyChatbot() {
   const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
   const isInitialMount = useRef(true);
+  const wasLoadingRef = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 100);
   }, []);
+
+  // Auto-focus input when AI response finishes
+  useEffect(() => {
+    if (wasLoadingRef.current && !isLoading) {
+      setTimeout(() => {
+        chatInputRef.current?.focus();
+      }, 50);
+    }
+    wasLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -220,6 +235,10 @@ export default function AstrologyChatbot() {
     addChatMessage(userMsg);
     if (!customPrompt) setInputMessage('');
     setIsLoading(true);
+
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 50);
 
     try {
       const res = await fetch('/api/gemini-consult', {
@@ -270,6 +289,9 @@ export default function AstrologyChatbot() {
       });
     } finally {
       setIsLoading(false);
+      setTimeout(() => {
+        chatInputRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -479,8 +501,10 @@ export default function AstrologyChatbot() {
         className="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-900/40"
       >
         <input
+          ref={chatInputRef}
           type="text"
           value={inputMessage}
+          autoFocus
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder={t('chatPlaceholder', language)}
           className="flex-1 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"

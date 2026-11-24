@@ -288,7 +288,7 @@ export default function Home() {
 
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
                   {language === 'hi'
-                    ? 'शास्त्रीय वैदिक, के.पी. (KP) एवं पाराशरी ज्योतिष तथा वास्तु ऊर्जा संतुलन में वर्षों के गहन शोध पर आधारित। संदीप के. त्रिपाठी द्वारा निर्मित यह प्रणाली प्राचीन खगोलीय गणित और आधुनिक कंप्यूटिंग का समन्वय करती है—जो जीवन और व्यवसाय के महत्वपूर्ण निर्णयों के लिए तर्कसंगत और सटीक मार्गदर्शन प्रदान करती है।'
+                    ? 'शास्त्रीय वैदिक, के.पी. (KP) एवं पाराशरी ज्योतिष के साथ-साथ स्थानिक ऊर्जा विज्ञान (एस्ट्रो-वास्तु) में वर्षों के गहन शोध पर आधारित। संदीप के. त्रिपाठी द्वारा परिकल्पित यह प्रणाली प्राचीन खगोलीय गणित और आधुनिक बुद्धिमत्ता का समन्वय करती है—जो जीवन और व्यवसाय के महत्वपूर्ण निर्णयों के लिए तर्कसंगत और सटीक अंतर्दृष्टि प्रदान करती है।'
                     : 'Built upon years of rigorous research in classical Vedic, KP, and Parashari astrology alongside spatial energy dynamics (AstroVastu). Conceived by Sandeep K. Tripathi to bridge ancient astronomical mathematics with modern computational intelligence—delivering structured, logic-driven insights for strategic life and executive decisions.'}
                 </p>
 

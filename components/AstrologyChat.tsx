@@ -183,11 +183,27 @@ export default function AstrologyChat() {
   const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
   const isInitialMount = useRef(true);
+  const wasLoadingRef = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
+    // Initial auto-focus
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 100);
   }, []);
+
+  // Auto-focus input when AI response finishes (isLoading goes from true to false)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isLoading) {
+      setTimeout(() => {
+        chatInputRef.current?.focus();
+      }, 50);
+    }
+    wasLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -267,6 +283,11 @@ export default function AstrologyChat() {
     if (!customPrompt) setInputMessage('');
     setIsLoading(true);
     setStreamingText('');
+
+    // Immediately restore cursor focus to input box
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 50);
 
     try {
       const res = await fetch('/api/gemini/kp-predict', {
@@ -361,6 +382,9 @@ export default function AstrologyChat() {
     } finally {
       setIsLoading(false);
       setStreamingText('');
+      setTimeout(() => {
+        chatInputRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -608,9 +632,10 @@ export default function AstrologyChat() {
         </button>
 
         <input
+          ref={chatInputRef}
           type="text"
           value={inputMessage}
-          disabled={isLoading}
+          autoFocus
           onChange={(e) => setInputMessage(e.target.value)}
           placeholder={
             isListening
@@ -621,7 +646,7 @@ export default function AstrologyChat() {
               ? 'अपनी शंका पूछें (उदा. क्या मुझे इस वर्ष पदोन्नति मिलेगी?)...'
               : 'Ask specific question (e.g., When will I get a job promotion?)...'
           }
-          className="flex-1 min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition disabled:opacity-60"
+          className="flex-1 min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-base sm:text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
         />
 
         <button
