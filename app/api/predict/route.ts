@@ -222,12 +222,14 @@ ${gocharData.summaryTextHi}
 
     let replyText = '';
     let modelUsed = '';
+    const geminiErrors: string[] = [];
 
     if (apiKey) {
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      // Verified production Google Gemini models
+      const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
       for (const m of models) {
         try {
-          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5500));
+          const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 7000));
           const aiCall = ai.models.generateContent({
             model: m,
             contents: formattedContents,
@@ -238,11 +240,16 @@ ${gocharData.summaryTextHi}
             replyText = res.text.trim();
             modelUsed = m;
             break;
+          } else if (!res) {
+            geminiErrors.push(`${m}: timed out after 7000ms`);
           }
-        } catch (e) {
+        } catch (e: any) {
+          geminiErrors.push(`${m}: ${e?.message || String(e)}`);
           console.warn(`Model ${m} failed in predict route:`, e);
         }
       }
+    } else {
+      geminiErrors.push('GEMINI_API_KEY not present in environment');
     }
 
     // Fail-safe Astrological Synthesis: Instant, zero-hang guaranteed response
@@ -257,6 +264,9 @@ ${gocharData.summaryTextHi}
       model: modelUsed,
       debug: {
         modelUsed,
+        geminiErrors,
+        apiKeyConfigured: Boolean(apiKey),
+        apiKeyPrefix: apiKey ? apiKey.slice(0, 6) + '...' + apiKey.slice(-4) : 'none',
         topic: topicAnalysis?.topic || 'general',
         isFirstTurn,
         userTurnsCount,
