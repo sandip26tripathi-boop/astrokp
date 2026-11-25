@@ -92,10 +92,35 @@ export const useAstrologyStore = create<AstrologyState>()(
 
       setChartStyle: (style) => set({ chartStyle: style }),
       setLanguage: (lang) => {
-        set((state) => ({
-          language: lang,
-          input: { ...state.input, language: lang },
-        }));
+        set((state) => {
+          // Dynamically translate initial welcome greeting if only greeting is present
+          let updatedChatMessages = state.chatMessages;
+          const isInitialGreeting =
+            state.chatMessages.length === 1 &&
+            state.chatMessages[0].role === 'model' &&
+            (state.chatMessages[0].content === 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?' ||
+              state.chatMessages[0].content === 'Namaste! I am Gemini Astro. What guidance do you seek?' ||
+              state.chatMessages[0].content === 'Namaste! I am Gemini Astro. How may I guide you today?');
+
+          if (isInitialGreeting) {
+            updatedChatMessages = [
+              {
+                role: 'model',
+                content:
+                  lang === 'hi'
+                    ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                    : 'Namaste! I am Gemini Astro. How may I guide you today?',
+                timestamp: state.chatMessages[0].timestamp,
+              },
+            ];
+          }
+
+          return {
+            language: lang,
+            input: { ...state.input, language: lang },
+            chatMessages: updatedChatMessages,
+          };
+        });
       },
 
       setSelectedHouse: (house) => set({ selectedHouse: house, selectedPlanet: null }),
@@ -278,7 +303,7 @@ export const useAstrologyStore = create<AstrologyState>()(
               content:
                 lang === 'hi'
                   ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
-                  : 'Namaste! I am Gemini Astro. What guidance do you seek?',
+                  : 'Namaste! I am Gemini Astro. How may I guide you today?',
               timestamp: new Date().toISOString(),
             },
           ],

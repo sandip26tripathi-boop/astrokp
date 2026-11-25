@@ -25,8 +25,8 @@ import {
   Cpu,
 } from 'lucide-react';
 
-function formatDashaDisplay(dasha: any): string {
-  if (!dasha) return 'N/A';
+function formatDashaDisplay(dasha: any, isEn: boolean = false): string {
+  if (!dasha) return isEn ? 'N/A' : 'उपलब्ध नहीं';
   if (typeof dasha === 'string') return dasha;
 
   const extractPlanet = (d: any) => {
@@ -47,6 +47,13 @@ function formatDashaDisplay(dasha: any): string {
     extractPlanet(dasha.pratyantardasha_Antara) ||
     extractPlanet(dasha.pratyantar) ||
     null;
+
+  if (isEn) {
+    if (prat) {
+      return `Mahadasha: ${maha} → Antardasha: ${antar} → Pratyantardasha: ${prat}`;
+    }
+    return `Mahadasha: ${maha} → Antardasha: ${antar}`;
+  }
 
   if (prat) {
     return `महादशा: ${maha} → अंतर्दशा: ${antar} → प्रत्यंतर्दशा: ${prat}`;
@@ -497,21 +504,37 @@ export default function AstrologyChat() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-[#B87314] dark:text-[#D4AF37] flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-[#B87314]" />
-            {input.name ? `${input.name} की कुंडली:` : (language === 'hi' ? 'सक्रिय कुंडली गणना:' : 'Active Kundli Grounding:')}
+            {input.name
+              ? language === 'hi'
+                ? `${input.name} की कुंडली:`
+                : `${input.name}'s Chart:`
+              : language === 'hi'
+              ? 'सक्रिय कुंडली गणना:'
+              : 'Active Kundli Grounding:'}
           </span>
           <span className="bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
-            लग्न: <strong className="text-[#231A12] dark:text-[#D4AF37]">{kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'}</strong>
+            {language === 'hi' ? 'लग्न: ' : 'Asc: '}
+            <strong className="text-[#231A12] dark:text-[#D4AF37]">
+              {language === 'hi'
+                ? kpMatrix?.cusps?.[0]?.hindiSignName || kpMatrix?.cusps?.[0]?.signName || 'वृश्चिक'
+                : kpMatrix?.cusps?.[0]?.signName || 'Scorpio'}
+            </strong>
           </span>
           <span className="bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
-            चन्द्र: <strong className="text-[#231A12] dark:text-[#D4AF37]">{kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'}</strong>
+            {language === 'hi' ? 'चन्द्र: ' : 'Moon: '}
+            <strong className="text-[#231A12] dark:text-[#D4AF37]">
+              {language === 'hi'
+                ? kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.hindiSignName || kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'वृश्चिक'
+                : kpMatrix?.planets?.find((p) => p.name.toLowerCase() === 'moon')?.signName || 'Scorpio'}
+            </strong>
           </span>
           <span className="hidden sm:inline bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] px-2.5 py-1 rounded text-xs">
-            {formatDashaDisplay(kpMatrix?.currentDasha)}
+            {formatDashaDisplay(kpMatrix?.currentDasha, language === 'en')}
           </span>
         </div>
         {input.dateOfBirth && (
           <div className="text-xs text-[#5C4D3C] dark:text-[#D8C39E] font-medium">
-            {input.dateOfBirth} | {input.timeOfBirth || '12:00'} | {input.placeName || 'भारत'}
+            {input.dateOfBirth} | {input.timeOfBirth || '12:00'} | {input.placeName || (language === 'hi' ? 'भारत' : 'India')}
           </div>
         )}
       </div>
@@ -567,7 +590,17 @@ export default function AstrologyChat() {
                 {isUser ? (
                   <div className="whitespace-pre-wrap">{msg.content}</div>
                 ) : (
-                  renderFormattedContent(msg.content, (q) => handleSend(q))
+                  renderFormattedContent(
+                    index === 0 &&
+                      (msg.content === 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?' ||
+                        msg.content === 'Namaste! I am Gemini Astro. What guidance do you seek?' ||
+                        msg.content === 'Namaste! I am Gemini Astro. How may I guide you today?')
+                      ? language === 'hi'
+                        ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                        : 'Namaste! I am Gemini Astro. How may I guide you today?'
+                      : msg.content,
+                    (q) => handleSend(q)
+                  )
                 )}
                 <div
                   suppressHydrationWarning
