@@ -11,6 +11,7 @@ import { generateMasterKundli, MasterKundliJSON } from '@/lib/master-kundli-engi
 import { extractQueriedTargetDate, getDashaForDate, getAllMahadashasTable } from '@/lib/dasha-date-resolver';
 import { evaluateChartAgainstRules } from '@/lib/astrology/ruleEngine';
 import { PLANET_ELEMENTAL_MAP } from '@/lib/astrology/classicalRules';
+import { routeUserIntent, extractIntentAstrologyData } from '@/lib/astrology/intentRouter';
 import { ChartInput } from '@/types/astrology';
 
 try {
@@ -166,15 +167,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Deep KP & Parashari Question Analysis using exact Kundli data
-    const questionAnalysis = analyzeQuestionAstrology(
-      activeChart,
-      parashariData,
-      gocharData,
-      currentQuestion,
-      birthDetails
-    );
-
     // Ensure comprehensive Master Kundli JSON from backend calculation engine
     let masterKundli: MasterKundliJSON;
     if (activeChart.masterKundli) {
@@ -197,6 +189,19 @@ export async function POST(req: NextRequest) {
       masterKundli = generateMasterKundli(bInput);
     }
 
+    // Programmatic Intent Routing & Relevant Data Slicing (100% accurate house mapping)
+    const userIntent = routeUserIntent(currentQuestion, recentMessages);
+    const intentAstrologyData = extractIntentAstrologyData(masterKundli, userIntent);
+
+    // Deep KP & Parashari Question Analysis using exact Kundli data
+    const questionAnalysis = analyzeQuestionAstrology(
+      activeChart,
+      parashariData,
+      gocharData,
+      currentQuestion,
+      birthDetails
+    );
+
     // Historical & Target Date Resolution (e.g., 2014, 2028, next year)
     const dateParse = extractQueriedTargetDate(currentQuestion);
     const targetDateDasha = getDashaForDate(masterKundli.full120YearDashaTimeline, dateParse.targetDate);
@@ -204,7 +209,7 @@ export async function POST(req: NextRequest) {
     const allMahadashasTable = masterKundli.allMahadashasTable || getAllMahadashasTable(masterKundli.full120YearDashaTimeline);
 
     // Programmatic Rule Engine Evaluation (KP Laws + Parashari Laws + Tattva/Dosha)
-    const astrologicalAudit = evaluateChartAgainstRules(masterKundli, currentQuestion);
+    const astrologicalAudit = evaluateChartAgainstRules(masterKundli, currentQuestion, recentMessages);
 
     const cusps = activeChart.cusps || [];
     const currentDBA = masterKundli.dashaHierarchy;
@@ -341,28 +346,27 @@ export async function POST(req: NextRequest) {
       timingForecast: questionAnalysis.timingWindowHi,
     };
 
-    const masterSystemPrompt = `You are "Gemini Astro", an authoritative, wise senior Indian Astrologer speaking directly and warmly with a client sitting face-to-face. You possess master-level command over Krishnamurti Paddhati (KP Astrology) and Parashari Vedic Astrology.
+    const masterSystemPrompt = `You are "Gemini Astro", a sharp, perceptive, and deeply knowledgeable Indian Astrologer sitting face-to-face with a client.
 
-STRICT FORMATTING & STYLE RULES (ZERO TOLERANCE FOR ROBOTIC TEMPLATES):
-1. BANNED FORMATTING (ABSOLUTE RULE):
-   - NEVER use numbered sections or fixed headings like "1. सीधा निष्कर्ष", "2. KP ज्योतिष विश्लेषण", "3. पाराशरी वैदिक विश्लेषण", "4. दशा, गोचर और उपाय", or markdown titles (###, **1.**, **2.**, etc.).
-   - NEVER output bullet points, numbered lists, or raw JSON keys.
-   - NEVER start every response with the exact same repetitive greeting or opening phrase (e.g., avoid "आगामी समय में आपका...").
-   - NEVER write textbook definitions like "The 1st house represents physical body" or "Planets are giving mixed signals."
+1. STRICT LANGUAGE & TONE LOCK:
+- Follow the active UI language (uiLanguage: "${clientLanguage}"): if "hi", respond in warm, natural spoken Hindi (Devanagari); if "en", respond in natural, articulate Indian English. Even if the client asks in Hinglish or romanized text, you MUST reply strictly in the active UI language (${clientLanguage === 'hi' ? 'Pure, natural Hindi in Devanagari script' : 'Natural, articulate English'}).
+- NEVER address the user as "पंडित जी" (you are the astrologer, they are the client).
+- NEVER use a repetitive 3-paragraph formula, numbered headings, bullet lists, or generic closing sermons ("धैर्य और योजना से आगे बढ़ें").
+- Write like two intelligent people having a real conversation—concise, natural, and directly focused on what the client actually asked (140–210 words).
 
-2. NATURAL CONVERSATIONAL ARCHITECTURE (2 TO 3 COHESIVE PARAGRAPHS, ~160–230 WORDS TOTAL):
-   - Speak naturally, warmly, and authoritatively in fluent, spoken dialogue—exactly how an experienced senior Jyotishi speaks with a client across the table.
-   - Dynamic Empathetic Openings: Open naturally based on the client's question (e.g., "देखिए, आपके स्वास्थ्य/करियर को लेकर...", "आपकी कुंडली का गहरा विश्लेषण करने पर...", "जहां तक आपके इस सवाल का संबंध है..."). On follow-up questions, continue the dialogue directly without repeating introductory greetings.
-   - Paragraph 1 (Direct Diagnosis & KP Lens): Give the clear, direct verdict immediately and weave in the KP mechanics into natural speech. E.g., explain which planet is the Cuspal Sub-Lord (CSL) of the relevant house, which Star Lord (Nakshatra) it occupies, the signified houses, and how its Element (Tattva/Dosha) specifically manifests (e.g., cold/sinus/allergies, career shift, financial block).
-   - Paragraph 2 (Parashari Foundation & Conjunctions/Aspects): Seamlessly blend the Parashari structural confirmation into the conversation. Speak about the House Lord (भावेश), its placement, any Conjunctions (युति) or Aspects (दृष्टि) like Saturn/Mars/Jupiter, and how this confirms or modifies the KP diagnosis.
-   - Paragraph 3 (Dasha-Transit Timing & Practical Precaution): Flow directly into the exact running Mahadasha-Antardasha (or target date Dasha) and planetary Gochar transits, providing a clear timeframe and one calm, practical, grounded lifestyle or Ayurvedic precaution.
+2. UNDERSTAND THE QUESTION'S NATURE FIRST:
+- Read the client's exact intent: Are they asking for a general career direction, a job vs. business choice, timing of a change, or solving a current struggle? Answer that exact point first without wandering into unrelated houses (never discuss the 4th house of property when asked about career unless it directly links to a specific job transfer).
 
-3. CONTEXT & LANGUAGE:
-   - Language: Mirror the client's language naturally (${isEnglish ? 'warm, professional Indian English' : 'natural, respectful Hindi or Hinglish'}).
-   - Seamless Continuity: If this is a follow-up question in the ongoing conversation, answer the follow-up directly while retaining full context of earlier turns.
+3. LOGICAL KP + PARASHARI SYNTHESIS (NO TEXTBOOK FILLER):
+- Use ONLY the pre-filtered intentAstrologyData and verified todayDasha / targetDateDasha provided by the backend.
+- Weave the KP logic (exact 10th/6th CSL, its Star Lord, Sub-Lord approval, and signified houses like 2, 6, 10, 11) seamlessly with the Parashari logic (10th/6th Lord placement, degree strength, Yuti, Drishti, D10/D9 confirmation) into smooth, logical sentences—showing why a career path, shift, or timing makes astrological sense.
+- Maintain Sequence Across Turns: Remember the previous messages in the conversation so follow-up questions build directly on what you already explained without repeating the birth chart basics.
 
-BACKEND KUNDLI CALCULATED DATA (STRICT MATHEMATICAL TRUTH):
-${JSON.stringify(kundliJsonPayload, null, 2)}
+PRE-FILTERED INTENT-DRIVEN ASTROLOGICAL DATA SLICE (STRICT GROUND TRUTH):
+${JSON.stringify(intentAstrologyData, null, 2)}
+
+VERIFIED DASHA & TIMING (DO NOT GUESS OR RECALCULATE DATES):
+${JSON.stringify(kundliJsonPayload.dashaDateLock, null, 2)}
 `;
 
     const rawContents = recentMessages
@@ -431,8 +435,8 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
               contents: formattedContents,
               config: {
                 systemInstruction: masterSystemPrompt,
-                temperature: 0.2,
-                maxOutputTokens: 900,
+                temperature: 0.25,
+                maxOutputTokens: 650,
               },
             });
 
@@ -483,8 +487,8 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
             contents: formattedContents,
             config: {
               systemInstruction: masterSystemPrompt,
-              temperature: 0.2,
-              maxOutputTokens: 900,
+              temperature: 0.25,
+              maxOutputTokens: 650,
             },
           });
           const res: any = await Promise.race([aiCall, timeoutPromise]);
@@ -517,9 +521,10 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
         modelUsed,
         geminiErrors,
         apiKeyConfigured: Boolean(apiKey),
-        topic: questionAnalysis?.topic || 'general',
-        primaryHouse: questionAnalysis?.primaryHouseNum,
-        cslName: questionAnalysis?.cslName,
+        topic: userIntent.domain,
+        subIntent: userIntent.subIntent,
+        primaryHouse: userIntent.primaryHouses[0],
+        cslName: intentAstrologyData.kpSlice.primaryCsl.planet,
         lagnaSign: parashariData.lagnaSign,
         moonSign: parashariData.moonSign,
         isFirstTurn,
@@ -529,10 +534,13 @@ ${JSON.stringify(kundliJsonPayload, null, 2)}
     });
   } catch (error: any) {
     console.error('Prediction API Error:', error);
+    const fallbackMsg = (req as any)?.body?.language === 'en'
+      ? 'Based on your birth chart coordinates, planetary evaluation is complete. Please ask your question again.'
+      : 'आपकी कुंडली के अनुसार ग्रह स्थिति का विश्लेषण पूर्ण है। कृपया अपना प्रश्न पुनः पूछें।';
     return NextResponse.json(
       {
-        reply: 'आपकी कुंडली के अनुसार ग्रह स्थिति का विश्लेषण पूर्ण है। कृपया अपना प्रश्न पुनः पूछें।',
-        text: 'आपकी कुंडली के अनुसार ग्रह स्थिति का विश्लेषण पूर्ण है। कृपया अपना प्रश्न पुनः पूछें।',
+        reply: fallbackMsg,
+        text: fallbackMsg,
         error: error?.message || 'Error occurred',
       },
       { status: 200 }

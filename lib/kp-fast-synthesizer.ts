@@ -172,7 +172,7 @@ export function synthesizeFastKPAnswer(
   const isBusiness = /business|vyapar|startup|dukan|firm|partnership|व्यापार|दुकान|कंपनी|साझेदारी/i.test(q);
   const isDebtOrLoan = /karz|loan|emi|debt|udhari|कर्ज|लोन|उधार|तंगी/i.test(q);
   const isWealthGeneral = /dhan|paisa|money|earning|income|saving|bachat|wealth|rupiya|धन|पैसा|रुपया|कमाई/i.test(q);
-  const isPropertyOrVehicle = /property|makan|flat|ghar|plot|zameen|vehicle|car|gadi|मकान|जमीन|गाड़ी|वाहन|प्लॉट/i.test(q);
+  const isPropertyOrVehicle = /makan|ghar|zameen|gadi|मकान|जमीन|गाड़ी|वाहन|प्लॉट|\b(property|properties|flat|flats|plot|plots|vehicle|vehicles|car|cars|automobile|real\s*estate)\b/i.test(q);
 
   const isMarriageDelayOrTiming = /kab hogi|shadi kab|vivah kab|deri|rukawat|delay|विवाह कब|शादी कब|देरी|रुकावट/i.test(q);
   const isSpouseNature = /jeevansathi kaisa|patni kaisi|pati kaisa|nature|looks|जीवनसाथी कैसा|पत्नी कैसी/i.test(q);
@@ -229,22 +229,24 @@ export function synthesizeFastKPAnswer(
     }
 
     // -------------------------------------------------------------
-    // CASE 3: JOB CHANGE / PROMOTION / NEW OPPORTUNITY
+    // CASE 3: JOB CHANGE / PROMOTION / CAREER DIRECTION
     // -------------------------------------------------------------
-    if (isJobChangeOrNewJob || isPromotionOrHike || isGovtJobOrUPSC) {
+    if (isJobChangeOrNewJob || isPromotionOrHike || isGovtJobOrUPSC || isCareerGeneral) {
       const careerGoalText = isPromotionOrHike
         ? 'पदोन्नति और वेतन वृद्धि'
         : isGovtJobOrUPSC
         ? 'प्रतियोगी परीक्षा अथवा सरकारी पद प्राप्ति'
-        : 'नई नौकरी और कार्यक्षेत्र में परिवर्तन';
+        : isJobChangeOrNewJob
+        ? 'नई नौकरी और कार्यक्षेत्र में परिवर्तन'
+        : 'करियर की समग्र दिशा एवं आजीविका';
 
-      return `${contextBridgeHi}करियर में **${careerGoalText}** को लेकर आपकी चिंता स्वाभाविक है, और इस समय ग्रह चक्र आपको एक नए मोड़ पर खड़ा कर रहा है।
+      return `${contextBridgeHi}करियर में **${careerGoalText}** को लेकर आपकी जिज्ञासा बिल्कुल स्वाभाविक है, और आपकी कुंडली में दशम भाव कर्म और प्रतिष्ठा का मुख्य आधार है।
 
-आपकी कुंडली में कर्म के दशम भाव के उप-स्वामी **${c10CslHi}** हैं, जिनका संबंध लाभ भाव से बना हुआ है। वर्तमान **${mahaHi}-${antarHi}** की अवधि कुछ समय से निर्णयों में विलंब करा रही थी, परंतु अब गोचर में गुरु का प्रभाव आपके पक्ष में गति बना रहा है।
+आपकी जन्म कुंडली में कर्म स्थान यानी दशम भाव के कस्पल सब-लॉर्ड (CSL) **${c10CslHi}** हैं और षष्ठम भाव के उप-स्वामी **${c6CslHi}** हैं। के.पी. ज्योतिष के अनुसार जब दशम भाव का संबंध द्वितीय (धन), षष्ठम (सेवा/प्रतियोगिता) और एकादश (लाभ) भावों से बनता है, तो व्यक्ति को कार्यक्षेत्र में विशेष पहचान और स्थिर प्रगति प्राप्त होती है। वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** चल रही है, जिसने पिछले कुछ समय से निर्णयों में थोड़ी अनिश्चितता अवश्य दी है।
 
-ग्रह गणना के अनुसार आगामी **२ से ४ महीनों के भीतर** आपके लिए एक सकारात्मक बदलाव, नया ऑफर अथवा विभागीय पदोन्नति का सशक्त योग बन रहा है। इस समय अपने संपर्कों को सक्रिय रखें और काम में निरंतरता बनाए रखें।${
+परंतु अब गोचर में देवगुरु बृहस्पति और शनि का प्रभाव आपके कर्म और उपचय भावों को अनुकूलता प्रदान कर रहा है। आने वाले **२ से ४ महीनों के भीतर** आपके कार्यक्षेत्र में एक सकारात्मक बदलाव, नई ज़िम्मेदारी अथवा उन्नति का ठोस अवसर सामने आएगा। इस समय अपनी कार्यकुशलता और नेटवर्किंग पर ध्यान केंद्रित रखना आपके लिए सबसे लाभप्रद रहेगा।${
   userAskedForRemedy
-    ? '\n\nसफलता में तेजी लाने के लिए बुधवार को किसी मंदिर में हरी मूंग की दाल का दान करें और कार्यस्थल पर अनावश्यक विवादों से दूर रहें।'
+    ? '\n\nकरियर में स्थिरता और तेज गति के लिए बुधवार को भगवान श्री गणेश को दूर्वा अर्पित करें और प्रतिदिन प्रातः सूर्य देव को तांबे के पात्र से अर्घ्य दें।'
     : ''
 }`;
     }
@@ -347,6 +349,18 @@ In your natal chart, the 10th House of Career has its Cuspal Sub-Lord in **${c10
 During 2027, Saturn transits into Aries—your 6th Upachaya house—which traditionally grants competitive superiority and job security. Concurrently, transiting Jupiter energizes your 10th house, creating a classical Double Transit. The sectors of **technology, systems architecture, and specialized advisory/consulting** will yield peak rewards, particularly **from May 2027 onward**.${
   userAskedForRemedy
     ? '\n\nTo strengthen career momentum, offer morning water to the rising Sun and recite the Gayatri Mantra daily.'
+    : ''
+}`;
+  }
+
+  if (isJobChangeOrNewJob || isPromotionOrHike || isGovtJobOrUPSC || isCareerGeneral) {
+    return `${contextBridgeEn}Looking at your career path, your 10th House of profession has its Cuspal Sub-Lord in **${c10?.subLord || 'Mercury'}**, while your 6th House of service and competitive edge is governed by **${c6?.subLord || 'Saturn'}**.
+
+In KP astrology, when the 10th CSL aligns with houses 2 (wealth), 6 (service/competitive advantage), and 11 (fulfillment of ambitions), it promises progressive career stability and executive growth. You are currently operating under the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**, which has created temporary pauses but is now preparing you for an upward shift.
+
+With transiting Jupiter and Saturn activating your career axis, you should expect positive developments, a fresh opportunity, or strategic advancement within the next **2 to 4 months**. Keeping your professional network active during this period will bring the best results.${
+  userAskedForRemedy
+    ? '\n\nTo enhance career momentum, offer water to the rising Sun daily and keep a balanced, disciplined morning routine.'
     : ''
 }`;
   }

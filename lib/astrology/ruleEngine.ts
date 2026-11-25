@@ -6,7 +6,7 @@
  */
 
 import { MasterKundliJSON, MasterPlanetDetails } from '../master-kundli-engine';
-import { classifyQuestionTopic } from '../kp-classifier';
+import { routeUserIntent } from './intentRouter';
 import {
   PLANET_ELEMENTAL_MAP,
   ASCENDANT_FUNCTIONAL_MAP,
@@ -65,26 +65,37 @@ export interface AstrologicalAuditReport {
 
 export function evaluateChartAgainstRules(
   masterKundli: MasterKundliJSON,
-  userQuery: string
+  userQuery: string,
+  previousTurns: Array<{ role: string; content?: string; text?: string }> = []
 ): AstrologicalAuditReport {
-  // 1. Identify Topic & Target House
-  const classified = classifyQuestionTopic(userQuery);
-  const topicKey = (classified?.topic || 'health').toLowerCase();
+  // 1. Identify Topic & Target House via Strict Intent Router
+  const routedIntent = routeUserIntent(userQuery, previousTurns);
+  const domainKey = routedIntent.domain;
+  const topicKey = domainKey;
 
-  let domainRule = KP_HOUSE_GROUPINGS[topicKey];
+  let domainRule = KP_HOUSE_GROUPINGS[domainKey];
   if (!domainRule) {
-    if (topicKey.includes('health') || topicKey.includes('रोग') || topicKey.includes('बीमार')) {
+    if (domainKey === 'health') {
       domainRule = KP_HOUSE_GROUPINGS.health;
-    } else if (topicKey.includes('job') || topicKey.includes('career') || topicKey.includes('व्यवसाय')) {
+    } else if (domainKey === 'career') {
       domainRule = KP_HOUSE_GROUPINGS.career;
-    } else if (topicKey.includes('marriage') || topicKey.includes('विवाह')) {
+    } else if (domainKey === 'marriage') {
       domainRule = KP_HOUSE_GROUPINGS.marriage;
-    } else if (topicKey.includes('wealth') || topicKey.includes('धन') || topicKey.includes('money')) {
+    } else if (domainKey === 'finance') {
       domainRule = KP_HOUSE_GROUPINGS.wealth;
+    } else if (domainKey === 'education') {
+      domainRule = KP_HOUSE_GROUPINGS.education;
+    } else if (domainKey === 'property') {
+      domainRule = KP_HOUSE_GROUPINGS.property;
     } else {
-      domainRule = KP_HOUSE_GROUPINGS.health;
+      domainRule = KP_HOUSE_GROUPINGS.career;
     }
   }
+
+  const classified = {
+    topic: domainRule.domain,
+    topicHi: domainRule.domainHi,
+  };
 
   const primaryHouseNum = domainRule.primaryHouse;
   const cusps = masterKundli.cusps || [];

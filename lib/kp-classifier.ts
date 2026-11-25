@@ -34,6 +34,18 @@ export function classifyQuestionTopic(query: string, previousContext?: string): 
     };
   }
 
+  // Career / Profession / Job / Service
+  if (/\b(career|profession|job|jobs|service|employment|interview|boss|office|work|workplace|occupation)\b|करियर|पेशा|नौकरी|आजीविका|रोजगार|कामकाज|काम|सेवा|दफ्तर/i.test(combined)) {
+    return {
+      topic: 'Career & Profession',
+      topicHi: 'करियर, आजीविका एवं कार्यक्षेत्र',
+      primaryCusps: [10, 6],
+      positiveHouses: [2, 6, 10, 11],
+      negatingHouses: [5, 8, 12],
+      descriptionHi: 'आजीविका, पद-प्रतिष्ठा और कार्यक्षेत्र उन्नति हेतु १०वें व ६ठे भाव के कस्पल सब-लॉर्ड का विश्लेषण।',
+    };
+  }
+
   // Promotion
   if (/promotion|पदोन्नति|प्रमोशन|तरक्की|इंक्रीमेंट|increment|elevation/i.test(combined)) {
     return {
@@ -106,8 +118,8 @@ export function classifyQuestionTopic(query: string, previousContext?: string): 
     };
   }
 
-  // Property / Vehicle
-  if (/संपत्ति|मकान|घर|flat|plot|वाहन|गाड़ी|vehicle|car|ज़मीन|property/i.test(combined)) {
+  // Property / Vehicle (Strict word boundaries to never match "career")
+  if (/संपत्ति|मकान|घर|गाड़ी|वाहन|ज़मीन|जमीन|भूमि|\b(property|properties|flat|flats|plot|plots|vehicle|vehicles|car|cars|automobile|real\s*estate)\b/i.test(combined)) {
     return {
       topic: 'Property & Vehicle',
       topicHi: 'भूमि, भवन एवं वाहन सुख',
