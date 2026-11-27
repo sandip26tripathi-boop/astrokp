@@ -6,16 +6,16 @@ import { AuthProvider } from '@/context/AuthContext';
 export const metadata: Metadata = {
   title: {
     default:
-      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     template:
-      '%s | Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      '%s | VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
   },
   description:
-    'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
+    'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
   keywords: [
     'Vedic Astrology',
     'KP Astrology',
-    'Gemini Astro',
+    'VedicWisdom',
     'Astronomical Precision Meets Cosmic Intelligence',
     'सटीक खगोलीय गणना गहन ज्योतिषीय समझ',
     'Kundli Generator',
@@ -31,26 +31,26 @@ export const metadata: Metadata = {
     'Career Astrology',
     'BTR Birth Time Rectification',
   ],
-  authors: [{ name: 'Gemini Astro & Sandeep K. Tripathi' }],
-  creator: 'Gemini Astro',
-  publisher: 'Gemini Astro Vedic AI',
+  authors: [{ name: 'VedicWisdom & Sandeep K. Tripathi' }],
+  creator: 'VedicWisdom',
+  publisher: 'VedicWisdom Vedic AI',
   metadataBase: new URL('https://vedic-ai-astrology.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title:
-      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     description:
-      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
+      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
     url: 'https://vedic-ai-astrology.vercel.app',
-    siteName: 'Gemini Astro Vedic AI',
+    siteName: 'VedicWisdom Vedic AI',
     images: [
       {
         url: '/images/pandit-ji.jpg',
         width: 800,
         height: 800,
-        alt: 'Gemini Astro - Vedic Astrologer',
+        alt: 'VedicWisdom - Vedic Astrologer',
       },
     ],
     locale: 'hi_IN',
@@ -59,9 +59,9 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title:
-      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
     description:
-      'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
+      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
     images: ['/images/pandit-ji.jpg'],
   },
   robots: {
@@ -97,12 +97,12 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      name: 'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'All',
       url: 'https://vedic-ai-astrology.vercel.app',
       description:
-        'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision Vedic and KP Astrology Kundli generation with Gemini Astro AI consultation, 10-year life forecasts, and transit evaluations.',
+        'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision Vedic and KP Astrology Kundli generation with VedicWisdom AI consultation, 10-year life forecasts, and transit evaluations.',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -112,7 +112,7 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: 'Gemini Astro — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      name: 'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
       image: 'https://vedic-ai-astrology.vercel.app/images/pandit-ji.jpg',
       url: 'https://vedic-ai-astrology.vercel.app',
       priceRange: 'Free / ₹0',
@@ -122,7 +122,7 @@ export default function RootLayout({
       },
       founder: {
         '@type': 'Person',
-        name: 'Gemini Astro (Sandeep K. Tripathi)',
+        name: 'VedicWisdom (Sandeep K. Tripathi)',
         jobTitle: 'AstroVastu Researcher, Educator & App Developer',
       },
     },

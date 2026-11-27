@@ -64,7 +64,7 @@ export default function MonetizationModal({ isOpen, onClose }: MonetizationModal
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             {language === 'hi'
-              ? '१५+ पृष्ठीय संपूर्ण जीवन कुंडली, उप-स्वामी विश्लेषण एवं असीमित जेमिनी ए.आई. परामर्श'
+              ? '१५+ पृष्ठीय संपूर्ण जीवन कुंडली, उप-स्वामी विश्लेषण एवं असीमित वैदिक विज़डम ए.आई. परामर्श'
               : 'Comprehensive 15+ page Kundli, Sub-Lord Promise Matrix, and Unlimited Vedic AI Consultations.'}
           </p>
         </div>

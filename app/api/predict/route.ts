@@ -156,13 +156,13 @@ export async function POST(req: NextRequest) {
     // Strict Astrology Guardrail: Reject non-astrology / bot inquiries
     if (!isAstrologicalQuery(currentQuestion)) {
       const redirectMsg = isEnglish
-        ? '🙏 **Namaste!**\n\nI am **Gemini Astro**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
-        : '🙏 **सादर अभिवादन!**\n\nमैं **Gemini Astro** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
+        ? '🙏 **Namaste!**\n\nI am **VedicWisdom**, dedicated exclusively to authentic Vedic Astrology, Placidus Cuspal Sub-Lord analysis, and Janma Kundli guidance.\n\nKindly ask questions pertaining to your birth chart, life destiny, career, marriage, health, finances, dasha periods, or astrological remedies.'
+        : '🙏 **सादर अभिवादन!**\n\nमैं **VedicWisdom** केवल प्रामाणिक वैदिक ज्योतिष, कस्पल नक्षत्र गणना एवं जन्मकुंडली विश्लेषण के लिए समर्पित हूँ।\n\nकृपया अपने जीवन, भविष्य, करियर, नौकरी, व्यवसाय, विवाह, स्वास्थ्य, आर्थिक स्थिति, ग्रह शांति अथवा तात्कालिक गोचर से संबंधित ज्योतिषीय प्रश्न पूछें।';
 
       return NextResponse.json({
         reply: redirectMsg,
         text: redirectMsg,
-        model: 'Gemini-Astro-Guardrail',
+        model: 'VedicWisdom-Guardrail',
         debug: { topic: 'Off-Topic Redirection', isAstrological: false },
       });
     }
@@ -346,7 +346,10 @@ export async function POST(req: NextRequest) {
       timingForecast: questionAnalysis.timingWindowHi,
     };
 
-    const masterSystemPrompt = `You are "Gemini Astro", a sharp, perceptive, and deeply knowledgeable Indian Astrologer sitting face-to-face with a client.
+    const userAskedTiming = /kab|when|timing|samay|date|year|month|kisme|kis varsh|kab tak|कब|समय|तिथि|वर्ष|कब होगा|कब तक/i.test(currentQuestion);
+    const userAskedRemedy = /upay|remedy|puja|path|ratna|stone|mantra|daan|solution|उपाय|निवारण|पूजा|दान|मंत्र|रत्न|समाधान|क्या करूं|kya karun/i.test(currentQuestion);
+
+    const masterSystemPrompt = `You are "VedicWisdom", a sharp, perceptive, and deeply knowledgeable Indian Astrologer sitting face-to-face with a client.
 
 1. STRICT LANGUAGE & TONE LOCK:
 - Follow the active UI language (uiLanguage: "${clientLanguage}"): if "hi", respond in warm, natural spoken Hindi (Devanagari); if "en", respond in natural, articulate Indian English. Even if the client asks in Hinglish or romanized text, you MUST reply strictly in the active UI language (${clientLanguage === 'hi' ? 'Pure, natural Hindi in Devanagari script' : 'Natural, articulate English'}).
@@ -363,15 +366,12 @@ export async function POST(req: NextRequest) {
   (B) Star Lord (Result Giver): What actual results its Nakshatra Lord delivers across 4-fold significations (L1–L4) (favorable vs opposing houses).
   (C) Sub-Lord (Quality & Final Approval): How the Sub-Lord modifies the quality, speed, or gives final sanction to the event.
 - Parashari & Gochar Synthesis: Weave Parashari house lord placement, Yuti, Drishti, active Vimshottari Mahadasha-Antardasha-Pratyantardasha, live Gochar (Saturn & Jupiter transits), and the Double Transit principle (Saturn + Jupiter simultaneous activation) into natural, flowing sentences.
-- Cross-match with Purified Live Ruling Planets: Incorporate current Live Ruling Planets to corroborate the event timing window.
+- Cross-match with Purified Live Ruling Planets: Incorporate current Live Ruling Planets to corroborate the astrological reading.
 
-4. MANDATORY FINAL VERDICT SECTION (STRICTLY UNDER 100 WORDS):
-- Immediately below your main conversational reading, you MUST append a cleanly separated, crisp Final Verdict section formatted as:
-${clientLanguage === 'hi' ? '**अंतिम निर्णय (Final Verdict):**' : '**Final Verdict:**'}
-- This section must be strictly 80 to 100 words long and summarize:
-  (a) A clear Yes / No / Conditional outcome on the client's specific inquiry.
-  (b) The exact timing window derived from Ruling Planets + Dasha (MD-AD-PD) + Double Transit Gochar.
-  (c) One practical, grounded astrological remedy/action aligned with the planetary diagnosis.
+4. CONDITIONAL TIMING & REMEDIES (NO FORCED REPETITIVE BOXES):
+- Timing (समयावधि): ${userAskedTiming ? 'The client has explicitly asked WHEN / Timing ("kab" / "when" / "samay"). State the exact calculated event timing window derived from Ruling Planets + Dasha + Double Transit Gochar.' : 'The client did NOT ask for event timing. Do NOT force a dedicated timing window, dates, or time box into this response.'}
+- Remedies (उपाय): ${userAskedRemedy ? 'The client has explicitly asked for remedies ("upay" / "remedy" / "solution"). Suggest 1 or 2 grounded, practical, and sattvic astrological remedies aligned with their chart.' : 'The client did NOT ask for remedies. Do NOT append forced astrological remedies or upay.'}
+- Deliver a clear, authoritative, and direct astrological verdict on the client’s inquiry without unnecessary boilerplate or generic filler.
 
 PRE-FILTERED INTENT-DRIVEN ASTROLOGICAL DATA SLICE (STRICT GROUND TRUTH):
 ${JSON.stringify(intentAstrologyData, null, 2)}

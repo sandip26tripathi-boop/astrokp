@@ -97,8 +97,8 @@ export default function Home() {
 
           <p className="text-sm sm:text-base text-[#5C4D3C] dark:text-[#D8C39E] max-w-2xl mx-auto leading-relaxed px-1">
             {language === 'hi'
-              ? 'वैदिक लग्न चक्र, भाव चलित, विंशोत्तरी महादशा-अंतर्दशा एवं वास्तविक गोचर आधारित १००% प्रामाणिक विश्लेषण व Gemini Astro फलादेश।'
-              : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Vimshottari dasha, and real-time verifiable predictions from Gemini Astro.'}
+              ? 'वैदिक लग्न चक्र, भाव चलित, विंशोत्तरी महादशा-अंतर्दशा एवं वास्तविक गोचर आधारित १००% प्रामाणिक विश्लेषण व VedicWisdom फलादेश।'
+              : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Vimshottari dasha, and real-time verifiable predictions from VedicWisdom.'}
           </p>
 
           {/* Quick Metrics Bar */}
@@ -113,7 +113,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#B87314]" />
-              <span>{language === 'hi' ? 'Gemini Astro परामर्श' : 'Gemini Astro Voice'}</span>
+              <span>{language === 'hi' ? 'VedicWisdom परामर्श' : 'VedicWisdom Voice'}</span>
             </div>
           </div>
         </div>
@@ -254,13 +254,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* Section 4: Gemini Astro AI Assistant */}
+        {/* Section 4: VedicWisdom AI Assistant */}
         <div className="w-full space-y-4 pt-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-2">
                 <PanditJiIcon size={28} />
-                {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Astrological Guidance)'}
+                {language === 'hi' ? 'VedicWisdom (ज्योतिषीय परामर्श)' : 'VedicWisdom (Astrological Guidance)'}
               </h2>
               <p className="text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E]">
                 Inquires against your computed planetary positions, D1 chart, Cusps, and Dasha periods.
@@ -456,7 +456,7 @@ export default function Home() {
               सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
             </p>
             <p className="text-[11px] text-[#8A7967] pt-0.5">
-              © {new Date().getFullYear()} Gemini Astro. High-Precision Astrological Intelligence. All rights reserved.
+              © {new Date().getFullYear()} VedicWisdom. High-Precision Astrological Intelligence. All rights reserved.
             </p>
           </div>
           <div className="flex items-center gap-4 text-[11px]">

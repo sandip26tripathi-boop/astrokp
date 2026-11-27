@@ -259,7 +259,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </h3>
                 <p className="text-xs text-[#5C4D3C] dark:text-[#D8C39E] mt-1 leading-relaxed">
                   {language === 'hi'
-                    ? 'Gemini Astro पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु लॉगिन करें।'
+                    ? 'VedicWisdom पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु लॉगिन करें।'
                     : 'Sign in to safely save your horoscope and receive personalized AI astrological guidance.'}
                 </p>
               </div>

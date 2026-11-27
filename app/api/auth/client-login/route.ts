@@ -96,7 +96,7 @@ async function dispatchEmailToAdmin(lead: ClientLead) {
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
         <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 16px; border-radius: 8px; text-align: center; color: #ffffff;">
-          <h2 style="margin: 0; font-size: 20px;">🌟 New Client Login on Gemini Astro</h2>
+          <h2 style="margin: 0; font-size: 20px;">🌟 New Client Login on VedicWisdom</h2>
           <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.95;">A client has logged in with their Google account</p>
         </div>
 
@@ -142,13 +142,13 @@ async function dispatchEmailToAdmin(lead: ClientLead) {
         </div>
 
         <div style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 12px; color: #94a3b8;">
-          Sent to Admin: <strong>${ADMIN_EMAIL}</strong> • Gemini Astro High-Precision Astrology Engine
+          Sent to Admin: <strong>${ADMIN_EMAIL}</strong> • VedicWisdom High-Precision Astrology Engine
         </div>
       </div>
     `;
 
     const info = await transporter.sendMail({
-      from: `"Gemini Astro Client Alerts" <${smtpUser}>`,
+      from: `"VedicWisdom Client Alerts" <${smtpUser}>`,
       to: ADMIN_EMAIL,
       subject: `🌟 New Client Login: ${lead.name} (${lead.email})`,
       html: htmlContent,

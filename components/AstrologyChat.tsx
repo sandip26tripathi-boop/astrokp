@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
+import { useAuth } from '@/context/AuthContext';
+import { saveChatMessageToFirestore, saveKundliToFirestore } from '@/lib/firestoreService';
 import { t } from '@/lib/i18n';
 import { GeminiConsultMessage } from '@/types/astrology';
 import PanditJiIcon from '@/components/PanditJiIcon';
@@ -23,6 +25,8 @@ import {
   Terminal,
   Code,
   Cpu,
+  Loader2,
+  Lock,
 } from 'lucide-react';
 
 function formatDashaDisplay(dasha: any, isEn: boolean = false): string {
@@ -181,6 +185,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
 
 export default function AstrologyChat() {
   const { input, kpMatrix, language, chatMessages, addChatMessage, clearChat } = useAstrologyStore();
+  const { user, uid, signInWithGoogle } = useAuth();
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -188,6 +193,9 @@ export default function AstrologyChat() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [showLoginGateModal, setShowLoginGateModal] = useState(false);
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
+  const [isGateLoggingIn, setIsGateLoggingIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -280,6 +288,41 @@ export default function AstrologyChat() {
     const promptToSend = customPrompt || inputMessage.trim();
     if (!promptToSend || isLoading || !kpMatrix) return;
 
+    // Gated Google (Gmail) login enforcement
+    if (!user?.isLoggedIn) {
+      setPendingQuestion(promptToSend);
+      setShowLoginGateModal(true);
+      return;
+    }
+
+    await executePrediction(promptToSend);
+  };
+
+  const handleGateLogin = async () => {
+    if (isGateLoggingIn) return;
+    setIsGateLoggingIn(true);
+    try {
+      const fbUser = await signInWithGoogle();
+      if (fbUser) {
+        setShowLoginGateModal(false);
+        const questionToRun = pendingQuestion;
+        setPendingQuestion(null);
+        if (questionToRun) {
+          setTimeout(() => {
+            executePrediction(questionToRun);
+          }, 200);
+        }
+      }
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        console.warn('Login gate error:', err);
+      }
+    } finally {
+      setIsGateLoggingIn(false);
+    }
+  };
+
+  const executePrediction = async (promptToSend: string) => {
     const userMsg: GeminiConsultMessage = {
       role: 'user',
       content: promptToSend,
@@ -287,9 +330,17 @@ export default function AstrologyChat() {
     };
 
     addChatMessage(userMsg);
-    if (!customPrompt) setInputMessage('');
+    setInputMessage('');
     setIsLoading(true);
     setStreamingText('');
+
+    if (uid) {
+      saveChatMessageToFirestore(uid, {
+        role: 'user',
+        content: promptToSend,
+        language,
+      });
+    }
 
     // Immediately restore cursor focus to input box
     setTimeout(() => {
@@ -317,6 +368,7 @@ export default function AstrologyChat() {
         throw new Error(errDetail);
       }
 
+      let finalBotReply = '';
       const contentType = res.headers.get('content-type') || '';
       if (contentType.includes('text/event-stream') && res.body) {
         const reader = res.body.getReader();
@@ -348,23 +400,35 @@ export default function AstrologyChat() {
           }
         }
 
-        if (accumulated.trim()) {
+        finalBotReply = accumulated.trim();
+        if (finalBotReply) {
           addChatMessage({
             role: 'model',
-            content: accumulated.trim(),
+            content: finalBotReply,
             timestamp: new Date().toISOString(),
           });
         }
         setStreamingText('');
       } else {
         const data = await res.json();
+        finalBotReply = data.reply || data.text || 'Unable to generate prediction response.';
         const modelMsg: GeminiConsultMessage = {
           role: 'model',
-          content: data.reply || data.text || 'Unable to generate prediction response.',
+          content: finalBotReply,
           timestamp: new Date().toISOString(),
           debugInfo: data.debug || data.debugInfo,
         };
         addChatMessage(modelMsg);
+      }
+
+      // Persist assistant response and latest Kundli to Cloud Firestore
+      if (uid && finalBotReply) {
+        saveChatMessageToFirestore(uid, {
+          role: 'assistant',
+          content: finalBotReply,
+          language,
+        });
+        saveKundliToFirestore(uid, input, kpMatrix);
       }
     } catch (err: unknown) {
       console.error(err);
@@ -470,7 +534,7 @@ export default function AstrologyChat() {
           <PanditJiIcon size={40} />
           <div>
             <h3 className="text-base sm:text-lg font-bold font-serif text-[#231A12] dark:text-[#FFFDF7] flex items-center gap-2">
-              {language === 'hi' ? 'Gemini Astro (ज्योतिषीय परामर्श)' : 'Gemini Astro (Vedic AI Consult)'}
+              {language === 'hi' ? 'VedicWisdom (ज्योतिषीय परामर्श)' : 'VedicWisdom (Vedic AI Consult)'}
               <span className="w-2 h-2 rounded-full bg-[#4A6B53] animate-pulse" />
             </h3>
             <p className="text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E]">
@@ -592,12 +656,10 @@ export default function AstrologyChat() {
                 ) : (
                   renderFormattedContent(
                     index === 0 &&
-                      (msg.content === 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?' ||
-                        msg.content === 'Namaste! I am Gemini Astro. What guidance do you seek?' ||
-                        msg.content === 'Namaste! I am Gemini Astro. How may I guide you today?')
+                      (msg.content.includes('Gemini Astro') || msg.content.includes('VedicWisdom'))
                       ? language === 'hi'
-                        ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
-                        : 'Namaste! I am Gemini Astro. How may I guide you today?'
+                        ? 'नमस्ते! मैं VedicWisdom हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                        : 'Namaste! I am VedicWisdom. How may I guide you today?'
                       : msg.content,
                     (q) => handleSend(q)
                   )
@@ -635,7 +697,7 @@ export default function AstrologyChat() {
             <PanditJiIcon size={28} />
             <div className="bg-[#FFFDF7] dark:bg-[#1A140E] rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E] flex items-center gap-2 border border-[#E4D5B7] dark:border-[#443525]">
               <Sparkles className="w-4 h-4 text-[#B87314] animate-spin" />
-              <span>{language === 'hi' ? 'Gemini Astro गणना कर रहे हैं...' : 'Gemini Astro is evaluating kundli coordinates...'}</span>
+              <span>{language === 'hi' ? 'VedicWisdom गणना कर रहे हैं...' : 'VedicWisdom is evaluating kundli coordinates...'}</span>
             </div>
           </div>
         )}
@@ -690,6 +752,119 @@ export default function AstrologyChat() {
           <Send className="w-4 h-4" />
         </button>
       </form>
+
+      {/* Gated Google Login Modal before AI Answer Generation */}
+      {showLoginGateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#231A12]/80 backdrop-blur-sm animate-fade-in">
+          <div
+            className="relative w-full max-w-md bg-[#FFFDF7] dark:bg-[#1A140E] border-2 border-[#D4AF37] rounded-2xl shadow-2xl overflow-hidden p-5 sm:p-6 text-center space-y-4 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                setShowLoginGateModal(false);
+                setTimeout(() => chatInputRef.current?.focus(), 50);
+              }}
+              className="absolute right-3.5 top-3.5 p-1 rounded-lg text-[#5C4D3C] hover:text-[#231A12] dark:text-[#D8C39E] dark:hover:text-white hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] transition"
+            >
+              ✕
+            </button>
+
+            <div className="w-14 h-14 mx-auto rounded-full bg-[#B87314]/10 border border-[#D4AF37] flex items-center justify-center">
+              <svg className="w-7 h-7" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.9c2.28-2.1 3.645-5.2 3.645-9.15z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.9-3.05c-1.08.72-2.46 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.26c-.25-.72-.38-1.49-.38-2.26s.13-1.54.38-2.26V6.59H1.24C.45 8.16 0 9.92 0 12c0 2.08.45 3.84 1.24 5.41l4.04-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.83 3.6-4.99 6.72-4.99z"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <h3 className="text-base sm:text-lg font-bold font-serif text-[#231A12] dark:text-[#FFFDF7]">
+                {language === 'hi'
+                  ? 'सटीक ज्योतिषीय विश्लेषण अनलॉक करें'
+                  : 'Unlock Your Astrological Guidance'}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#5C4D3C] dark:text-[#D8C39E] mt-1.5 leading-relaxed">
+                {language === 'hi'
+                  ? 'अपना सटीक ज्योतिषीय विश्लेषण देखने और अपनी कुंडली सुरक्षित रखने के लिए कृपया Google (Gmail) से लॉगिन करें।'
+                  : 'Sign in with Google to unlock your personalized astrological analysis and save your chart.'}
+              </p>
+            </div>
+
+            {pendingQuestion && (
+              <div className="p-3 rounded-xl bg-[#F3E8D2]/60 dark:bg-[#2A1F16]/60 border border-[#E4D5B7] dark:border-[#443525] text-xs text-left">
+                <span className="font-semibold text-[#B87314] dark:text-[#D4AF37] block mb-0.5">
+                  {language === 'hi' ? 'आपका प्रश्न:' : 'Your Question:'}
+                </span>
+                <p className="text-[#231A12] dark:text-[#FFFDF7] italic line-clamp-2">
+                  &ldquo;{pendingQuestion}&rdquo;
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleGateLogin}
+              disabled={isGateLoggingIn}
+              className="w-full py-3 px-4 rounded-xl bg-[#FFFDF7] dark:bg-[#231A12] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] border-2 border-[#D4AF37] text-[#231A12] dark:text-[#FFFDF7] font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-70"
+            >
+              {isGateLoggingIn ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-[#B87314]" />
+                  <span>
+                    {language === 'hi' ? 'Google से कनेक्ट हो रहा है...' : 'Connecting with Google...'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.9c2.28-2.1 3.645-5.2 3.645-9.15z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.9-3.05c-1.08.72-2.46 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.26c-.25-.72-.38-1.49-.38-2.26s.13-1.54.38-2.26V6.59H1.24C.45 8.16 0 9.92 0 12c0 2.08.45 3.84 1.24 5.41l4.04-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.83 3.6-4.99 6.72-4.99z"
+                    />
+                  </svg>
+                  <span>
+                    {language === 'hi'
+                      ? 'Google (Gmail) से लॉगिन करें'
+                      : 'Sign in with Google (Gmail)'}
+                  </span>
+                </>
+              )}
+            </button>
+
+            <p className="text-[10.5px] text-[#8A7967] dark:text-[#A89886] leading-tight">
+              {language === 'hi'
+                ? 'लॉगिन के तुरंत बाद आपका उत्तर प्रदर्शित हो जाएगा तथा कुंडली सुरक्षित सहेजी जाएगी।'
+                : 'Your reading will display immediately upon login and your chart will be safely preserved.'}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

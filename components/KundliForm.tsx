@@ -19,6 +19,7 @@ import {
   Bookmark,
   Loader2,
   Navigation,
+  Phone,
 } from 'lucide-react';
 
 interface GeoPlaceItem {
@@ -169,6 +170,17 @@ export default function KundliForm() {
       return;
     }
 
+    const rawWhatsapp = (localInput.whatsapp || localInput.phone || '').trim();
+    const digitsOnly = rawWhatsapp.replace(/\D/g, '');
+    if (!digitsOnly || digitsOnly.length < 10) {
+      alert(
+        language === 'hi'
+          ? 'कृपया एक मान्य व्हाट्सएप नंबर (उदा. +91 9876543210) दर्ज करें।'
+          : 'Please enter a valid WhatsApp number (e.g. +91 9876543210).'
+      );
+      return;
+    }
+
     setIsGenerating(true);
     try {
       let activeLat = typeof localInput.latitude === 'string' ? parseFloat(localInput.latitude) : Number(localInput.latitude) || 0;
@@ -197,6 +209,8 @@ export default function KundliForm() {
       const parsedInput: ChartInput = {
         ...localInput,
         name: localInput.name.trim() || 'Native',
+        whatsapp: (localInput.whatsapp || localInput.phone || '').trim(),
+        phone: (localInput.whatsapp || localInput.phone || '').trim(),
         placeName: activePlace,
         latitude: activeLat,
         longitude: activeLon,
@@ -297,8 +311,8 @@ export default function KundliForm() {
 
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-        {/* Name & Gender */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Name, WhatsApp & Gender */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="md:col-span-2">
             <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-[#B87314]" />
@@ -311,6 +325,25 @@ export default function KundliForm() {
               onChange={(e) => setLocalInput({ ...localInput, name: e.target.value })}
               placeholder={language === 'hi' ? 'नाम लिखें (उदा. राहुल शर्मा)' : 'e.g. Rahul Verma'}
               className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-semibold text-[#231A12] dark:text-[#FFFDF7] mb-1.5 flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-[#4A6B53]" />
+              <span>{language === 'hi' ? 'व्हाट्सएप नंबर' : 'WhatsApp'}</span>
+              <span className="text-[#B87314]">*</span>
+            </label>
+            <input
+              type="tel"
+              required
+              value={localInput.whatsapp || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                setLocalInput({ ...localInput, whatsapp: val, phone: val });
+              }}
+              placeholder={language === 'hi' ? '+91 9876543210' : '+91 9876543210'}
+              className="w-full px-3.5 py-2.5 text-base sm:text-sm rounded-xl bg-[#FAF4E6]/50 dark:bg-[#1A140E] border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] font-mono transition"
             />
           </div>
 

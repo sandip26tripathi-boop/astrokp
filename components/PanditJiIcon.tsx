@@ -19,7 +19,7 @@ export default function PanditJiIcon({ className = 'w-9 h-9', size = 36 }: Pandi
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src="/images/pandit-ji.jpg"
-          alt="Gemini Astro"
+          alt="VedicWisdom"
           className="w-full h-full object-cover rounded-full"
           onError={() => setImgError(true)}
         />

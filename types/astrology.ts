@@ -14,6 +14,8 @@ export interface ChartInput {
   isHorary: boolean;
   horaryNumber?: number; // 1 to 249
   language: Language;
+  whatsapp?: string;
+  phone?: string;
 }
 
 export interface PlanetPosition {

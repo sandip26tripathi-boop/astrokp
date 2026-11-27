@@ -19,6 +19,8 @@ export const BASELINE_CHART_INPUT: ChartInput = {
   isHorary: false,
   horaryNumber: 1,
   language: 'hi',
+  whatsapp: '',
+  phone: '',
 };
 
 // Default birth chart starts EMPTY as requested so user can enter fresh details
@@ -35,6 +37,8 @@ export const DEFAULT_CHART_INPUT: ChartInput = {
   isHorary: false,
   horaryNumber: 1,
   language: 'hi',
+  whatsapp: '',
+  phone: '',
 };
 
 interface AstrologyState {
@@ -79,7 +83,7 @@ export const useAstrologyStore = create<AstrologyState>()(
       chatMessages: [
         {
           role: 'model',
-          content: 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?',
+          content: 'नमस्ते! मैं VedicWisdom हूँ। आप क्या मार्गदर्शन चाहते हैं?',
           timestamp: '2026-01-01T00:00:00.000Z',
         },
       ],
@@ -98,9 +102,8 @@ export const useAstrologyStore = create<AstrologyState>()(
           const isInitialGreeting =
             state.chatMessages.length === 1 &&
             state.chatMessages[0].role === 'model' &&
-            (state.chatMessages[0].content === 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?' ||
-              state.chatMessages[0].content === 'Namaste! I am Gemini Astro. What guidance do you seek?' ||
-              state.chatMessages[0].content === 'Namaste! I am Gemini Astro. How may I guide you today?');
+            (state.chatMessages[0].content.includes('Gemini Astro') ||
+              state.chatMessages[0].content.includes('VedicWisdom'));
 
           if (isInitialGreeting) {
             updatedChatMessages = [
@@ -108,8 +111,8 @@ export const useAstrologyStore = create<AstrologyState>()(
                 role: 'model',
                 content:
                   lang === 'hi'
-                    ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
-                    : 'Namaste! I am Gemini Astro. How may I guide you today?',
+                    ? 'नमस्ते! मैं VedicWisdom हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                    : 'Namaste! I am VedicWisdom. How may I guide you today?',
                 timestamp: state.chatMessages[0].timestamp,
               },
             ];
@@ -302,8 +305,8 @@ export const useAstrologyStore = create<AstrologyState>()(
               role: 'model',
               content:
                 lang === 'hi'
-                  ? 'नमस्ते! मैं Gemini Astro हूँ। आप क्या मार्गदर्शन चाहते हैं?'
-                  : 'Namaste! I am Gemini Astro. How may I guide you today?',
+                  ? 'नमस्ते! मैं VedicWisdom हूँ। आप क्या मार्गदर्शन चाहते हैं?'
+                  : 'Namaste! I am VedicWisdom. How may I guide you today?',
               timestamp: new Date().toISOString(),
             },
           ],

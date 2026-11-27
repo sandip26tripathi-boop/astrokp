@@ -1,6 +1,6 @@
 /**
  * lib/astrology/intentRouter.ts
- * Master Intent-to-House Router & Context Slice Extractor for Gemini Astro
+ * Master Intent-to-House Router & Context Slice Extractor for VedicWisdom
  *
  * Ensures:
  * 1. 100% accurate intent routing without false positives (e.g. "career" never matches "car" or 4th house).

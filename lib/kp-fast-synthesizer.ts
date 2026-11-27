@@ -27,6 +27,8 @@ const HINDI_PLANET_NAMES: Record<string, string> = {
   Ketu: 'केतु',
 };
 
+let activeSynthesizerQuery = '';
+
 function attachFinalVerdict(
   text: string,
   isEnglish: boolean,
@@ -37,11 +39,28 @@ function attachFinalVerdict(
   if (text.includes('Final Verdict') || text.includes('अंतिम निर्णय')) {
     return text;
   }
+  const q = activeSynthesizerQuery.toLowerCase();
+  const askedTiming = /kab|when|timing|samay|date|year|month|kisme|kis varsh|kab tak|कब|समय|तिथि|वर्ष|कब होगा|कब तक/i.test(q);
+  const askedRemedy = /upay|remedy|puja|path|ratna|stone|mantra|daan|solution|उपाय|निवारण|पूजा|दान|मंत्र|रत्न|समाधान|क्या करूं|kya karun/i.test(q);
+
+  let extraParts = '';
   if (isEnglish) {
-    const verdict = `**Final Verdict:**\nOverall analysis indicates a ${outcome}. The convergence of purified Live Ruling Planets, your running Vimshottari period, and the Saturn-Jupiter Double Transit activates this fruition window during ${timing}. As an astrological alignment measure, ${remedy}. Maintaining steady patience and strategic focus will ensure successful manifestation.`;
+    if (askedTiming && timing) {
+      extraParts += ` The planetary timing window activates during ${timing}.`;
+    }
+    if (askedRemedy && remedy) {
+      extraParts += ` Recommended astrological measure: ${remedy}.`;
+    }
+    const verdict = `**Final Verdict:** Overall analysis indicates a ${outcome}.${extraParts}`;
     return `${text.trim()}\n\n${verdict}`;
   } else {
-    const verdict = `**अंतिम निर्णय (Final Verdict):**\nसमग्र ज्योतिषीय विश्लेषण अनुसार यह परिणाम ${outcome} है। तात्कालिक शुद्ध रूलिंग प्लैनेट्स, वर्तमान विंशोत्तरी दशा तथा गोचरीय द्वि-गोचर के समन्वय से कार्य सिद्धि का सटीक समय ${timing} के मध्य निर्धारित होता है। ग्रह शांति एवं अनुकूलता संवर्धन हेतु ${remedy}। इस अवधि में संयम व सकारात्मक दृष्टिकोण रखने से अभीष्ट फल की प्राप्ति सुनिश्चित होगी।`;
+    if (askedTiming && timing) {
+      extraParts += ` कार्य सिद्धि का संभावित कालखंड ${timing} के मध्य बनता है।`;
+    }
+    if (askedRemedy && remedy) {
+      extraParts += ` ग्रह अनुकूलता संवर्धन हेतु ${remedy}।`;
+    }
+    const verdict = `**अंतिम निर्णय:** समग्र ज्योतिषीय विश्लेषण अनुसार यह परिणाम ${outcome} है।${extraParts}`;
     return `${text.trim()}\n\n${verdict}`;
   }
 }
@@ -74,6 +93,7 @@ export function synthesizeFastKPAnswer(
   language: 'en' | 'hi' = 'hi',
   conversationHistory: ChatTurn[] = []
 ): string {
+  activeSynthesizerQuery = userQuery || '';
   const q = (userQuery || '').toLowerCase().trim();
   const cusps = kpMatrix?.cusps || [];
   const planets = kpMatrix?.planets || [];

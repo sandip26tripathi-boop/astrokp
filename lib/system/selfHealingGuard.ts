@@ -1,6 +1,6 @@
 /**
  * lib/system/selfHealingGuard.ts
- * Autonomous Runtime Resilience & Self-Healing Guard Layer for Gemini Astro
+ * Autonomous Runtime Resilience & Self-Healing Guard Layer for VedicWisdom
  *
  * Provides:
  * 1. Automatic exponential backoff retries on transient ephemeris/AI timeouts

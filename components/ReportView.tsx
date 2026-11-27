@@ -69,7 +69,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
         {/* Cover / Header Section */}
         <div className="text-center pb-8 border-b-2 border-amber-500/40">
           <div className="inline-block px-3 py-1 mb-1 rounded-full text-xs font-bold tracking-widest text-amber-700 bg-amber-100 uppercase">
-            GEMINI ASTRO • ASTRONOMICAL DOSSIER
+            VEDICWISDOM • ASTRONOMICAL DOSSIER
           </div>
           <p className="text-[11px] font-medium text-slate-500 mb-2">
             Astronomical Precision Meets Cosmic Intelligence • सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
@@ -430,8 +430,8 @@ export default function ReportView({ onClose }: ReportViewProps) {
         {/* Footer */}
         <div className="pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
           {language === 'hi'
-            ? 'Gemini Astro द्वारा स्वतः निर्मित • संरचना एवं परिकल्पना: संदीप के. त्रिपाठी • प्रमाणित ज्योतिषीय एल्गोरिथम'
-            : 'Generated automatically by Gemini Astro • Architected by Sandeep K. Tripathi • Certified Astrological Algorithm'}
+            ? 'VedicWisdom द्वारा स्वतः निर्मित • संरचना एवं परिकल्पना: संदीप के. त्रिपाठी • प्रमाणित ज्योतिषीय एल्गोरिथम'
+            : 'Generated automatically by VedicWisdom • Architected by Sandeep K. Tripathi • Certified Astrological Algorithm'}
         </div>
       </div>
     </div>

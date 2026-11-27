@@ -89,7 +89,7 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
             <div>
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-serif font-black text-sm sm:text-xl tracking-tight text-[#231A12] dark:text-[#FFFDF7]">
-                  Gemini Astro
+                  VedicWisdom
                 </span>
                 <span className="text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.2 rounded bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525]">
                   PRO

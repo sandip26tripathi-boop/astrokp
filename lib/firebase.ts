@@ -8,6 +8,7 @@ import {
   User as FirebaseUser,
   Auth,
 } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -22,17 +23,19 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
+let db: Firestore | null = null;
 
 // Safe client-side initialization avoiding duplicate initialization on Next.js SSR / Fast Refresh
 function getFirebaseInstances() {
   if (typeof window === 'undefined') {
-    return { app: null, auth: null, googleProvider: null };
+    return { app: null, auth: null, googleProvider: null, db: null };
   }
 
   if (!app) {
     try {
       app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
       auth = getAuth(app);
+      db = getFirestore(app);
       googleProvider = new GoogleAuthProvider();
       googleProvider.setCustomParameters({
         prompt: 'select_account',
@@ -42,11 +45,15 @@ function getFirebaseInstances() {
     }
   }
 
-  return { app, auth, googleProvider };
+  return { app, auth, googleProvider, db };
 }
 
 export function getFirebaseAuth(): Auth | null {
   return getFirebaseInstances().auth;
+}
+
+export function getFirebaseDb(): Firestore | null {
+  return getFirebaseInstances().db;
 }
 
 export function getGoogleProvider(): GoogleAuthProvider | null {
@@ -86,4 +93,4 @@ export function subscribeToAuthChanges(callback: (user: FirebaseUser | null) => 
   return onAuthStateChanged(auth, callback);
 }
 
-export { app, auth, googleProvider };
+export { app, auth, googleProvider, db };
