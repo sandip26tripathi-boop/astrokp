@@ -141,8 +141,8 @@ export function compileWhatsAppReportText(data: ConsultationReportData): string 
 
   // Footer Attribution
   text += isHi
-    ? `🏛️ *संरचना एवं शोध:* संदीप के. त्रिपाठी (AstroVastu Researcher & App Developer)\n`
-    : `🏛️ *Architected by:* Sandeep K. Tripathi (AstroVastu Researcher & App Developer)\n`;
+    ? `🏛️ *संरचना एवं शोध:* संदीप के. त्रिपाठी — एस्ट्रो-वास्तु शोधकर्ता | वेल्थ एवं बिज़नेस ग्रोथ आर्किटेक्ट\n`
+    : `🏛️ *Architected by:* Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect\n`;
   text += `🌐 *Online Platform:* https://www.vedicwisdom.world\n`;
 
   return text;
@@ -318,7 +318,7 @@ export function downloadConsultationPdfDossier(data: ConsultationReportData): vo
   doc.setFontSize(7.5);
   doc.setTextColor(138, 121, 103);
   doc.text(
-    'Architected by Sandeep K. Tripathi | AstroVastu Researcher & App Developer | vedicwisdom.world',
+    'Architected by Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect | vedicwisdom.world',
     margin,
     cursorY + 4
   );

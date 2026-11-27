@@ -16,12 +16,15 @@ export async function GET() {
     };
 
     const isHealthy = selfTest.isFullyOperational;
+    const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
 
     return NextResponse.json(
       {
         status: isHealthy ? 'healthy' : 'degraded',
         uptimeSeconds: Math.round(process.uptime()),
         timestamp: new Date().toISOString(),
+        geminiApiReady: hasGeminiKey,
+        firebaseConfigured: true,
         memory: memoryStats,
         caches: cacheStats,
         diagnostics: selfTest,

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     'Vimshottari Dasha',
     'Gochar Transit Today',
   ],
-  authors: [{ name: 'VedicWisdom & Sandeep K. Tripathi' }],
+  authors: [{ name: 'Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect' }],
   creator: 'VedicWisdom',
   publisher: 'VedicWisdom',
   metadataBase: new URL('https://www.vedicwisdom.world'),
@@ -119,7 +119,7 @@ export default function RootLayout({
       founder: {
         '@type': 'Person',
         name: 'Sandeep K. Tripathi',
-        jobTitle: 'AstroVastu Researcher & App Developer',
+        jobTitle: 'Astro-Vastu Researcher | Wealth & Business Growth Architect',
       },
     },
   ];

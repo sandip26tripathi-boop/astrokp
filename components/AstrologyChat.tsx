@@ -8,6 +8,7 @@ import { t } from '@/lib/i18n';
 import { GeminiConsultMessage } from '@/types/astrology';
 import PanditJiIcon from '@/components/PanditJiIcon';
 import WhatsAppReportModal from '@/components/WhatsAppReportModal';
+import { resilientFetch } from '@/lib/resilientFetch';
 import {
   Sparkles,
   Send,
@@ -452,7 +453,7 @@ export default function AstrologyChat() {
     }, 50);
 
     try {
-      const res = await fetch('/api/gemini/kp-predict', {
+      const res = await resilientFetch('/api/gemini/kp-predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -422,7 +422,9 @@ export default function ReportView({ onClose }: ReportViewProps) {
               </span>
             </div>
             <span>
-              {language === 'hi' ? 'एस्ट्रो-वास्तु शोधकर्ता एवं ऐप डेवलपर' : 'AstroVastu Researcher & App Developer'}
+              {language === 'hi'
+                ? 'संदीप के. त्रिपाठी — एस्ट्रो-वास्तु शोधकर्ता | वेल्थ एवं बिज़नेस ग्रोथ आर्किटेक्ट'
+                : 'Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect'}
             </span>
           </div>
         </div>

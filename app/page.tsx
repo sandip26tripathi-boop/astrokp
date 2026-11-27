@@ -13,6 +13,7 @@ import AstrologyChat from '@/components/AstrologyChat';
 import ReportView from '@/components/ReportView';
 import PanditJiIcon from '@/components/PanditJiIcon';
 import AutoRecoveryBoundary from '@/components/AutoRecoveryBoundary';
+import LegalModal, { LegalTab } from '@/components/LegalModal';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
 import { t } from '@/lib/i18n';
 import {
@@ -42,6 +43,13 @@ export default function Home() {
   const [showReport, setShowReport] = useState(false);
   const [showCalculations, setShowCalculations] = useState(false);
   const [activeCalcTab, setActiveCalcTab] = useState<'chart' | 'events' | 'matrix' | 'btr'>('chart');
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [activeLegalTab, setActiveLegalTab] = useState<LegalTab>('privacy');
+
+  const openLegalModal = (tab: LegalTab) => {
+    setActiveLegalTab(tab);
+    setLegalModalOpen(true);
+  };
 
   // Ensure page starts at top
   useEffect(() => {
@@ -326,8 +334,8 @@ export default function Home() {
                 </h3>
                 <p className="text-xs sm:text-sm font-semibold text-[#B87314] dark:text-[#D4AF37] tracking-wide">
                   {language === 'hi'
-                    ? 'एस्ट्रो-वास्तु शोधकर्ता एवं ऐप डेवलपर'
-                    : 'AstroVastu Researcher & App Developer'}
+                    ? 'संदीप के. त्रिपाठी — एस्ट्रो-वास्तु शोधकर्ता | वेल्थ एवं बिज़नेस ग्रोथ आर्किटेक्ट'
+                    : 'Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect'}
                 </p>
 
                 <p className="text-sm sm:text-base text-[#231A12] dark:text-[#FAF4E6] leading-relaxed max-w-3xl">
@@ -347,8 +355,8 @@ export default function Home() {
                     <span>{language === 'hi' ? 'एस्ट्रो-वास्तु ऊर्जा संतुलन' : 'AstroVastu Energy Dynamics'}</span>
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] shadow-sm flex items-center gap-1">
-                    <span>💻</span>
-                    <span>{language === 'hi' ? 'सॉफ्टवेयर एवं ऐप आर्किटेक्चर' : 'Software & AI Architecture'}</span>
+                    <span>📈</span>
+                    <span>{language === 'hi' ? 'वेल्थ एवं बिज़नेस ग्रोथ' : 'Wealth & Business Growth'}</span>
                   </span>
                 </div>
               </div>
@@ -447,23 +455,57 @@ export default function Home() {
       </main>
 
       <footer className="w-full border-t border-[#E4D5B7] dark:border-[#443525] py-6 text-xs text-[#5C4D3C] dark:text-[#D8C39E] bg-[#FFFDF7]/60 dark:bg-[#1A140E]/60">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="space-y-1">
             <p className="font-semibold text-[#231A12] dark:text-[#FFFDF7] text-xs sm:text-sm">
               Ancient Jyotish Wisdom, Modern AI Precision.
             </p>
-            <p className="text-[#5C4D3C] dark:text-[#D4AF37] text-xs sm:text-sm font-medium">
-              शास्त्रीय ज्योतिष की गहराई, आधुनिक AI की सटीकता।
+            <p className="text-[#B87314] dark:text-[#D4AF37] text-xs sm:text-sm font-medium">
+              {language === 'hi'
+                ? 'संदीप के. त्रिपाठी — एस्ट्रो-वास्तु शोधकर्ता | वेल्थ एवं बिज़नेस ग्रोथ आर्किटेक्ट'
+                : 'Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect'}
             </p>
             <p className="text-[11px] text-[#8A7967] pt-0.5">
-              © {new Date().getFullYear()} VedicWisdom. High-Precision Astrological Intelligence. All rights reserved.
+              © {new Date().getFullYear()} VedicWisdom (vedicwisdom.world). High-Precision Astrological Intelligence. All rights reserved.
             </p>
           </div>
-          <div className="text-[11px] text-[#8A7967] dark:text-[#A89886]">
-            <span>Empowering Classical KP, Parashari & AstroVastu Calculation</span>
+
+          {/* Minimal Legal Links */}
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[11px] font-medium text-[#5C4D3C] dark:text-[#D8C39E]">
+            <button
+              type="button"
+              onClick={() => openLegalModal('privacy')}
+              className="hover:text-[#B87314] dark:hover:text-[#D4AF37] hover:underline transition"
+            >
+              {language === 'hi' ? 'गोपनीयता नीति' : 'Privacy Policy'}
+            </button>
+            <span className="text-[#D8C39E] dark:text-[#443525]">•</span>
+            <button
+              type="button"
+              onClick={() => openLegalModal('terms')}
+              className="hover:text-[#B87314] dark:hover:text-[#D4AF37] hover:underline transition"
+            >
+              {language === 'hi' ? 'उपयोग की शर्तें' : 'Terms of Use'}
+            </button>
+            <span className="text-[#D8C39E] dark:text-[#443525]">•</span>
+            <button
+              type="button"
+              onClick={() => openLegalModal('disclaimer')}
+              className="hover:text-[#B87314] dark:hover:text-[#D4AF37] hover:underline transition"
+            >
+              {language === 'hi' ? 'अस्वीकरण (Disclaimer)' : 'Disclaimer'}
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* Minimal Legal Information Modal */}
+      <LegalModal
+        isOpen={legalModalOpen}
+        initialTab={activeLegalTab}
+        language={language}
+        onClose={() => setLegalModalOpen(false)}
+      />
     </div>
   );
 }
