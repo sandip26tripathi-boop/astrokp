@@ -12,30 +12,30 @@ import {
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
-function sanitizeEnv(val: string | undefined, fallback: string = ''): string {
-  if (!val) return fallback;
-  const cleaned = val.trim().replace(/^["']|["']$/g, '');
-  return cleaned || fallback;
-}
-
-const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyAhLy09nGt9FL-nBv9JwWZn6nmA23xhZEg',
-  authDomain: 'geminiastro-b043e.firebaseapp.com',
-  projectId: 'geminiastro-b043e',
-  storageBucket: 'geminiastro-b043e.firebasestorage.app',
-  messagingSenderId: '239984589273',
-  appId: '1:239984589273:web:995dcb2d73dc61d87e45bc',
-  measurementId: '',
-};
+// Permanent production-valid Firebase Web App configuration for geminiastro-b043e
+const rawApiKey = (process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+const validApiKey =
+  rawApiKey.startsWith('AIzaSy') && rawApiKey.length > 25
+    ? rawApiKey
+    : 'AIzaSyAhLy09nGt9FL-nBv9JwWZn6nmA23xhZEg';
 
 const firebaseConfig = {
-  apiKey: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY, DEFAULT_FIREBASE_CONFIG.apiKey),
-  authDomain: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, DEFAULT_FIREBASE_CONFIG.authDomain),
-  projectId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID, DEFAULT_FIREBASE_CONFIG.projectId),
-  storageBucket: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, DEFAULT_FIREBASE_CONFIG.storageBucket),
-  messagingSenderId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, DEFAULT_FIREBASE_CONFIG.messagingSenderId),
-  appId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_APP_ID, DEFAULT_FIREBASE_CONFIG.appId),
-  measurementId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, DEFAULT_FIREBASE_CONFIG.measurementId),
+  apiKey: validApiKey,
+  authDomain:
+    (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '').trim().replace(/^["']|["']$/g, '') ||
+    'geminiastro-b043e.firebaseapp.com',
+  projectId:
+    (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '').trim().replace(/^["']|["']$/g, '') ||
+    'geminiastro-b043e',
+  storageBucket:
+    (process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '').trim().replace(/^["']|["']$/g, '') ||
+    'geminiastro-b043e.firebasestorage.app',
+  messagingSenderId:
+    (process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '').trim().replace(/^["']|["']$/g, '') ||
+    '239984589273',
+  appId:
+    (process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '').trim().replace(/^["']|["']$/g, '') ||
+    '1:239984589273:web:995dcb2d73dc61d87e45bc',
 };
 
 let app: FirebaseApp | null = null;
