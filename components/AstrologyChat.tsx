@@ -7,6 +7,7 @@ import { saveChatMessageToFirestore, saveKundliToFirestore } from '@/lib/firesto
 import { t } from '@/lib/i18n';
 import { GeminiConsultMessage } from '@/types/astrology';
 import PanditJiIcon from '@/components/PanditJiIcon';
+import WhatsAppReportModal from '@/components/WhatsAppReportModal';
 import {
   Sparkles,
   Send,
@@ -194,6 +195,7 @@ export default function AstrologyChat() {
   const [isListening, setIsListening] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showLoginGateModal, setShowLoginGateModal] = useState(false);
+  const [showWhatsAppReportModal, setShowWhatsAppReportModal] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const [isGateLoggingIn, setIsGateLoggingIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -543,7 +545,20 @@ export default function AstrologyChat() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Send Report on WhatsApp Trigger */}
+          <button
+            type="button"
+            onClick={() => setShowWhatsAppReportModal(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#4A6B53]/10 hover:bg-[#4A6B53]/20 border border-[#4A6B53]/30 text-[#4A6B53] dark:text-emerald-400 font-bold text-xs transition shadow-sm"
+            title={language === 'hi' ? 'व्हाट्सएप पर रिपोर्ट प्राप्त करें' : 'Send Report on WhatsApp'}
+          >
+            <span>📲</span>
+            <span className="hidden sm:inline">
+              {language === 'hi' ? 'व्हाट्सएप रिपोर्ट' : 'WhatsApp Report'}
+            </span>
+          </button>
+
           <button
             type="button"
             onClick={clearChat}
@@ -699,6 +714,36 @@ export default function AstrologyChat() {
               <Sparkles className="w-4 h-4 text-[#B87314] animate-spin" />
               <span>{language === 'hi' ? 'VedicWisdom गणना कर रहे हैं...' : 'VedicWisdom is evaluating kundli coordinates...'}</span>
             </div>
+          </div>
+        )}
+
+        {/* Post-Consultation WhatsApp Report Prompt */}
+        {chatMessages.filter((m) => m.role === 'user').length >= 1 && !isLoading && !streamingText && (
+          <div className="mt-2 p-3 sm:p-3.5 rounded-2xl bg-[#FFFDF7] dark:bg-[#1A140E] border border-[#D4AF37] shadow-sm flex flex-wrap items-center justify-between gap-2 text-xs animate-fade-in">
+            <div className="flex items-center gap-2">
+              <span className="text-base sm:text-lg">📲</span>
+              <div>
+                <p className="font-bold text-[#231A12] dark:text-[#FFFDF7]">
+                  {language === 'hi'
+                    ? 'परामर्श सारांश व्हाट्सएप पर प्राप्त करें'
+                    : 'Get Full Consultation on WhatsApp'}
+                </p>
+                <p className="text-[10.5px] sm:text-xs text-[#5C4D3C] dark:text-[#D8C39E]">
+                  {language === 'hi'
+                    ? 'अपनी संपूर्ण जन्मकुंडली व चैट उत्तरों की ब्रांडेड रिपोर्ट प्राप्त करें।'
+                    : 'Receive your customized birth chart & answers directly.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowWhatsAppReportModal(true)}
+              className="px-3 py-1.5 rounded-xl bg-[#4A6B53] hover:bg-[#3B5742] text-white font-bold text-xs transition shadow-sm flex items-center gap-1.5"
+            >
+              <span>{language === 'hi' ? 'व्हाट्सएप रिपोर्ट' : 'WhatsApp Report'}</span>
+              <span>→</span>
+            </button>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -865,6 +910,12 @@ export default function AstrologyChat() {
           </div>
         </div>
       )}
+
+      {/* WhatsApp Report Modal */}
+      <WhatsAppReportModal
+        isOpen={showWhatsAppReportModal}
+        onClose={() => setShowWhatsAppReportModal(false)}
+      />
     </div>
   );
 }

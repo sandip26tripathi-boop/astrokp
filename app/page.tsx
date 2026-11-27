@@ -87,11 +87,11 @@ export default function Home() {
 
           <div className="space-y-1.5 sm:space-y-2">
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold font-serif tracking-tight text-[#231A12] dark:text-[#FFFDF7] leading-snug sm:leading-tight">
-              Astronomical Precision Meets{' '}
-              <span className="gold-gradient-text">Cosmic Intelligence</span>.
+              Ancient Jyotish Wisdom,{' '}
+              <span className="gold-gradient-text">Modern AI Precision</span>.
             </h1>
             <p className="text-base sm:text-xl md:text-2xl font-serif font-bold text-[#5C4D3C] dark:text-[#D4AF37] tracking-wide leading-relaxed">
-              सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+              शास्त्रीय ज्योतिष की गहराई, आधुनिक AI की सटीकता।
             </p>
           </div>
 
@@ -450,10 +450,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="space-y-1">
             <p className="font-semibold text-[#231A12] dark:text-[#FFFDF7] text-xs sm:text-sm">
-              Astronomical Precision Meets Cosmic Intelligence.
+              Ancient Jyotish Wisdom, Modern AI Precision.
             </p>
             <p className="text-[#5C4D3C] dark:text-[#D4AF37] text-xs sm:text-sm font-medium">
-              सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+              शास्त्रीय ज्योतिष की गहराई, आधुनिक AI की सटीकता।
             </p>
             <p className="text-[11px] text-[#8A7967] pt-0.5">
               © {new Date().getFullYear()} VedicWisdom. High-Precision Astrological Intelligence. All rights reserved.

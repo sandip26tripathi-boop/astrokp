@@ -6,62 +6,58 @@ import { AuthProvider } from '@/context/AuthContext';
 export const metadata: Metadata = {
   title: {
     default:
-      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
     template:
-      '%s | VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      '%s | VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
   },
   description:
-    'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Authentic Vedic D1 Lagna Kundli, Placidus Cuspal Sub-Lords, Vimshottari Dasha, real-time Gochar transits, and logic-based AI astrological counseling.',
+    'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
   keywords: [
-    'Vedic Astrology',
-    'KP Astrology',
     'VedicWisdom',
-    'Astronomical Precision Meets Cosmic Intelligence',
-    'सटीक खगोलीय गणना गहन ज्योतिषीय समझ',
+    'Personal AI Astrologer',
+    'Exact Event Timing Astrology',
+    'KP Astrology Online',
+    'Precise Kundli Analysis',
+    'Parashari Jyotish AI',
+    'Online Astrology Consultation',
+    'Vedic Astrology',
     'Kundli Generator',
     'Janam Kundali',
-    'Horoscope Predictions',
-    'Bhava Chalit Chart',
     'Vimshottari Dasha',
     'Gochar Transit Today',
-    'Sade Sati Analysis',
-    'Free Kundli Hindi',
-    'Astrology AI Chatbot',
-    'Marriage Matchmaking',
-    'Career Astrology',
-    'BTR Birth Time Rectification',
   ],
   authors: [{ name: 'VedicWisdom & Sandeep K. Tripathi' }],
   creator: 'VedicWisdom',
-  publisher: 'VedicWisdom Vedic AI',
-  metadataBase: new URL('https://vedic-ai-astrology.vercel.app'),
+  publisher: 'VedicWisdom',
+  metadataBase: new URL('https://www.vedicwisdom.world'),
   alternates: {
-    canonical: '/',
+    canonical: 'https://www.vedicwisdom.world',
   },
   openGraph: {
     title:
-      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
     description:
-      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision astronomical Kundli calculations, D1 & Bhava Chalit charts, 10-year comprehensive life predictions, and live astrological AI consultation.',
-    url: 'https://vedic-ai-astrology.vercel.app',
-    siteName: 'VedicWisdom Vedic AI',
+      'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
+    url: 'https://www.vedicwisdom.world',
+    siteName: 'VedicWisdom',
     images: [
       {
         url: '/images/pandit-ji.jpg',
         width: 800,
         height: 800,
-        alt: 'VedicWisdom - Vedic Astrologer',
+        alt: 'VedicWisdom - Personal AI Astrologer',
       },
     ],
-    locale: 'hi_IN',
+    locale: 'en_US',
+    alternateLocale: ['hi_IN'],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title:
-      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
     description:
-      'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। Generate authentic Kundli with exact Cuspal Sub-Lords, Dasha, Gochar, and personalized Astrological AI consultation.',
+      'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
     images: ['/images/pandit-ji.jpg'],
   },
   robots: {
@@ -97,12 +93,12 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
+      name: 'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'All',
-      url: 'https://vedic-ai-astrology.vercel.app',
+      url: 'https://www.vedicwisdom.world',
       description:
-        'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ। High-precision Vedic and KP Astrology Kundli generation with VedicWisdom AI consultation, 10-year life forecasts, and transit evaluations.',
+        'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -112,9 +108,9 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: 'VedicWisdom — Astronomical Precision Meets Cosmic Intelligence | सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।',
-      image: 'https://vedic-ai-astrology.vercel.app/images/pandit-ji.jpg',
-      url: 'https://vedic-ai-astrology.vercel.app',
+      name: 'VedicWisdom — Personal AI Astrologer',
+      image: 'https://www.vedicwisdom.world/images/pandit-ji.jpg',
+      url: 'https://www.vedicwisdom.world',
       priceRange: 'Free / ₹0',
       address: {
         '@type': 'PostalAddress',
@@ -122,7 +118,7 @@ export default function RootLayout({
       },
       founder: {
         '@type': 'Person',
-        name: 'VedicWisdom (Sandeep K. Tripathi)',
+        name: 'Sandeep K. Tripathi',
         jobTitle: 'AstroVastu Researcher, Educator & App Developer',
       },
     },

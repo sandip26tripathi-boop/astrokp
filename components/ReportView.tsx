@@ -72,7 +72,7 @@ export default function ReportView({ onClose }: ReportViewProps) {
             VEDICWISDOM • ASTRONOMICAL DOSSIER
           </div>
           <p className="text-[11px] font-medium text-slate-500 mb-2">
-            Astronomical Precision Meets Cosmic Intelligence • सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+            Ancient Jyotish Wisdom, Modern AI Precision. • शास्त्रीय ज्योतिष की गहराई, आधुनिक AI की सटीकता।
           </p>
           <h1 className="text-3xl sm:text-4xl font-serif font-extrabold tracking-tight text-slate-950">
             {input.name || 'Client Kundli'}

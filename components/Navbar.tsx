@@ -97,10 +97,10 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               </div>
               <div className="hidden sm:block">
                 <p className="text-[9.5px] sm:text-[10px] font-medium text-[#5C4D3C] dark:text-[#D8C39E] leading-tight">
-                  Astronomical Precision Meets Cosmic Intelligence.
+                  Ancient Jyotish Wisdom, Modern AI Precision.
                 </p>
                 <p className="text-[8.5px] sm:text-[9px] font-medium text-[#5C4D3C] dark:text-[#D4AF37]/90 leading-tight">
-                  सटीक खगोलीय गणना, गहन ज्योतिषीय समझ।
+                  शास्त्रीय ज्योतिष की गहराई, आधुनिक AI की सटीकता।
                 </p>
               </div>
             </div>
