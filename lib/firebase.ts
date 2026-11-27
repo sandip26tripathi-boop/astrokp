@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -61,16 +63,60 @@ export function getGoogleProvider(): GoogleAuthProvider | null {
 }
 
 /**
- * Triggers Google Sign-In with popup
+ * Triggers Google Sign-In with popup, with graceful fallback to redirect if popups are blocked
  */
-export async function signInWithGoogle(): Promise<FirebaseUser | null> {
+export async function signInWithGoogle(forceRedirect = false): Promise<FirebaseUser | null> {
   const { auth, googleProvider } = getFirebaseInstances();
   if (!auth || !googleProvider) {
     throw new Error('Firebase Auth is not available on server or unconfigured');
   }
 
-  const result = await signInWithPopup(auth, googleProvider);
-  return result.user;
+  if (forceRedirect) {
+    await signInWithRedirect(auth, googleProvider);
+    return null;
+  }
+
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user;
+  } catch (err: any) {
+    // If popup is blocked by mobile browser or webview, fall back to redirect
+    if (
+      err?.code === 'auth/popup-blocked' ||
+      err?.code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      console.warn('Google Sign-In popup blocked; falling back to redirect flow...');
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Initiates Google Sign-In with redirect (ideal for mobile webviews)
+ */
+export async function signInWithGoogleRedirect(): Promise<void> {
+  const { auth, googleProvider } = getFirebaseInstances();
+  if (!auth || !googleProvider) {
+    throw new Error('Firebase Auth is not available on server or unconfigured');
+  }
+  await signInWithRedirect(auth, googleProvider);
+}
+
+/**
+ * Checks for a pending redirect sign-in result on page load
+ */
+export async function checkRedirectResult(): Promise<FirebaseUser | null> {
+  const { auth } = getFirebaseInstances();
+  if (!auth) return null;
+  try {
+    const result = await getRedirectResult(auth);
+    return result?.user || null;
+  } catch (error) {
+    console.warn('Firebase getRedirectResult error:', error);
+    throw error;
+  }
 }
 
 /**

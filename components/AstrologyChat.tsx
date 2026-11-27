@@ -186,7 +186,7 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
 
 export default function AstrologyChat() {
   const { input, kpMatrix, language, chatMessages, addChatMessage, clearChat } = useAstrologyStore();
-  const { user, uid, signInWithGoogle } = useAuth();
+  const { user, uid, signInWithGoogle, signInWithGoogleRedirect } = useAuth();
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -198,6 +198,7 @@ export default function AstrologyChat() {
   const [showWhatsAppReportModal, setShowWhatsAppReportModal] = useState(false);
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const [isGateLoggingIn, setIsGateLoggingIn] = useState(false);
+  const [gateLoginError, setGateLoginError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -211,6 +212,36 @@ export default function AstrologyChat() {
       chatInputRef.current?.focus();
     }, 100);
   }, []);
+
+  // Auto-answer queued question when user logs in (including returning from mobile redirect)
+  useEffect(() => {
+    if (!isMounted || !user?.isLoggedIn) return;
+
+    let savedQ: string | null = null;
+    try {
+      savedQ =
+        typeof window !== 'undefined'
+          ? sessionStorage.getItem('vedic_pending_question')
+          : null;
+    } catch (e) {}
+
+    const questionToRun = savedQ || pendingQuestion;
+    if (questionToRun) {
+      try {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('vedic_pending_question');
+        }
+      } catch (e) {}
+      setPendingQuestion(null);
+      setShowLoginGateModal(false);
+      setGateLoginError(null);
+
+      const timer = setTimeout(() => {
+        executePrediction(questionToRun);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [user?.isLoggedIn, isMounted]);
 
   // Auto-focus input when AI response finishes (isLoading goes from true to false)
   useEffect(() => {
@@ -293,6 +324,12 @@ export default function AstrologyChat() {
     // Gated Google (Gmail) login enforcement
     if (!user?.isLoggedIn) {
       setPendingQuestion(promptToSend);
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem('vedic_pending_question', promptToSend);
+        } catch (e) {}
+      }
+      setGateLoginError(null);
       setShowLoginGateModal(true);
       return;
     }
@@ -303,12 +340,27 @@ export default function AstrologyChat() {
   const handleGateLogin = async () => {
     if (isGateLoggingIn) return;
     setIsGateLoggingIn(true);
+    setGateLoginError(null);
+
+    // Save pending question to sessionStorage so it persists across potential redirects
+    const currentQ = pendingQuestion;
+    if (currentQ && typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('vedic_pending_question', currentQ);
+      } catch (e) {}
+    }
+
     try {
       const fbUser = await signInWithGoogle();
       if (fbUser) {
         setShowLoginGateModal(false);
-        const questionToRun = pendingQuestion;
+        const questionToRun = currentQ;
         setPendingQuestion(null);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.removeItem('vedic_pending_question');
+          } catch (e) {}
+        }
         if (questionToRun) {
           setTimeout(() => {
             executePrediction(questionToRun);
@@ -316,10 +368,60 @@ export default function AstrologyChat() {
         }
       }
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
-        console.warn('Login gate error:', err);
+      console.warn('Login gate error:', err);
+      const code = err?.code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setGateLoginError(
+          language === 'hi'
+            ? 'लॉगिन विंडो बंद कर दी गई। यदि आपके ब्राउज़र में पॉपअप समस्या है, तो कृपया नीचे दिए गए "पेज रीडायरेक्ट" विकल्प का उपयोग करें।'
+            : 'Sign-in window was closed. If popups are restricted in your browser, please use the "Direct Redirect" option below.'
+        );
+      } else if (code === 'auth/unauthorized-domain') {
+        setGateLoginError(
+          language === 'hi'
+            ? 'यह डोमेन Firebase Authentication में अधिकृत नहीं है (Unauthorized Domain)। कृपया Firebase Console > Authentication > Settings > Authorized Domains में vedicwisdom.world तथा वर्तमान डोमेन जोड़ें।'
+            : 'This domain is not authorized in Firebase Authentication. Please add vedicwisdom.world and your Vercel deployment domain to Firebase Console > Authentication > Settings > Authorized domains.'
+        );
+      } else if (code === 'auth/popup-blocked') {
+        setGateLoginError(
+          language === 'hi'
+            ? 'ब्राउज़र द्वारा पॉपअप ब्लॉक किया गया। Google लॉगिन पेज पर पुनः निर्देशित किया जा रहा है...'
+            : 'Popup blocked by browser. Redirecting to Google Sign-In page...'
+        );
+        try {
+          await signInWithGoogleRedirect();
+        } catch (redirectErr: any) {
+          setGateLoginError(redirectErr?.message || 'Redirect failed');
+        }
+      } else {
+        setGateLoginError(
+          err?.message ||
+            (language === 'hi'
+              ? 'Google लॉगिन में त्रुटि हुई। कृपया पुनः प्रयास करें।'
+              : 'Google Sign-In failed. Please try again.')
+        );
       }
     } finally {
+      setIsGateLoggingIn(false);
+    }
+  };
+
+  const handleDirectRedirectLogin = async () => {
+    if (isGateLoggingIn) return;
+    setIsGateLoggingIn(true);
+    setGateLoginError(null);
+
+    if (pendingQuestion && typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('vedic_pending_question', pendingQuestion);
+      } catch (e) {}
+    }
+
+    try {
+      await signInWithGoogleRedirect();
+    } catch (err: any) {
+      console.warn('Direct redirect error:', err);
+      setGateLoginError(err?.message || 'Redirect failed');
       setIsGateLoggingIn(false);
     }
   };
@@ -860,6 +962,18 @@ export default function AstrologyChat() {
               </div>
             )}
 
+            {gateLoginError && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 text-xs text-left leading-relaxed flex items-start gap-2 animate-fade-in">
+                <span className="shrink-0 text-sm">⚠️</span>
+                <div className="flex-1">
+                  <p className="font-semibold text-[#B87314] dark:text-[#D4AF37]">
+                    {language === 'hi' ? 'लॉगिन सूचना' : 'Sign-In Notice'}
+                  </p>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-relaxed">{gateLoginError}</p>
+                </div>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={handleGateLogin}
@@ -901,6 +1015,19 @@ export default function AstrologyChat() {
                 </>
               )}
             </button>
+
+            <div className="pt-0.5">
+              <button
+                type="button"
+                onClick={handleDirectRedirectLogin}
+                disabled={isGateLoggingIn}
+                className="text-[11px] text-[#B87314] dark:text-[#D4AF37] hover:underline transition font-medium"
+              >
+                {language === 'hi'
+                  ? 'पॉपअप नहीं खुल रहा? सीधे पेज रीडायरेक्ट द्वारा लॉगिन करें →'
+                  : 'Popup blocked or not opening? Sign in via direct redirect →'}
+              </button>
+            </div>
 
             <p className="text-[10.5px] text-[#8A7967] dark:text-[#A89886] leading-tight">
               {language === 'hi'

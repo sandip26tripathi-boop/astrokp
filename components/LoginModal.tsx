@@ -48,7 +48,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         onClose();
       }, 1200);
     } catch (err: any) {
-      if (err?.code !== 'auth/popup-closed-by-user') {
+      if (err?.code === 'auth/unauthorized-domain') {
+        setErrorMessage(
+          language === 'hi'
+            ? 'यह डोमेन Firebase Console में Authorized Domain नहीं है। कृपया Firebase Console > Authentication > Settings में यह डोमेन जोड़ें।'
+            : 'This domain is not authorized in Firebase Console. Please add it under Authentication > Settings > Authorized Domains.'
+        );
+      } else if (err?.code !== 'auth/popup-closed-by-user') {
         setErrorMessage(
           language === 'hi'
             ? 'Google लॉगिन में समस्या आई। कृपया पुनः प्रयास करें अथवा नीचे विवरण दर्ज करें।'

@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User as FirebaseUser } from 'firebase/auth';
 import {
   signInWithGoogle as firebaseSignInWithGoogle,
+  signInWithGoogleRedirect as firebaseSignInWithGoogleRedirect,
+  checkRedirectResult,
   signOutFirebaseUser,
   subscribeToAuthChanges,
 } from '@/lib/firebase';
@@ -20,7 +22,8 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   uid: string | null;
   isLoading: boolean;
-  signInWithGoogle: () => Promise<FirebaseUser | null>;
+  signInWithGoogle: (forceRedirect?: boolean) => Promise<FirebaseUser | null>;
+  signInWithGoogleRedirect: () => Promise<void>;
   signOut: () => Promise<void>;
   error: string | null;
   saveCurrentKundli: () => Promise<void>;
@@ -32,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   uid: null,
   isLoading: true,
   signInWithGoogle: async () => null,
+  signInWithGoogleRedirect: async () => {},
   signOut: async () => {},
   error: null,
   saveCurrentKundli: async () => {},
@@ -43,6 +47,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check redirect result on initial page load (for mobile redirect flow)
+  useEffect(() => {
+    checkRedirectResult()
+      .then((redirectUser) => {
+        if (redirectUser) {
+          console.log('Redirect sign-in succeeded:', redirectUser.email);
+        }
+      })
+      .catch((err: any) => {
+        console.warn('Redirect sign-in catch:', err);
+        if (err?.code === 'auth/unauthorized-domain') {
+          setError(
+            'This domain is not authorized in Firebase Console. Please add this domain to Firebase Console > Authentication > Settings > Authorized domains.'
+          );
+        } else if (err?.code !== 'auth/popup-closed-by-user') {
+          setError(err?.message || 'Google Sign-In redirect failed.');
+        }
+      });
+  }, []);
 
   // Sync Firebase Auth state
   useEffect(() => {
@@ -114,11 +138,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [firebaseUser?.uid, input, kpMatrix]);
 
-  const signInWithGoogle = async (): Promise<FirebaseUser | null> => {
+  const signInWithGoogle = async (forceRedirect = false): Promise<FirebaseUser | null> => {
     setError(null);
     setIsLoading(true);
     try {
-      const fbUser = await firebaseSignInWithGoogle();
+      const fbUser = await firebaseSignInWithGoogle(forceRedirect);
       if (fbUser) {
         const cleanName = fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
         const cleanEmail = fbUser.email || '';
@@ -184,6 +208,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithGoogleRedirect = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await firebaseSignInWithGoogleRedirect();
+    } catch (err: any) {
+      console.error('Google Sign-In Redirect Error:', err);
+      setError(err?.message || 'Google Sign-In redirect failed.');
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
   const signOut = async () => {
     setError(null);
     try {
@@ -204,6 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         uid: firebaseUser?.uid || null,
         isLoading,
         signInWithGoogle,
+        signInWithGoogleRedirect,
         signOut,
         error,
         saveCurrentKundli,
