@@ -12,14 +12,30 @@ import {
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
+function sanitizeEnv(val: string | undefined, fallback: string = ''): string {
+  if (!val) return fallback;
+  const cleaned = val.trim().replace(/^["']|["']$/g, '');
+  return cleaned || fallback;
+}
+
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAhLy09nGt9FL-nBv9JwWZn6nmA23xhZEg',
+  authDomain: 'geminiastro-b043e.firebaseapp.com',
+  projectId: 'geminiastro-b043e',
+  storageBucket: 'geminiastro-b043e.firebasestorage.app',
+  messagingSenderId: '239984589273',
+  appId: '1:239984589273:web:995dcb2d73dc61d87e45bc',
+  measurementId: '',
+};
+
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
+  apiKey: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY, DEFAULT_FIREBASE_CONFIG.apiKey),
+  authDomain: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, DEFAULT_FIREBASE_CONFIG.authDomain),
+  projectId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID, DEFAULT_FIREBASE_CONFIG.projectId),
+  storageBucket: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, DEFAULT_FIREBASE_CONFIG.storageBucket),
+  messagingSenderId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, DEFAULT_FIREBASE_CONFIG.messagingSenderId),
+  appId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_APP_ID, DEFAULT_FIREBASE_CONFIG.appId),
+  measurementId: sanitizeEnv(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, DEFAULT_FIREBASE_CONFIG.measurementId),
 };
 
 let app: FirebaseApp | null = null;
