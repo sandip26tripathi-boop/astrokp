@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
+import { useAuth } from '@/context/AuthContext';
 import {
   X,
   Mail,
@@ -14,6 +15,7 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 
 interface LoginModalProps {
@@ -22,16 +24,41 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const { user, loginUser, logoutUser, language, input } = useAstrologyStore();
+  const { user, language, input, loginUser } = useAstrologyStore();
+  const { signInWithGoogle, signOut, isLoading } = useAuth();
 
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loginSuccess, setLoginSuccess] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleGoogleSignIn = async () => {
+    setErrorMessage('');
+    setIsGoogleSubmitting(true);
+    try {
+      await signInWithGoogle();
+      setLoginSuccess(true);
+      setTimeout(() => {
+        setLoginSuccess(false);
+        onClose();
+      }, 1200);
+    } catch (err: any) {
+      if (err?.code !== 'auth/popup-closed-by-user') {
+        setErrorMessage(
+          language === 'hi'
+            ? 'Google लॉगिन में समस्या आई। कृपया पुनः प्रयास करें अथवा नीचे विवरण दर्ज करें।'
+            : 'Google Sign-in failed. Please retry or enter your details below.'
+        );
+      }
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  };
 
   const handleSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,12 +74,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       return;
     }
 
-    // Auto-append @gmail.com if client entered username only
+    // Auto-append @gmail.com if user entered username only
     if (!cleanEmail.includes('@')) {
       cleanEmail = `${cleanEmail}@gmail.com`;
     }
 
-    // Basic email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
       setErrorMessage(
@@ -68,7 +94,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsSubmitting(true);
 
     try {
-      // Send genuine client lead & Gmail to backend to store and forward to sandip26tripathi@gmail.com
       const res = await fetch('/api/auth/client-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,13 +110,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Login registration failed');
-      }
-
-      // Log in with client's genuine details
       loginUser({
         name: cleanName,
         email: cleanEmail,
@@ -106,10 +124,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setClientEmail('');
         setClientName('');
         setClientPhone('');
-      }, 1500);
+      }, 1200);
     } catch (err: any) {
       console.error('Login error:', err);
-      // Fallback local login if offline or backend warning
       loginUser({
         name: cleanName,
         email: cleanEmail,
@@ -120,22 +137,23 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setTimeout(() => {
         setLoginSuccess(false);
         onClose();
-      }, 1500);
+      }, 1200);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#231A12]/80 backdrop-blur-sm animate-fade-in">
       <div
-        className="relative w-full max-w-md bg-white dark:bg-cosmic-card border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-900 dark:text-white"
+        className="relative w-full max-w-md bg-[#FFFDF7] dark:bg-[#1A140E] border border-[#D4AF37] rounded-2xl shadow-2xl overflow-hidden text-[#231A12] dark:text-[#FFFDF7]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Google Branding Header */}
-        <div className="px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
+        {/* Top Header */}
+        <div className="px-5 py-4 border-b border-[#E4D5B7] dark:border-[#443525] flex items-center justify-between bg-[#F3E8D2]/60 dark:bg-[#2A1F16]/60">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            {/* Google Icon */}
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.9c2.28-2.1 3.645-5.2 3.645-9.15z"
@@ -153,36 +171,37 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.83 3.6-4.99 6.72-4.99z"
               />
             </svg>
-            <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
-              Google Sign-In
+            <span className="text-sm font-bold font-serif text-[#231A12] dark:text-[#FFFDF7]">
+              {language === 'hi' ? 'Google प्रमाणीकरण' : 'Google Authentication'}
             </span>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-[#5C4D3C] hover:text-[#231A12] dark:text-[#D8C39E] dark:hover:text-[#FFFDF7] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           {/* Active Logged-In Profile View */}
           {user?.isLoggedIn ? (
             <div className="space-y-4">
               <div className="text-center pb-2">
-                <div className="w-16 h-16 mx-auto mb-2 rounded-full p-1 bg-gradient-to-tr from-amber-500 to-indigo-600 shadow-md">
+                <div className="w-16 h-16 mx-auto mb-2 rounded-full p-1 bg-gradient-to-tr from-[#B87314] to-[#D4AF37] shadow-md">
                   <img
                     src={user.avatar}
                     alt={user.name}
                     className="w-full h-full rounded-full object-cover bg-white"
                   />
                 </div>
-                <h4 className="font-bold text-base">{user.name}</h4>
-                <p className="text-xs text-amber-600 dark:text-amber-400 font-mono font-medium">
+                <h4 className="font-bold text-base text-[#231A12] dark:text-[#FFFDF7]">{user.name}</h4>
+                <p className="text-xs text-[#B87314] dark:text-[#D4AF37] font-mono font-medium">
                   {user.email}
                 </p>
-                <div className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold border border-emerald-500/20">
+                <div className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold border border-emerald-500/30">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>
                     {language === 'hi'
@@ -192,14 +211,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                <div className="flex justify-between text-slate-500">
+              <div className="p-3.5 rounded-xl bg-[#F3E8D2]/50 dark:bg-[#2A1F16]/50 border border-[#E4D5B7] dark:border-[#443525] text-xs space-y-2">
+                <div className="flex justify-between text-[#5C4D3C] dark:text-[#D8C39E]">
                   <span>{language === 'hi' ? 'खाता प्रकार:' : 'Account Provider:'}</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 uppercase">
+                  <span className="font-semibold text-[#231A12] dark:text-[#FFFDF7] uppercase">
                     Google (Gmail)
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-500">
+                <div className="flex justify-between text-[#5C4D3C] dark:text-[#D8C39E]">
                   <span>{language === 'hi' ? 'कुंडली सिंक व डेटा:' : 'Data Security:'}</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
@@ -211,159 +230,188 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    logoutUser();
+                  onClick={async () => {
+                    await signOut();
+                    onClose();
                   }}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition"
+                  className="w-full py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition flex items-center justify-center gap-1.5"
                 >
-                  {language === 'hi' ? 'लॉगआउट करें' : 'Sign Out'}
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{language === 'hi' ? 'लॉगआउट करें' : 'Sign Out'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                  className="w-full py-2.5 rounded-xl text-xs font-bold text-[#231A12] dark:text-[#FFFDF7] bg-[#F3E8D2] dark:bg-[#2A1F16] hover:bg-[#E4D5B7] dark:hover:bg-[#443525] border border-[#E4D5B7] dark:border-[#443525] transition"
                 >
                   {language === 'hi' ? 'बंद करें' : 'Close'}
                 </button>
               </div>
             </div>
           ) : (
-            /* Genuine Client Gmail Sign-In Form */
+            /* Sign-In Options */
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-serif font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base sm:text-lg font-serif font-bold text-[#231A12] dark:text-[#FFFDF7]">
                   {language === 'hi'
-                    ? 'अपने मूल Google (Gmail) से लॉगिन करें'
-                    : 'Sign in with your original Gmail'}
+                    ? 'अपने Google (Gmail) खाते से लॉगिन करें'
+                    : 'Sign in with Google Account'}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <p className="text-xs text-[#5C4D3C] dark:text-[#D8C39E] mt-1 leading-relaxed">
                   {language === 'hi'
-                    ? 'Gemini Astro पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु अपना वास्तविक Gmail दर्ज करें।'
-                    : 'Sign in with your authentic Gmail account to sync your horoscope and receive personalized astrological guidance.'}
+                    ? 'Gemini Astro पर अपनी जन्म कुंडली सुरक्षित रखने व सटीक AI फलादेश प्राप्त करने हेतु लॉगिन करें।'
+                    : 'Sign in to safely save your horoscope and receive personalized AI astrological guidance.'}
                 </p>
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmitLogin} className="space-y-3.5">
-                {/* Client Full Name */}
+              {/* Primary Action: One-Click Google Sign-In */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleSubmitting || isLoading}
+                className="w-full py-3 px-4 rounded-xl bg-[#FFFDF7] dark:bg-[#231A12] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] border-2 border-[#D4AF37] text-[#231A12] dark:text-[#FFFDF7] font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-70"
+              >
+                {isGoogleSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-[#B87314]" />
+                    <span>
+                      {language === 'hi'
+                        ? 'Google से कनेक्ट हो रहा है...'
+                        : 'Connecting with Google...'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.9c2.28-2.1 3.645-5.2 3.645-9.15z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.9-3.05c-1.08.72-2.46 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.28 14.26c-.25-.72-.38-1.49-.38-2.26s.13-1.54.38-2.26V6.59H1.24C.45 8.16 0 9.92 0 12c0 2.08.45 3.84 1.24 5.41l4.04-3.15z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.83 3.6-4.99 6.72-4.99z"
+                      />
+                    </svg>
+                    <span>
+                      {language === 'hi'
+                        ? 'Google खाते से एक-क्लिक लॉगिन'
+                        : 'One-Click Sign in with Google'}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-[#B87314]" />
+                  </>
+                )}
+              </button>
+
+              {/* Subtle Divider */}
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-[#E4D5B7] dark:border-[#443525]" />
+                <span className="flex-shrink mx-3 text-[10.5px] uppercase tracking-wider text-[#8A7967] font-semibold">
+                  {language === 'hi' ? 'अथवा ईमेल से' : 'or with email'}
+                </span>
+                <div className="flex-grow border-t border-[#E4D5B7] dark:border-[#443525]" />
+              </div>
+
+              {/* Form Input Alternative */}
+              <form onSubmit={handleSubmitLogin} className="space-y-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    {language === 'hi' ? 'आपका पूरा नाम (Full Name)' : 'Full Name'} <span className="text-amber-500">*</span>
+                  <label className="block text-[11px] font-semibold text-[#5C4D3C] dark:text-[#D8C39E] mb-1">
+                    {language === 'hi' ? 'आपका पूरा नाम (Full Name)' : 'Full Name'}
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <User className="w-4 h-4 text-[#8A7967] absolute left-3 top-2.5" />
                     <input
                       type="text"
-                      required
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       placeholder={language === 'hi' ? 'उदा. राहुल शर्मा' : 'e.g. Rahul Sharma'}
-                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#F3E8D2]/40 dark:bg-[#2A1F16]/40 border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
                     />
                   </div>
                 </div>
 
-                {/* Client Genuine Gmail Address */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    {language === 'hi' ? 'आपका मूल Gmail पता (Original Gmail)' : 'Original Gmail Address'} <span className="text-amber-500">*</span>
+                  <label className="block text-[11px] font-semibold text-[#5C4D3C] dark:text-[#D8C39E] mb-1">
+                    {language === 'hi' ? 'Gmail पता (Gmail Address)' : 'Gmail Address'} <span className="text-amber-600">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Mail className="w-4 h-4 text-[#8A7967] absolute left-3 top-2.5" />
                     <input
                       type="email"
                       required
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
                       placeholder="yourname@gmail.com"
-                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 font-mono transition"
+                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#F3E8D2]/40 dark:bg-[#2A1F16]/40 border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] font-mono transition"
                     />
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    {language === 'hi'
-                      ? 'आपका खाता सुरक्षित रूप से प्रमाणित किया जाएगा'
-                      : 'Your authentic Google account will be verified'}
-                  </p>
                 </div>
 
-                {/* Client Phone / WhatsApp (Optional) */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block text-[11px] font-semibold text-[#5C4D3C] dark:text-[#D8C39E] mb-1">
                     {language === 'hi'
-                      ? 'मोबाइल / WhatsApp नंबर (वैकल्पिक - परामर्श अलर्ट हेतु)'
-                      : 'Phone / WhatsApp (Optional - for consultation updates)'}
+                      ? 'मोबाइल / WhatsApp (वैकल्पिक)'
+                      : 'Phone / WhatsApp (Optional)'}
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <Phone className="w-4 h-4 text-[#8A7967] absolute left-3 top-2.5" />
                     <input
                       type="tel"
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
                       placeholder="+91 98765 43210"
-                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#F3E8D2]/40 dark:bg-[#2A1F16]/40 border border-[#E4D5B7] dark:border-[#443525] text-[#231A12] dark:text-[#FFFDF7] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition"
                     />
                   </div>
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-[#B87314] hover:bg-[#9A5E0D] text-[#FFFDF7] font-bold text-xs shadow-md transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>
-                        {language === 'hi'
-                          ? 'सत्यापित एवं कनेक्ट किया जा रहा है...'
-                          : 'Verifying & Connecting...'}
-                      </span>
+                      <span>{language === 'hi' ? 'सत्यापित किया जा रहा है...' : 'Verifying...'}</span>
                     </>
                   ) : (
-                    <>
-                      <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                        <path
-                          fill="currentColor"
-                          d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.9c2.28-2.1 3.645-5.2 3.645-9.15z"
-                        />
-                        <path
-                          fill="currentColor"
-                          d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.9-3.05c-1.08.72-2.46 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
-                        />
-                      </svg>
-                      <span>
-                        {language === 'hi'
-                          ? 'Google (Gmail) से लॉगिन करें'
-                          : 'Continue with Google Account'}
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
+                    <span>
+                      {language === 'hi' ? 'ईमेल द्वारा जारी रखें' : 'Continue with Email'}
+                    </span>
                   )}
                 </button>
               </form>
 
               {loginSuccess && (
-                <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center gap-2 animate-fade-in shadow-sm">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center gap-2 animate-fade-in shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>
                     {language === 'hi'
                       ? 'सफलतापूर्वक लॉगिन हो गया! आपका स्वागत है।'
-                      : 'Logged in with your Google account successfully!'}
+                      : 'Logged in successfully! Welcome.'}
                   </span>
                 </div>
               )}
 
-              {/* Security & Admin Lead Notice */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 space-y-1 leading-relaxed">
-                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              {/* Security & Vedic Platform Notice */}
+              <div className="pt-2 border-t border-[#E4D5B7] dark:border-[#443525] text-[10.5px] text-[#8A7967] dark:text-[#A89886] space-y-0.5 leading-relaxed">
+                <div className="flex items-center gap-1.5 text-[#5C4D3C] dark:text-[#D8C39E] font-semibold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>
                     {language === 'hi'
                       ? 'सुरक्षित एवं प्रामाणिक वैदिक प्लेटफॉर्म'
@@ -372,8 +420,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
                 <p>
                   {language === 'hi'
-                    ? 'आपका डेटा और कुंडली केवल आपके और मुख्य ज्योतिषी परामर्शदाता के लिए सुरक्षित रूप से प्रबंधित की जाती है।'
-                    : 'Your account and charts are securely managed for personal astrological consultation.'}
+                    ? 'आपकी जन्म कुंडली व विवरण पूर्णतः गोपनीय और सुरक्षित हैं।'
+                    : 'Your personal birth chart and consultation history remain strictly secure.'}
                 </p>
               </div>
             </div>
