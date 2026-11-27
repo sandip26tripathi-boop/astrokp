@@ -326,8 +326,8 @@ export default function Home() {
                 </h3>
                 <p className="text-xs sm:text-sm font-semibold text-[#B87314] dark:text-[#D4AF37] tracking-wide">
                   {language === 'hi'
-                    ? 'एस्ट्रो-वास्तु शोधकर्ता, शिक्षक एवं ऐप डेवलपर'
-                    : 'AstroVastu Researcher, Educator & App Developer'}
+                    ? 'एस्ट्रो-वास्तु शोधकर्ता एवं ऐप डेवलपर'
+                    : 'AstroVastu Researcher & App Developer'}
                 </p>
 
                 <p className="text-sm sm:text-base text-[#231A12] dark:text-[#FAF4E6] leading-relaxed max-w-3xl">
@@ -347,8 +347,8 @@ export default function Home() {
                     <span>{language === 'hi' ? 'एस्ट्रो-वास्तु ऊर्जा संतुलन' : 'AstroVastu Energy Dynamics'}</span>
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-[#FFFDF7] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525] shadow-sm flex items-center gap-1">
-                    <span>📚</span>
-                    <span>{language === 'hi' ? 'शोधकर्ता एवं शिक्षक' : 'Researcher & Educator'}</span>
+                    <span>💻</span>
+                    <span>{language === 'hi' ? 'सॉफ्टवेयर एवं ऐप आर्किटेक्चर' : 'Software & AI Architecture'}</span>
                   </span>
                 </div>
               </div>
@@ -459,14 +459,8 @@ export default function Home() {
               © {new Date().getFullYear()} VedicWisdom. High-Precision Astrological Intelligence. All rights reserved.
             </p>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <Link
-              href="/admin"
-              className="text-[#B87314] dark:text-[#D4AF37] hover:underline font-semibold flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F3E8D2] dark:bg-[#2A1F16] border border-[#E4D5B7] dark:border-[#443525]"
-            >
-              <span>🔐</span>
-              <span>क्लाइंट डेटा (Admin Dashboard)</span>
-            </Link>
+          <div className="text-[11px] text-[#8A7967] dark:text-[#A89886]">
+            <span>Empowering Classical KP, Parashari & AstroVastu Calculation</span>
           </div>
         </div>
       </footer>

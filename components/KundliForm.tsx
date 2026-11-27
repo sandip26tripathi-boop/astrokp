@@ -5,6 +5,8 @@ import { useAstrologyStore, DEFAULT_CHART_INPUT } from '@/store/useAstrologyStor
 import { t } from '@/lib/i18n';
 import { AyanamsaType, ChartInput } from '@/types/astrology';
 import TriangleLogo from './TriangleLogo';
+import SavedKundlisModal from './SavedKundlisModal';
+import { useAuth } from '@/context/AuthContext';
 import { generateHorary249Table, HorarySegment } from '@/lib/kp-calculator';
 import {
   Compass,
@@ -35,6 +37,7 @@ interface GeoPlaceItem {
 export default function KundliForm() {
   const { input, setInput, computeChart, language, saveCurrentChart, savedCharts, loadSavedChart } =
     useAstrologyStore();
+  const { user, savedKundlis, saveCurrentKundli } = useAuth();
 
   const [localInput, setLocalInput] = useState<ChartInput>({
     ...DEFAULT_CHART_INPUT,
@@ -48,6 +51,9 @@ export default function KundliForm() {
   const [horarySegments, setHorarySegments] = useState<HorarySegment[]>([]);
   const [showSavedList, setShowSavedList] = useState(false);
   const [savedNotice, setSavedNotice] = useState(false);
+  const [showVaultModal, setShowVaultModal] = useState(false);
+  const [isSavingToVault, setIsSavingToVault] = useState(false);
+  const [vaultSuccessNotice, setVaultSuccessNotice] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedSuccess, setGeneratedSuccess] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -235,10 +241,23 @@ export default function KundliForm() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     saveCurrentChart();
-    setSavedNotice(true);
-    setTimeout(() => setSavedNotice(false), 2500);
+    if (user?.isLoggedIn && localInput.dateOfBirth) {
+      setIsSavingToVault(true);
+      try {
+        const savedId = await saveCurrentKundli(localInput);
+        if (savedId) {
+          setVaultSuccessNotice(language === 'hi' ? 'खाते में सुरक्षित!' : 'Saved to Vault!');
+          setTimeout(() => setVaultSuccessNotice(null), 3000);
+        }
+      } finally {
+        setIsSavingToVault(false);
+      }
+    } else {
+      setSavedNotice(true);
+      setTimeout(() => setSavedNotice(false), 2500);
+    }
   };
 
   const currentHorarySeg = horarySegments.find(
@@ -265,24 +284,45 @@ export default function KundliForm() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Save Chart Button */}
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F3E8D2] hover:bg-[#E4D5B7] text-[#231A12] dark:bg-[#2A1F16] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] transition-all"
+            disabled={isSavingToVault || !localInput.dateOfBirth}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all disabled:opacity-50 ${
+              vaultSuccessNotice
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300'
+                : 'bg-[#F3E8D2] hover:bg-[#E4D5B7] text-[#231A12] dark:bg-[#2A1F16] dark:text-[#FFFDF7] border-[#E4D5B7] dark:border-[#443525]'
+            }`}
           >
-            <Bookmark className="w-3.5 h-3.5 text-[#B87314]" />
-            {savedNotice ? 'Saved!' : t('saveCurrent', language)}
+            {isSavingToVault ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#B87314]" />
+            ) : vaultSuccessNotice ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            ) : (
+              <Bookmark className="w-3.5 h-3.5 text-[#B87314]" />
+            )}
+            <span>
+              {vaultSuccessNotice
+                ? vaultSuccessNotice
+                : savedNotice
+                ? (language === 'hi' ? 'सेव हो गया!' : 'Saved!')
+                : (language === 'hi' ? 'कुंडली सेव करें' : 'Save Chart')}
+            </span>
           </button>
 
-          {savedCharts.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowSavedList(!showSavedList)}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F3E8D2] dark:bg-[#2A1F16] text-[#231A12] dark:text-[#FFFDF7] border border-[#E4D5B7] dark:border-[#443525] hover:bg-[#E4D5B7] transition"
-            >
-              {t('savedKundlis', language)} ({savedCharts.length})
-            </button>
-          )}
+          {/* Saved Kundlis Vault Trigger Button */}
+          <button
+            type="button"
+            onClick={() => setShowVaultModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#FFFDF7] dark:bg-[#2A1F16] hover:bg-[#F3E8D2] dark:hover:bg-[#34261B] text-[#231A12] dark:text-[#FFFDF7] border border-[#D4AF37] transition shadow-sm"
+          >
+            <span>📂</span>
+            <span>
+              {language === 'hi' ? 'सेव कुंडलियाँ' : 'Saved Kundlis'} (
+              {savedKundlis.length > 0 ? savedKundlis.length : savedCharts.length})
+            </span>
+          </button>
         </div>
       </div>
 
@@ -612,6 +652,8 @@ export default function KundliForm() {
           )}
         </button>
       </form>
+
+      <SavedKundlisModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
     </div>
   );
 }

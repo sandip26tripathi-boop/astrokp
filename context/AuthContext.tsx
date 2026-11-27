@@ -13,20 +13,26 @@ import {
   saveUserProfileToFirestore,
   saveKundliToFirestore,
   loadUserDataFromFirestore,
+  getAllSavedKundlisFromFirestore,
+  deleteKundliFromFirestore,
+  SavedKundliRecord,
 } from '@/lib/firestoreService';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
-import { UserProfile } from '@/types/astrology';
+import { UserProfile, ChartInput } from '@/types/astrology';
 
 interface AuthContextType {
   user: UserProfile | null;
   firebaseUser: FirebaseUser | null;
   uid: string | null;
   isLoading: boolean;
+  savedKundlis: SavedKundliRecord[];
+  refreshSavedKundlis: () => Promise<void>;
+  deleteSavedKundli: (kundliId: string) => Promise<boolean>;
   signInWithGoogle: (forceRedirect?: boolean) => Promise<FirebaseUser | null>;
   signInWithGoogleRedirect: () => Promise<void>;
   signOut: () => Promise<void>;
   error: string | null;
-  saveCurrentKundli: () => Promise<void>;
+  saveCurrentKundli: (customInput?: ChartInput) => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,11 +40,14 @@ const AuthContext = createContext<AuthContextType>({
   firebaseUser: null,
   uid: null,
   isLoading: true,
+  savedKundlis: [],
+  refreshSavedKundlis: async () => {},
+  deleteSavedKundli: async () => false,
   signInWithGoogle: async () => null,
   signInWithGoogleRedirect: async () => {},
   signOut: async () => {},
   error: null,
-  saveCurrentKundli: async () => {},
+  saveCurrentKundli: async () => '',
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -47,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [savedKundlis, setSavedKundlis] = useState<SavedKundliRecord[]>([]);
 
   // Check redirect result on initial page load (for mobile redirect flow)
   useEffect(() => {
@@ -95,7 +105,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             whatsappNumber: input.whatsapp || input.phone || undefined,
           });
 
-          // 2. Load returning user's saved data if birth details in store are empty
+          // 2. Fetch all saved kundlis for user vault
+          const allKundlis = await getAllSavedKundlisFromFirestore(fbUser.uid);
+          setSavedKundlis(allKundlis);
+
+          // 3. Load returning user's saved data if birth details in store are empty
           const { profile, latestKundli } = await loadUserDataFromFirestore(fbUser.uid);
           if (latestKundli && !input.dateOfBirth) {
             const restoredInput = {
@@ -122,6 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (syncErr) {
           console.warn('Firestore initial sync notice:', syncErr);
         }
+      } else {
+        setSavedKundlis([]);
       }
       setIsLoading(false);
     });
@@ -129,14 +145,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [loginUser, input.dateOfBirth, input.whatsapp, input.phone, setInput, computeChart]);
 
-  const saveCurrentKundli = useCallback(async () => {
-    if (!firebaseUser?.uid || !input.dateOfBirth) return;
-    try {
-      await saveKundliToFirestore(firebaseUser.uid, input, kpMatrix);
-    } catch (err) {
-      console.warn('Save kundli error:', err);
+  const refreshSavedKundlis = useCallback(async () => {
+    if (!firebaseUser?.uid) {
+      setSavedKundlis([]);
+      return;
     }
-  }, [firebaseUser?.uid, input, kpMatrix]);
+    try {
+      const records = await getAllSavedKundlisFromFirestore(firebaseUser.uid);
+      setSavedKundlis(records);
+    } catch (err) {
+      console.warn('Error refreshing saved kundlis:', err);
+    }
+  }, [firebaseUser?.uid]);
+
+  const saveCurrentKundli = useCallback(
+    async (customInput?: ChartInput): Promise<string> => {
+      const chartToSave = customInput || input;
+      if (!firebaseUser?.uid || !chartToSave.dateOfBirth) return '';
+      try {
+        const savedId = await saveKundliToFirestore(firebaseUser.uid, chartToSave, kpMatrix);
+        await refreshSavedKundlis();
+        return savedId;
+      } catch (err) {
+        console.warn('Save kundli error:', err);
+        return '';
+      }
+    },
+    [firebaseUser?.uid, input, kpMatrix, refreshSavedKundlis]
+  );
+
+  const deleteSavedKundli = useCallback(
+    async (kundliId: string): Promise<boolean> => {
+      if (!firebaseUser?.uid || !kundliId) return false;
+      try {
+        const ok = await deleteKundliFromFirestore(firebaseUser.uid, kundliId);
+        if (ok) {
+          setSavedKundlis((prev) => prev.filter((k) => k.id !== kundliId));
+        }
+        return ok;
+      } catch (err) {
+        console.warn('Delete kundli error:', err);
+        return false;
+      }
+    },
+    [firebaseUser?.uid]
+  );
 
   const signInWithGoogle = async (forceRedirect = false): Promise<FirebaseUser | null> => {
     setError(null);
@@ -240,6 +293,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         firebaseUser,
         uid: firebaseUser?.uid || null,
         isLoading,
+        savedKundlis,
+        refreshSavedKundlis,
+        deleteSavedKundli,
         signInWithGoogle,
         signInWithGoogleRedirect,
         signOut,

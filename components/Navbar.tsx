@@ -21,6 +21,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import LoginModal from './LoginModal';
+import SavedKundlisModal from './SavedKundlisModal';
 import TriangleLogo from './TriangleLogo';
 
 interface NavbarProps {
@@ -30,8 +31,9 @@ interface NavbarProps {
 export default function Navbar({ onOpenReport }: NavbarProps) {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useAstrologyStore();
-  const { user, signInWithGoogle, signOut, isLoading } = useAuth();
+  const { user, signInWithGoogle, signOut, isLoading, savedKundlis } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showVaultModal, setShowVaultModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [lockedToast, setLockedToast] = useState<string | null>(null);
@@ -134,6 +136,24 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
               </button>
             </div>
 
+            {/* Multi-Kundli Account Vault Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowVaultModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#FFFDF7] dark:bg-[#231A12] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] border border-[#D4AF37] text-[#231A12] dark:text-[#FFFDF7] text-[11px] sm:text-xs font-semibold shadow-sm transition active:scale-95"
+              title={language === 'hi' ? 'मेरी सुरक्षित कुंडलियाँ (Vault)' : 'Saved Kundlis Vault'}
+            >
+              <span>📂</span>
+              <span className="hidden sm:inline">
+                {language === 'hi' ? 'कुंडलियाँ' : 'Kundlis'}
+              </span>
+              {savedKundlis.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[9.5px] bg-[#B87314] text-[#FFFDF7] font-bold">
+                  {savedKundlis.length}
+                </span>
+              )}
+            </button>
+
             {/* Google Sign-In / Authenticated User Pill (Directly next to Language Toggle) */}
             {user?.isLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
@@ -161,6 +181,21 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
                       <p className="font-bold text-[#231A12] dark:text-[#FFFDF7] truncate">{user.name}</p>
                       <p className="text-[10.5px] text-[#5C4D3C] dark:text-[#D8C39E] font-mono truncate">{user.email}</p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowVaultModal(true);
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg text-[#5C4D3C] dark:text-[#D8C39E] hover:bg-[#F3E8D2] dark:hover:bg-[#2A1F16] flex items-center gap-2 transition"
+                    >
+                      <span>📂</span>
+                      <span>
+                        {language === 'hi'
+                          ? `सुरक्षित कुंडलियाँ (${savedKundlis.length})`
+                          : `Saved Kundlis (${savedKundlis.length})`}
+                      </span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
@@ -287,6 +322,7 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
       </header>
 
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <SavedKundlisModal isOpen={showVaultModal} onClose={() => setShowVaultModal(false)} />
     </>
   );
 }

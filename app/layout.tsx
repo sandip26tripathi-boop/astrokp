@@ -119,7 +119,7 @@ export default function RootLayout({
       founder: {
         '@type': 'Person',
         name: 'Sandeep K. Tripathi',
-        jobTitle: 'AstroVastu Researcher, Educator & App Developer',
+        jobTitle: 'AstroVastu Researcher & App Developer',
       },
     },
   ];
