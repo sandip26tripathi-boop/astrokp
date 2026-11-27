@@ -13,6 +13,7 @@
 
 import { KPMatrix, CuspData, PlanetPosition } from '@/types/astrology';
 import { resolveSignId, SIGN_NAMES_HI, SIGN_LORDS } from './parashari-evaluator';
+import { computeLiveRulingPlanets } from './astrology/rulingPlanetsEngine';
 
 const HINDI_PLANET_NAMES: Record<string, string> = {
   Sun: 'सूर्य',
@@ -25,6 +26,25 @@ const HINDI_PLANET_NAMES: Record<string, string> = {
   Rahu: 'राहु',
   Ketu: 'केतु',
 };
+
+function attachFinalVerdict(
+  text: string,
+  isEnglish: boolean,
+  outcome: string,
+  timing: string,
+  remedy: string
+): string {
+  if (text.includes('Final Verdict') || text.includes('अंतिम निर्णय')) {
+    return text;
+  }
+  if (isEnglish) {
+    const verdict = `**Final Verdict:**\nOverall analysis indicates a ${outcome}. The convergence of purified Live Ruling Planets, your running Vimshottari period, and the Saturn-Jupiter Double Transit activates this fruition window during ${timing}. As an astrological alignment measure, ${remedy}. Maintaining steady patience and strategic focus will ensure successful manifestation.`;
+    return `${text.trim()}\n\n${verdict}`;
+  } else {
+    const verdict = `**अंतिम निर्णय (Final Verdict):**\nसमग्र ज्योतिषीय विश्लेषण अनुसार यह परिणाम ${outcome} है। तात्कालिक शुद्ध रूलिंग प्लैनेट्स, वर्तमान विंशोत्तरी दशा तथा गोचरीय द्वि-गोचर के समन्वय से कार्य सिद्धि का सटीक समय ${timing} के मध्य निर्धारित होता है। ग्रह शांति एवं अनुकूलता संवर्धन हेतु ${remedy}। इस अवधि में संयम व सकारात्मक दृष्टिकोण रखने से अभीष्ट फल की प्राप्ति सुनिश्चित होगी।`;
+    return `${text.trim()}\n\n${verdict}`;
+  }
+}
 
 const HINDI_RASHI_NAMES: Record<string, string> = {
   Aries: 'मेष',
@@ -183,6 +203,15 @@ export function synthesizeFastKPAnswer(
   const isChildOrProgeny = /santan|bacha|baby|child|garbh|conceive|संतान|बच्चा|गर्भ/i.test(q);
   const userAskedForRemedy = /upay|remedy|puja|path|ratna|stone|mantra|daan|उपाय|निवारण|पूजा|दान|मंत्र|रत्न|समाधान/i.test(q);
 
+  // Compute Live Ruling Planets for timing precision
+  const liveRP = computeLiveRulingPlanets(
+    Number((kpMatrix as any)?.latitude ?? (kpMatrix as any)?.meta?.latitude ?? 28.6139),
+    Number((kpMatrix as any)?.longitude ?? (kpMatrix as any)?.meta?.longitude ?? 77.209),
+    new Date()
+  );
+  const defaultTimingHi = liveRP.eventTimingWindowHi || 'आगामी २ से ४ महीनों के भीतर';
+  const defaultTimingEn = liveRP.eventTimingWindow || 'within the next 2 to 4 months';
+
   // ===============================================================
   // NATURAL HUMAN SPOKEN COUNSELING (HINDI)
   // ===============================================================
@@ -192,17 +221,24 @@ export function synthesizeFastKPAnswer(
     // CASE 1: BEST PROFESSION IN 2027
     // -------------------------------------------------------------
     if (is2027Career || (targetYear === '२०२७' && (q.includes('best') || q.includes('kaun sa')))) {
-      return `${contextBridgeHi}देखिए, वर्ष २०२७ को लेकर आपके करियर में ग्रह स्थितियां बहुत ही महत्वपूर्ण और अनुकूल परिवर्तन की ओर संकेत कर रही हैं। 
+      const content = `${contextBridgeHi}देखिए, वर्ष २०२७ को लेकर आपके करियर में ग्रह स्थितियां बहुत ही महत्वपूर्ण और अनुकूल परिवर्तन की ओर संकेत कर रही हैं। 
 
-आपकी जन्म कुंडली में कर्म स्थान यानी दशम भाव के कस्पल सब-लॉर्ड **${c10CslHi}** हैं और लग्नेश का प्रभाव आपकी आजीविका में बौद्धिक क्षमता, विश्लेषण और सिस्टम प्रबंधन का मुख्य योग बनाता है। 
+के.पी. ज्योतिषीय ३-स्तरीय विश्लेषण:
+• **स्रोत (Planet Source):** दशम भाव के कस्पल सब-लॉर्ड (CSL) **${c10CslHi}** हैं, जो कार्यक्षेत्र में बौद्धिक क्षमता, विश्लेषण और सिस्टम प्रबंधन का मुख्य आधार हैं।
+• **फल दाता (Star Lord Result):** नक्षत्र स्वामी के ४-स्तरीय संबंध (L1-L4) सेवा व लाभ भावों को सीधा बल प्रदान कर रहे हैं।
+• **अंतिम स्वीकृति (Sub-Lord Approval):** उप-स्वामी की अनुकूलता इस अवधि में पद-प्रतिष्ठा व स्थायित्व की पुष्टि करती है।
 
 वर्ष २०२७ में दो बड़े गोचरीय परिवर्तन आपके पक्ष में आ रहे हैं। सबसे पहले, शनि देव का संचरण मेष राशि में होगा, जो आपके लग्न से छठे उपचय भाव में आता है। ज्योतिष का सनातन नियम है कि छठे भाव में शनि का गोचर प्रतियोगी परीक्षाओं, कार्यस्थल की चुनौतियों और प्रतिस्पर्धा में जातक को विजयी बनाता है। इसके साथ ही २०२७ के मध्य भाग में देवगुरु बृहस्पति का गोचर आपके कर्म और लाभ स्थान को सक्रिय करेगा, जिसे ज्योतिष में द्वि-गोचर का अत्यंत शुभ प्रभाव माना जाता है।
 
-आपके लिए २०२७ में विशेष रूप से **तकनीकी, आईटी, सॉफ्टवेयर व डेटा प्रबंधन**, अथवा **रणनीतिक सलाहकारिता (Consulting & Operations Management)** के क्षेत्र सर्वाधिक फलदायी रहेंगे। यदि आप कोई स्वतंत्र परामर्श या फर्म स्थापित करने का विचार कर रहे हैं, तो **मई २०२७ के बाद का समय** आपके लिए सबसे सुनहरा कालखंड सिद्ध होगा।${
-  userAskedForRemedy
-    ? '\n\nकरियर में गति बनाए रखने के लिए प्रतिदिन सुबह तांबे के लोटे से सूर्य देव को जल अर्पित करें और बुधवार को गणेश जी को दूर्वा चढ़ाएं।'
-    : ''
-}`;
+आपके लिए २०२७ में विशेष रूप से **तकनीकी, आईटी, सॉफ्टवेयर व डेटा प्रबंधन**, अथवा **रणनीतिक सलाहकारिता (Consulting & Operations Management)** के क्षेत्र सर्वाधिक फलदायी रहेंगे। यदि आप कोई स्वतंत्र परामर्श या फर्म स्थापित करने का विचार कर रहे हैं, तो **मई २०२७ के बाद का समय** आपके लिए सबसे सुनहरा कालखंड सिद्ध होगा।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'अत्यंत सकारात्मक एवं सुनिश्चित',
+        'मई २०२७ से दिसंबर २०२७',
+        'प्रतिदिन सुबह तांबे के पात्र से सूर्य देव को जल अर्पित करें और बुधवार को गणेश जी को दूर्वा चढ़ाएं'
+      );
     }
 
     // -------------------------------------------------------------
@@ -217,15 +253,22 @@ export function synthesizeFastKPAnswer(
         ? 'जोड़ों और नसों में खिंचाव'
         : 'स्वास्थ्य और शारीरिक ऊर्जा';
 
-      return `${contextBridgeHi}स्वास्थ्य के संदर्भ में, विशेषकर **${specificIssueText}** को लेकर जो आपने पूछा है, उस पर कुंडली की ग्रह स्थिति स्पष्ट संकेत दे रही है।
+      const content = `${contextBridgeHi}स्वास्थ्य के संदर्भ में, विशेषकर **${specificIssueText}** को लेकर जो आपने पूछा है, उस पर कुंडली की ग्रह स्थिति स्पष्ट संकेत दे रही है।
 
-आपकी कुंडली में लग्न भाव शारीरिक आरोग्यता का है, जिसके स्वामी **${lagnaLordHi}** हैं, जबकि रोग भाव के उप-स्वामी **${c6CslHi}** हैं। वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** चल रही है। इस दशा के कारण शरीर में वात-पित्त की मात्रा कभी-कभी बढ़ जाती है, जिससे अचानक ऊर्जा में कमी या बेचैनी का अनुभव होता है। 
+के.पी. ज्योतिषीय ३-स्तरीय स्वास्थ्य परीक्षण:
+• **स्रोत (Source):** लग्न स्वामी **${lagnaLordHi}** शारीरिक आरोग्यता के मुख्य स्तंभ हैं, जबकि षष्ठम भाव के उप-स्वामी **${c6CslHi}** हैं।
+• **फल दाता (Result Giver):** नक्षत्र स्तर पर रोग निवारण भाव (१ व ११) पूर्ण रूप से सक्रिय हैं।
+• **अंतिम स्वीकृति (Sub-Lord):** उप-स्वामी की स्थिति दीर्घकालिक व्याधि का निषेध करती है।
 
-राहत की बात यह है कि आपकी कुंडली में रोगमुक्ति के भाव शुभ प्रभाव में हैं, जिसका अर्थ है कि कोई भी दीर्घकालिक या गंभीर समस्या नहीं है। गोचर के अनुसार आने वाले **३ से ५ सप्ताह के भीतर** आपको शारीरिक स्फूर्ति और राहत का स्पष्ट अनुभव होगा।${
-  userAskedForRemedy
-    ? '\n\nस्वास्थ्य सुधार हेतु प्रतिदिन सुबह सूर्य देव को जल अर्पित करें और रात्रि को सोने से पूर्व ११ बार महामृत्युंजय मंत्र का स्मरण करें।'
-    : ''
-}`;
+वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** चल रही है। इस दशा के कारण शरीर में वात-पित्त की मात्रा कभी-कभी बढ़ जाती है, जिससे अचानक ऊर्जा में कमी या बेचैनी का अनुभव होता है। राहत की बात यह है कि आपकी कुंडली में रोगमुक्ति के भाव शुभ प्रभाव में हैं। गोचर के अनुसार आने वाले **३ से ५ सप्ताह के भीतर** आपको शारीरिक स्फूर्ति और राहत का स्पष्ट अनुभव होगा।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'शीघ्र स्वास्थ्य लाभ एवं सकारात्मक सुधार',
+        'आगामी ३ से ५ सप्ताह',
+        'प्रातःकाल तांबे के लोटे में जल भरकर सूर्य देव को अर्घ्य दें और महामृत्युंजय मंत्र का ११ बार जप करें'
+      );
     }
 
     // -------------------------------------------------------------
@@ -240,15 +283,22 @@ export function synthesizeFastKPAnswer(
         ? 'नई नौकरी और कार्यक्षेत्र में परिवर्तन'
         : 'करियर की समग्र दिशा एवं आजीविका';
 
-      return `${contextBridgeHi}करियर में **${careerGoalText}** को लेकर आपकी जिज्ञासा बिल्कुल स्वाभाविक है, और आपकी कुंडली में दशम भाव कर्म और प्रतिष्ठा का मुख्य आधार है।
+      const content = `${contextBridgeHi}करियर में **${careerGoalText}** को लेकर आपकी जिज्ञासा बिल्कुल स्वाभाविक है, और आपकी कुंडली में दशम भाव कर्म और प्रतिष्ठा का मुख्य आधार है।
 
-आपकी जन्म कुंडली में कर्म स्थान यानी दशम भाव के कस्पल सब-लॉर्ड (CSL) **${c10CslHi}** हैं और षष्ठम भाव के उप-स्वामी **${c6CslHi}** हैं। के.पी. ज्योतिष के अनुसार जब दशम भाव का संबंध द्वितीय (धन), षष्ठम (सेवा/प्रतियोगिता) और एकादश (लाभ) भावों से बनता है, तो व्यक्ति को कार्यक्षेत्र में विशेष पहचान और स्थिर प्रगति प्राप्त होती है। वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** चल रही है, जिसने पिछले कुछ समय से निर्णयों में थोड़ी अनिश्चितता अवश्य दी है।
+के.पी. ३-स्तरीय कार्य सिद्धि विश्लेषण:
+• **स्रोत (Planet Source):** दशम भाव के कस्पल सब-लॉर्ड (CSL) **${c10CslHi}** हैं तथा षष्ठम भाव के उप-स्वामी **${c6CslHi}** हैं।
+• **फल दाता (Star Lord):** नक्षत्र स्वामी द्वारा द्वितीय (धन), षष्ठम (सेवा) और एकादश (लाभ) भावों का समन्वय बन रहा है।
+• **अंतिम स्वीकृति (Sub-Lord):** उप-स्वामी कार्य सिद्धि और प्रगति को अंतिम स्वीकृति प्रदान करता है।
 
-परंतु अब गोचर में देवगुरु बृहस्पति और शनि का प्रभाव आपके कर्म और उपचय भावों को अनुकूलता प्रदान कर रहा है। आने वाले **२ से ४ महीनों के भीतर** आपके कार्यक्षेत्र में एक सकारात्मक बदलाव, नई ज़िम्मेदारी अथवा उन्नति का ठोस अवसर सामने आएगा। इस समय अपनी कार्यकुशलता और नेटवर्किंग पर ध्यान केंद्रित रखना आपके लिए सबसे लाभप्रद रहेगा।${
-  userAskedForRemedy
-    ? '\n\nकरियर में स्थिरता और तेज गति के लिए बुधवार को भगवान श्री गणेश को दूर्वा अर्पित करें और प्रतिदिन प्रातः सूर्य देव को तांबे के पात्र से अर्घ्य दें।'
-    : ''
-}`;
+वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** चल रही है, जिसने पिछले कुछ समय से निर्णयों में थोड़ी अनिश्चितता अवश्य दी है। परंतु अब गोचर में देवगुरु बृहस्पति और शनि का प्रभाव आपके कर्म और उपचय भावों को अनुकूलता प्रदान कर रहा है। आने वाले **२ से ४ महीनों के भीतर** आपके कार्यक्षेत्र में एक सकारात्मक बदलाव, नई ज़िम्मेदारी अथवा उन्नति का ठोस अवसर सामने आएगा।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'सकारात्मक एवं करियर उन्नति का प्रबल योग',
+        defaultTimingHi,
+        'बुधवार को भगवान गणेश को दूर्वा दल अर्पित करें और नियमित रूप से सूर्य देव को अर्घ्य दें'
+      );
     }
 
     // -------------------------------------------------------------
@@ -263,15 +313,22 @@ export function synthesizeFastKPAnswer(
         ? 'मकान या वाहन प्राप्ति'
         : 'आर्थिक स्थिति और धन संचय';
 
-      return `${contextBridgeHi}आर्थिक विषय और **${financeTopicText}** को लेकर जो आपने पूछा है, आइए उसे कुंडली के धन व लाभ भावों से समझते हैं।
+      const content = `${contextBridgeHi}आर्थिक विषय और **${financeTopicText}** को लेकर जो आपने पूछा है, आइए उसे कुंडली के धन व लाभ भावों से समझते हैं।
 
-आपकी कुंडली में संचित धन के द्वितीय भाव के उप-स्वामी **${c2CslHi}** हैं और लाभ भाव के स्वामी का संबंध आपकी नियमित आय को सुरक्षित रखे हुए है। वर्तमान **${mahaHi} में ${antarHi}** के प्रभाव से अचानक कुछ अनपेक्षित खर्च सामने आए, जिससे वित्तीय दबाव महसूस हुआ।
+के.पी. ३-स्तरीय वित्तीय परीक्षण:
+• **स्रोत (Source):** संचित धन के द्वितीय भाव के उप-स्वामी **${c2CslHi}** हैं एवं लाभ भाव के अधिपति आय के स्रोत को स्थिर बनाए हुए हैं।
+• **फल दाता (Result Giver):** नक्षत्र स्तर पर लाभ (११) और धन (२) भावों की सक्रियता अनुकूल है।
+• **अंतिम स्वीकृति (Sub-Lord):** उप-स्वामी धीरे-धीरे आर्थिक रुकावटों को दूर करने की अनुमति देता है।
 
-ग्रहों के आगामी संचरण के अनुसार, आने वाले **३ से ५ महीनों में** आपके लिए आय का नया माध्यम या फंसा हुआ धन वापस आने का मार्ग प्रशस्त होगा। इस अवधि के बाद धीरे-धीरे आर्थिक स्थिरता लौट आएगी।${
-  userAskedForRemedy
-    ? '\n\nआर्थिक रुकावटों के निवारण के लिए शुक्रवार को श्री सूक्त का पाठ करें और मंगलवार को किसी जरूरतमंद को भोजन कराएं।'
-    : ''
-}`;
+वर्तमान **${mahaHi} में ${antarHi}** के प्रभाव से अचानक कुछ अनपेक्षित खर्च सामने आए, जिससे वित्तीय दबाव महसूस हुआ। ग्रहों के आगामी संचरण के अनुसार, आने वाले **३ से ५ महीनों में** आपके लिए आय का नया माध्यम या फंसा हुआ धन वापस आने का मार्ग प्रशस्त होगा। इस अवधि के बाद धीरे-धीरे आर्थिक स्थिरता लौट आएगी।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'आर्थिक राहत एवं धन प्रवाह में अनुकूलता',
+        'आगामी ३ से ५ महीनों',
+        'शुक्रवार को श्री सूक्त का पाठ करें अथवा किसी जरूरतमंद को भोजन कराएं'
+      );
     }
 
     // -------------------------------------------------------------
@@ -286,51 +343,73 @@ export function synthesizeFastKPAnswer(
         ? 'विवाह में आ रहे विलंब का समाधान'
         : 'विवाह योग और दांपत्य';
 
-      return `${contextBridgeHi}दांपत्य और **${marriageTopicText}** को लेकर जो आपने पूछा है, उस पर सप्तम भाव की स्थिति बहुत स्पष्ट संकेत दे रही है।
+      const content = `${contextBridgeHi}दांपत्य और **${marriageTopicText}** को लेकर जो आपने पूछा है, उस पर सप्तम भाव की स्थिति बहुत स्पष्ट संकेत दे रही है।
 
-आपकी कुंडली में विवाह के सप्तम भाव के कस्पल सब-लॉर्ड **${c7CslHi}** हैं। के.पी. ज्योतिष का नियम है कि जब सप्तम भाव का उप-स्वामी कुटुंब (२रे) और लाभ (११वें) भाव से जुड़ता है, तब विवाह और दांपत्य सुख का योग बनता है। वर्तमान दशा के कारण कुछ गलतफहमियां या बात बनते-बनते रुकने का अनुभव हुआ होगा।
+के.पी. ३-स्तरीय वैवाहिक जांच:
+• **स्रोत (Source):** विवाह के सप्तम भाव के कस्पल सब-लॉर्ड **${c7CslHi}** हैं।
+• **फल दाता (Result Giver):** नक्षत्र स्वामी कुटुंब (२) और लाभ (११) भावों से जुड़कर वैवाहिक सुख की पुष्टि करता है।
+• **अंतिम स्वीकृति (Sub-Lord):** उप-स्वामी का प्रभाव बात पक्की होने का मार्ग प्रशस्त करता है।
 
-गोचरीय गुरु का प्रभाव अब धीरे-धीरे अनुकूल हो रहा है। आगामी **४ से ७ महीनों के भीतर** एक सुयोग्य रिश्ते की बातचीत अंतिम रूप ले सकती है।${isDisputeOrDivorce ? ' वैवाहिक अनबन के मामले में अगले ३ महीने आवेश में कोई कठोर कदम न उठाएं, सुलह का मार्ग खुलेगा।' : ''}${
-  userAskedForRemedy
-    ? '\n\nदांपत्य शांति और शीघ्र विवाह हेतु गुरुवार को भगवान विष्णु और मां लक्ष्मी की आराधना करें तथा चने की दाल गाय को खिलाएं।'
-    : ''
-}`;
+वर्तमान दशा के कारण कुछ गलतफहमियां या बात बनते-बनते रुकने का अनुभव हुआ होगा। गोचरीय गुरु का प्रभाव अब धीरे-धीरे अनुकूल हो रहा है। आगामी **४ से ७ महीनों के भीतर** एक सुयोग्य रिश्ते की बातचीत अंतिम रूप ले सकती है।${isDisputeOrDivorce ? ' वैवाहिक अनबन के मामले में अगले ३ महीने आवेश में कोई कठोर कदम न उठाएं, सुलह का मार्ग खुलेगा।' : ''}`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'विवाह योग में अनुकूलता एवं रिश्ते की परिपक्वता',
+        'आगामी ४ से ७ महीनों',
+        'गुरुवार को भगवान विष्णु की आराधना करें तथा चने की दाल गाय को खिलाएं'
+      );
     }
 
     // -------------------------------------------------------------
     // CASE 6: REMEDIES REQUEST
     // -------------------------------------------------------------
     if (userAskedForRemedy) {
-      return `${contextBridgeHi}आपकी कुंडली में चल रही **${mahaHi} की महादशा** और **${antarHi} की अंतर्दशा** तथा तात्कालिक गोचर को संतुलित करने के लिए निम्नलिखित सात्विक उपाय अत्यंत प्रभावशाली रहेंगे:
+      const remedyDetail = antarRaw === 'Saturn'
+        ? '• शनिवार को सूर्यास्त के बाद पीपल के वृक्ष के नीचे सरसों के तेल का चौमुखा दीपक जलाएं और "ॐ शं शनैश्चराय नमः" का शांत मन से १०८ बार जप करें।'
+        : antarRaw === 'Rahu'
+        ? '• पक्षियों को नियमित रूप से सात अनाज (सप्तधान्य) डालें और सोते समय सिरहाने थोड़ी सौंफ रखकर सुबह जल में प्रवाहित कर दें।'
+        : antarRaw === 'Jupiter'
+        ? '• गुरुवार को भगवान विष्णु का ध्यान करें, मस्तक पर पीले चंदन का तिलक लगाएं और चने की दाल का दान करें।'
+        : antarRaw === 'Mars'
+        ? '• मंगलवार को श्री हनुमान चालीसा का तीन बार पाठ करें और बूंदी का प्रसाद अर्पित करें।'
+        : antarRaw === 'Mercury'
+        ? '• बुधवार को गणेश जी को २१ दूर्वा दल अर्पित करें और गाय को हरा चारा खिलाएं।'
+        : '• प्रतिदिन प्रातः तांबे के लोटे में शुद्ध जल व रोली डालकर सूर्य देव को अर्घ्य दें।';
 
-${
-  antarRaw === 'Saturn'
-    ? '• शनिवार को सूर्यास्त के बाद पीपल के वृक्ष के नीचे सरसों के तेल का चौमुखा दीपक जलाएं और "ॐ शं शनैश्चराय नमः" का शांत मन से १०८ बार जप करें।'
-    : antarRaw === 'Rahu'
-    ? '• पक्षियों को नियमित रूप से सात अनाज (सप्तधान्य) डालें और सोते समय सिरहाने थोड़ी सौंफ रखकर सुबह जल में प्रवाहित कर दें।'
-    : antarRaw === 'Jupiter'
-    ? '• गुरुवार को भगवान विष्णु का ध्यान करें, मस्तक पर पीले चंदन का तिलक लगाएं और चने की दाल का दान करें।'
-    : antarRaw === 'Mars'
-    ? '• मंगलवार को श्री हनुमान चालीसा का तीन बार पाठ करें और बूंदी का प्रसाद अर्पित करें।'
-    : antarRaw === 'Mercury'
-    ? '• बुधवार को गणेश जी को २१ दूर्वा दल अर्पित करें और गाय को हरा चारा खिलाएं।'
-    : '• प्रतिदिन प्रातः तांबे के लोटे में शुद्ध जल व रोली डालकर सूर्य देव को अर्घ्य दें।'
-}
+      const content = `${contextBridgeHi}आपकी कुंडली में चल रही **${mahaHi} की महादशा** और **${antarHi} की अंतर्दशा** तथा तात्कालिक गोचर को संतुलित करने के लिए निम्नलिखित सात्विक उपाय अत्यंत प्रभावशाली रहेंगे:
+
+${remedyDetail}
 • प्रतिदिन प्रातः ५ मिनट शांत बैठकर अपने इष्टदेव का स्मरण करें। इन उपायों को निरंतर २१ दिन करने से आपको मन में शांति और परिस्थितियों में स्पष्ट अनुकूलता का अनुभव होगा।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'उपायों के नियमित अनुष्ठान से ग्रह शांति एवं मानसिक स्पष्टता',
+        'निरंतर २१ दिन के भीतर',
+        'प्रातःकाल इष्टदेव का ५ मिनट ध्यान व अपनी दशा अनुसार बताए गए सात्विक उपाय करें'
+      );
     }
 
     // -------------------------------------------------------------
     // CASE 7: GENERAL DYNAMIC HUMAN RESPONSE FOR ANY QUERY
     // -------------------------------------------------------------
-    return `${contextBridgeHi}आपके इस प्रश्न को लेकर जब हम आपकी कुंडली के ग्रह विन्यास को देखते हैं, तो वर्तमान स्थिति स्पष्ट समझ आती है।
+    const content = `${contextBridgeHi}आपके इस प्रश्न को लेकर जब हम आपकी कुंडली के ग्रह विन्यास को देखते हैं, तो वर्तमान स्थिति स्पष्ट समझ आती है।
 
-आपकी कुंडली में लग्न **${lagnaSignHi}** है और चन्द्र राशि **${moonSignHi}** है। वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** गतिशील है। ग्रहों का यह संचरण आपको अपने निर्णयों में थोड़ा धैर्य और संयम रखने का संकेत दे रहा है।
+के.पी. ३-स्तरीय ग्रह विन्यास:
+• **स्रोत (Source):** लग्न **${lagnaSignHi}** और चन्द्र राशि **${moonSignHi}** आपके मूल स्वभाव और चेतना का आधार हैं।
+• **फल दाता (Result Giver):** दशा स्वामी ग्रह जीवन के प्रमुख क्षेत्रों को क्रियान्वित कर रहे हैं।
+• **अंतिम स्वीकृति (Sub-Lord):** कस्पल सब-लॉर्ड का संचरण अनुकूल गति दे रहा है।
 
-गोचर में शनि और गुरु का प्रभाव जीवन के महत्वपूर्ण केंद्रों को सक्रिय कर रहा है, जिसका अर्थ है कि वर्तमान परिस्थितियां भले ही थोड़ी धीमी लगें, किंतु आने वाले **२ से ४ महीनों के भीतर** आपको अपनी योजनाओं में स्पष्ट प्रगति और अनुकूल अवसर देखने को मिलेंगे।${
-  userAskedForRemedy
-    ? '\n\nसकारात्मक ऊर्जा बनाए रखने के लिए प्रातःकाल सूर्य देव को जल अर्पित करें और अपने इष्टदेव पर पूर्ण निष्ठा रखें।'
-    : ''
-}`;
+वर्तमान में आप पर **${mahaHi} की महादशा में ${antarHi} की अंतर्दशा** गतिशील है। गोचर में शनि और गुरु का प्रभाव जीवन के महत्वपूर्ण केंद्रों को सक्रिय कर रहा है, जिसका अर्थ है कि वर्तमान परिस्थितियां भले ही थोड़ी धीमी लगें, किंतु आने वाले समय में आपको अपनी योजनाओं में स्पष्ट प्रगति और अनुकूल अवसर देखने को मिलेंगे।`;
+
+    return attachFinalVerdict(
+      content,
+      false,
+      'धैर्य व सुनियोजित प्रयास से अनुकूल',
+      defaultTimingHi,
+      'प्रातःकाल सूर्य देव को अर्घ्य दें और अपने इष्टदेव का नित्य स्मरण करें'
+    );
   }
 
   // ===============================================================
@@ -342,44 +421,76 @@ ${
   }
 
   if (targetYear === '२०२७' || q.includes('2027')) {
-    return `${contextBridgeEn}Regarding your query about the year 2027, the planetary transits are setting up a highly favorable turning point for your career.
+    const content = `${contextBridgeEn}Regarding your query about the year 2027, the planetary transits are setting up a highly favorable turning point for your career.
 
-In your natal chart, the 10th House of Career has its Cuspal Sub-Lord in **${c10?.subLord || 'Mercury'}**, which places high value on analytical strategy, communication, and executive decision-making. 
+KP 3-Tier Analysis:
+• **Source (Planet):** Cuspal Sub-Lord of the 10th House is **${c10?.subLord || 'Mercury'}**, establishing intellectual acumen, strategy, and operations as your core strength.
+• **Result Giver (Star Lord):** The Star Lord connects to Houses 2, 6, and 11, channeling fruitful outcomes and competitive success.
+• **Final Approval (Sub-Lord):** The Sub-Lord sanctions long-term executive growth without denial.
 
-During 2027, Saturn transits into Aries—your 6th Upachaya house—which traditionally grants competitive superiority and job security. Concurrently, transiting Jupiter energizes your 10th house, creating a classical Double Transit. The sectors of **technology, systems architecture, and specialized advisory/consulting** will yield peak rewards, particularly **from May 2027 onward**.${
-  userAskedForRemedy
-    ? '\n\nTo strengthen career momentum, offer morning water to the rising Sun and recite the Gayatri Mantra daily.'
-    : ''
-}`;
+During 2027, Saturn transits into Aries—your 6th Upachaya house—granting competitive superiority. Concurrently, transiting Jupiter energizes your career axis, establishing a classical Double Transit. The sectors of **technology, systems architecture, and specialized advisory/consulting** will yield peak rewards, particularly **from May 2027 onward**.`;
+
+    return attachFinalVerdict(
+      content,
+      true,
+      'highly favorable career expansion',
+      'from May 2027 through December 2027',
+      'offer morning water to the rising Sun and recite the Gayatri Mantra daily'
+    );
   }
 
   if (isJobChangeOrNewJob || isPromotionOrHike || isGovtJobOrUPSC || isCareerGeneral) {
-    return `${contextBridgeEn}Looking at your career path, your 10th House of profession has its Cuspal Sub-Lord in **${c10?.subLord || 'Mercury'}**, while your 6th House of service and competitive edge is governed by **${c6?.subLord || 'Saturn'}**.
+    const content = `${contextBridgeEn}Looking at your career path, your 10th House of profession has its Cuspal Sub-Lord in **${c10?.subLord || 'Mercury'}**, while your 6th House of service and competitive edge is governed by **${c6?.subLord || 'Saturn'}**.
 
-In KP astrology, when the 10th CSL aligns with houses 2 (wealth), 6 (service/competitive advantage), and 11 (fulfillment of ambitions), it promises progressive career stability and executive growth. You are currently operating under the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**, which has created temporary pauses but is now preparing you for an upward shift.
+KP 3-Tier Signification:
+• **Source (Planet):** 10th CSL **${c10?.subLord || 'Mercury'}** acts as the primary driver of career trajectory.
+• **Result Giver (Star Lord):** The Star Lord aligns with houses 2 (wealth), 6 (service/competitive edge), and 11 (fulfillment of ambitions).
+• **Final Approval (Sub-Lord):** The Sub-Lord ratifies stability and progressive recognition.
 
-With transiting Jupiter and Saturn activating your career axis, you should expect positive developments, a fresh opportunity, or strategic advancement within the next **2 to 4 months**. Keeping your professional network active during this period will bring the best results.${
-  userAskedForRemedy
-    ? '\n\nTo enhance career momentum, offer water to the rising Sun daily and keep a balanced, disciplined morning routine.'
-    : ''
-}`;
+You are currently operating under the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**, which is preparing you for an upward shift. With transiting Jupiter and Saturn activating your career axis, you should expect positive developments, a fresh opening, or strategic promotion within the next **2 to 4 months**.`;
+
+    return attachFinalVerdict(
+      content,
+      true,
+      'positive advancement and job elevation',
+      defaultTimingEn,
+      'maintain a disciplined dawn routine, offer water to the Sun, and channel focus on strategic skill building'
+    );
   }
 
   if (isDigestiveOrStomach || isMentalOrStress || isBoneOrJoints || isHealthGeneral) {
-    return `${contextBridgeEn}Looking at your health indicators, your Ascendant Lord is **${lagnaLord}** while your 6th Cusp Sub-Lord is **${c6?.subLord || 'Mars'}**.
+    const content = `${contextBridgeEn}Looking at your health indicators, your Ascendant Lord is **${lagnaLord}** while your 6th Cusp Sub-Lord is **${c6?.subLord || 'Mars'}**.
 
-Under the current **${mahaRaw}-${antarRaw}** sub-period, temporary pitta or vata imbalances can manifest as fatigue or tension. However, your recovery houses remain strong, indicating no chronic vulnerability. You should anticipate a clear rejuvenation in energy within the next **3 to 5 weeks**.${
-  userAskedForRemedy
-    ? '\n\nFor vitality, practice morning pranayama, drink dawn-stored copper water, and chant the Mahamrityunjaya Mantra 11 times.'
-    : ''
-}`;
+KP 3-Tier Health Diagnosis:
+• **Source (Planet):** Ascendant indicates vital force, while 6th CSL indicates physical sensitivities.
+• **Result Giver (Star Lord):** Nakshatra connections to recovery houses (1 and 11) confirm strong recuperative power.
+• **Final Approval (Sub-Lord):** The Sub-Lord affirms that no chronic ailment is indicated.
+
+Under the current **${mahaRaw}-${antarRaw}** sub-period, temporary pitta or vata imbalances can manifest as fatigue. However, your recovery houses remain strong. You should anticipate a clear rejuvenation in vitality within the next **3 to 5 weeks**.`;
+
+    return attachFinalVerdict(
+      content,
+      true,
+      'steady rejuvenation and energetic recovery',
+      'the next 3 to 5 weeks',
+      'practice morning pranayama and chant the Mahamrityunjaya Mantra 11 times'
+    );
   }
 
-  return `${contextBridgeEn}Evaluating your inquiry, your chart is operating under the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**. 
+  const content = `${contextBridgeEn}Evaluating your inquiry, your chart is operating under the **${mahaRaw} Mahadasha and ${antarRaw} Antardasha**. 
 
-Planetary transits of Saturn and Jupiter are reorganizing your focus toward long-term stability. Noticeable relief and progressive openings will materialize across the next **2 to 4 months**.${
-  userAskedForRemedy
-    ? '\n\nMaintain daily personal prayers to your chosen deity and avoid impulsive decisions during this transition.'
-    : ''
-}`;
+KP 3-Tier Overview:
+• **Source (Planet):** Ascendant in ${lagnaSign} grounds your temperament and purpose.
+• **Result Giver (Star Lord):** Dasha periods activate key life sectors progressively.
+• **Final Approval (Sub-Lord):** Cuspal Sub-Lords govern the timing of fruition.
+
+Planetary transits of Saturn and Jupiter are reorganizing your focus toward long-term stability. Noticeable relief and progressive openings will materialize across the coming months.`;
+
+  return attachFinalVerdict(
+    content,
+    true,
+    'constructive resolution and progressive openings',
+    defaultTimingEn,
+    'maintain daily personal devotion to your chosen deity and refrain from hasty actions'
+  );
 }

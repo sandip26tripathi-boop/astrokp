@@ -290,63 +290,13 @@ export function evaluateEventChecklist(
   });
 }
 
+import { computeLiveRulingPlanets } from './astrology/rulingPlanetsEngine';
+
 // Real-time Ruling Planets Calculator for Header HUD with Astronomical Engine
 export function getLiveRulingPlanets(
   lat: number = 28.6139,
   lon: number = 77.209,
   timezone: number = 5.5
 ): RulingPlanets {
-  const now = new Date();
-  const time = new AstroTime(now);
-
-  const jd = 2451545.0 + time.ut;
-  const diffYears = (jd - 2415020.0) / 365.2422;
-  const ayanamsa = 22.3755 + (diffYears * 50.2388475) / 3600.0;
-
-  // Exact Greenwich Sidereal Time
-  const gmstHours = SiderealTime(time);
-  const gmstDeg = norm360(gmstHours * 15.0);
-  const lst = norm360(gmstDeg + lon);
-
-  // Obliquity
-  const T = time.ut / 36525.0;
-  const eps = 23.43929111 - (46.815 * T) / 3600.0 - (0.00059 * T * T) / 3600.0;
-
-  // Ascendant
-  const ramcRad = (lst * Math.PI) / 180.0;
-  const epsRad = (eps * Math.PI) / 180.0;
-  const latRad = (lat * Math.PI) / 180.0;
-
-  const yAsc = Math.cos(ramcRad);
-  const xAsc = -(
-    Math.sin(ramcRad) * Math.cos(epsRad) +
-    Math.tan(latRad) * Math.sin(epsRad)
-  );
-  let ascRad = Math.atan2(yAsc, xAsc);
-  if (ascRad < 0) ascRad += 2 * Math.PI;
-  const ascTropical = (ascRad * 180.0) / Math.PI;
-  const ascNirayana = norm360(ascTropical - ayanamsa);
-
-  // Exact Moon position from astronomy-engine
-  const moonVec = GeoVector(Body.Moon, time, true);
-  const moonEcl = Ecliptic(moonVec);
-  const moonNirayana = norm360(moonEcl.elon - ayanamsa);
-
-  const dayLords = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
-  const dayLord = dayLords[now.getDay()];
-
-  const moonDiv = getKPDivision(moonNirayana);
-  const lagnaDiv = getKPDivision(ascNirayana);
-
-  return {
-    timestamp: now.toISOString(),
-    dayLord,
-    moonSignLord: moonDiv.signLord,
-    moonStarLord: moonDiv.starLord,
-    moonSubLord: moonDiv.subLord,
-    lagnaSignLord: lagnaDiv.signLord,
-    lagnaStarLord: lagnaDiv.starLord,
-    lagnaSubLord: lagnaDiv.subLord,
-    isRealtime: true,
-  };
+  return computeLiveRulingPlanets(lat, lon, new Date());
 }

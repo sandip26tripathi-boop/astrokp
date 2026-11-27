@@ -357,13 +357,30 @@ export async function POST(req: NextRequest) {
 2. UNDERSTAND THE QUESTION'S NATURE FIRST:
 - Read the client's exact intent: Are they asking for a general career direction, a job vs. business choice, timing of a change, or solving a current struggle? Answer that exact point first without wandering into unrelated houses (never discuss the 4th house of property when asked about career unless it directly links to a specific job transfer).
 
-3. LOGICAL KP + PARASHARI SYNTHESIS (NO TEXTBOOK FILLER):
-- Use ONLY the pre-filtered intentAstrologyData and verified todayDasha / targetDateDasha provided by the backend.
-- Weave the KP logic (exact 10th/6th CSL, its Star Lord, Sub-Lord approval, and signified houses like 2, 6, 10, 11) seamlessly with the Parashari logic (10th/6th Lord placement, degree strength, Yuti, Drishti, D10/D9 confirmation) into smooth, logical sentences—showing why a career path, shift, or timing makes astrological sense.
-- Maintain Sequence Across Turns: Remember the previous messages in the conversation so follow-up questions build directly on what you already explained without repeating the birth chart basics.
+3. COMPLETE KP 3-TIER CHAIN + PARASHARI DASHA-GOCHAR SYNTHESIS:
+- Trace the complete 3-tier KP logic for the relevant house:
+  (A) Planet (Source): Explain the Cuspal Sub-Lord (CSL), its house placement and ownership, and explicitly note if it is Untenanted (no planet occupying its stars, meaning it acts as a direct, unhindered source of its own houses).
+  (B) Star Lord (Result Giver): What actual results its Nakshatra Lord delivers across 4-fold significations (L1–L4) (favorable vs opposing houses).
+  (C) Sub-Lord (Quality & Final Approval): How the Sub-Lord modifies the quality, speed, or gives final sanction to the event.
+- Parashari & Gochar Synthesis: Weave Parashari house lord placement, Yuti, Drishti, active Vimshottari Mahadasha-Antardasha-Pratyantardasha, live Gochar (Saturn & Jupiter transits), and the Double Transit principle (Saturn + Jupiter simultaneous activation) into natural, flowing sentences.
+- Cross-match with Purified Live Ruling Planets: Incorporate current Live Ruling Planets to corroborate the event timing window.
+
+4. MANDATORY FINAL VERDICT SECTION (STRICTLY UNDER 100 WORDS):
+- Immediately below your main conversational reading, you MUST append a cleanly separated, crisp Final Verdict section formatted as:
+${clientLanguage === 'hi' ? '**अंतिम निर्णय (Final Verdict):**' : '**Final Verdict:**'}
+- This section must be strictly 80 to 100 words long and summarize:
+  (a) A clear Yes / No / Conditional outcome on the client's specific inquiry.
+  (b) The exact timing window derived from Ruling Planets + Dasha (MD-AD-PD) + Double Transit Gochar.
+  (c) One practical, grounded astrological remedy/action aligned with the planetary diagnosis.
 
 PRE-FILTERED INTENT-DRIVEN ASTROLOGICAL DATA SLICE (STRICT GROUND TRUTH):
 ${JSON.stringify(intentAstrologyData, null, 2)}
+
+COMPLETE KP 3-TIER CHAIN & TIMING AUDIT:
+${JSON.stringify({
+  threeTierKpChain: astrologicalAudit.threeTierKpChain,
+  timingSynthesis: astrologicalAudit.timingSynthesis,
+}, null, 2)}
 
 VERIFIED DASHA & TIMING (DO NOT GUESS OR RECALCULATE DATES):
 ${JSON.stringify(kundliJsonPayload.dashaDateLock, null, 2)}
@@ -435,8 +452,8 @@ ${JSON.stringify(kundliJsonPayload.dashaDateLock, null, 2)}
               contents: formattedContents,
               config: {
                 systemInstruction: masterSystemPrompt,
-                temperature: 0.25,
-                maxOutputTokens: 650,
+                temperature: 0.2,
+                maxOutputTokens: 2048,
               },
             });
 
@@ -487,8 +504,8 @@ ${JSON.stringify(kundliJsonPayload.dashaDateLock, null, 2)}
             contents: formattedContents,
             config: {
               systemInstruction: masterSystemPrompt,
-              temperature: 0.25,
-              maxOutputTokens: 650,
+              temperature: 0.2,
+              maxOutputTokens: 2048,
             },
           });
           const res: any = await Promise.race([aiCall, timeoutPromise]);

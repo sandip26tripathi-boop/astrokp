@@ -88,6 +88,13 @@ export interface RulingPlanets {
   lagnaStarLord: string;
   lagnaSubLord: string;
   isRealtime?: boolean;
+  purifiedRulingPlanets?: string[];
+  retrogradePlanets?: string[];
+  eventTimingWindow?: string;
+  eventTimingWindowHi?: string;
+  timestampIST?: string;
+  sunriseTodayIST?: string;
+  vedicWeekday?: string;
 }
 
 export interface DashaPeriod {

@@ -31,7 +31,7 @@ export default function RulingPlanetsBar() {
 
   if (!mounted || !liveRP) {
     return (
-      <div className="w-full bg-[#231A12] text-[#FFFDF7] border-b border-[#D4AF37]/30 px-3 py-1.5 min-h-[34px] flex items-center justify-between text-xs">
+      <div className="w-full bg-[#231A12] text-[#FFFDF7] border-b border-[#D4AF37]/30 px-3 py-2 min-h-[40px] box-border flex items-center justify-between text-xs overflow-visible">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#4A6B53]/25 text-[#7CAE89] border border-[#4A6B53]/40 text-[9px] font-bold uppercase tracking-wider">
             <span>LIVE RP</span>
@@ -47,7 +47,7 @@ export default function RulingPlanetsBar() {
     : (language === 'hi' ? 'तात्कालिक कालचक्र' : 'Live Astro Clock');
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-[#231A12] text-[#FFFDF7] border-b border-[#D4AF37]/30 backdrop-blur-md px-2.5 sm:px-4 py-1.5 transition-all">
+    <div className="w-full max-w-full overflow-visible bg-[#231A12] text-[#FFFDF7] border-b border-[#D4AF37]/30 backdrop-blur-md px-3 sm:px-4 py-2 min-h-[40px] box-border transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs">
         {/* Left Status Badge */}
         <div className="flex items-center gap-1.5 shrink-0">
@@ -82,6 +82,13 @@ export default function RulingPlanetsBar() {
             <span className="text-[#D4AF37] font-semibold">({liveRP.lagnaStarLord})</span>
             <span className="text-[#7CAE89] font-bold">[{liveRP.lagnaSubLord}]</span>
           </div>
+
+          {liveRP.purifiedRulingPlanets && liveRP.purifiedRulingPlanets.length > 0 && (
+            <div className="hidden md:flex items-center gap-1 bg-[#1A140E] px-2 py-0.5 rounded-md border border-[#D4AF37]/40 shrink-0">
+              <span className="text-[#D4AF37] font-semibold">{language === 'hi' ? 'शुद्ध RP:' : 'Purified:'}</span>
+              <span className="text-[#7CAE89] font-mono text-[10px]">{liveRP.purifiedRulingPlanets.join(', ')}</span>
+            </div>
+          )}
         </div>
 
         {/* Right Toggle */}

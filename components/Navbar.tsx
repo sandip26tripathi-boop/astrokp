@@ -47,8 +47,8 @@ export default function Navbar({ onOpenReport }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#FFFDF7]/95 dark:bg-[#1A140E]/95 border-b border-[#E4D5B7] dark:border-[#443525] transition-colors shadow-sandalwood">
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#FFFDF7]/95 dark:bg-[#1A140E]/95 border-b border-[#E4D5B7] dark:border-[#443525] transition-colors shadow-sandalwood overflow-visible box-border">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 min-h-[64px] py-3 flex items-center justify-between gap-2 sm:gap-4 overflow-visible box-border">
           {/* Logo & Brand */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <TriangleLogo size="sm" />

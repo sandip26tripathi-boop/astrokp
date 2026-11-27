@@ -15,12 +15,45 @@ import {
   PlanetElementalProperties,
   HouseGroupRule
 } from './classicalRules';
+import { computeLiveRulingPlanets } from './rulingPlanetsEngine';
+
+export interface ThreeTierKPChain {
+  stepA_PlanetSource: {
+    planet: string;
+    occupiedHouse: number;
+    ownedHouses: number[];
+    isUntenanted: boolean;
+    untenantedSignificanceHi: string;
+    untenantedSignificanceEn: string;
+    sourceSummaryHi: string;
+    sourceSummaryEn: string;
+  };
+  stepB_StarLordResult: {
+    starLord: string;
+    housesSignifiedL1toL4: number[];
+    supportiveHouses: number[];
+    negatingHouses: number[];
+    resultGiverSummaryHi: string;
+    resultGiverSummaryEn: string;
+  };
+  stepC_SubLordApproval: {
+    subLord: string;
+    housesSignified: number[];
+    approvalStatus: 'Promised' | 'Delayed / Obstacles' | 'Denied';
+    approvalStatusHi: string;
+    qualityModifierSummaryHi: string;
+    qualityModifierSummaryEn: string;
+  };
+  completeChainSummaryHi: string;
+  completeChainSummaryEn: string;
+}
 
 export interface AstrologicalAuditReport {
   topic: string;
   topicHi: string;
   primaryHouseNum: number;
   domainRule: HouseGroupRule;
+  threeTierKpChain: ThreeTierKPChain;
   kpDiagnosis: {
     primaryCuspalSubLord: string;
     cslStarLord: string;
@@ -58,8 +91,38 @@ export interface AstrologicalAuditReport {
     dashaPeriodDates: string;
     dashaLordNavtara: string;
     dashaLordIsFavorableInNavtara: boolean;
+    saturnTransit: {
+      sign: string;
+      houseFromLagna: number;
+      houseFromMoon: number;
+      isRetrograde: boolean;
+    };
+    jupiterTransit: {
+      sign: string;
+      houseFromLagna: number;
+      houseFromMoon: number;
+      isRetrograde: boolean;
+    };
+    rahuKetuAxis: {
+      rahuHouseFromLagna: number;
+      ketuHouseFromLagna: number;
+    };
     doubleTransitHouses: number[];
+    doubleTransitSummaryHi: string;
+    doubleTransitSummaryEn: string;
+    liveRulingPlanets: {
+      purifiedRPs: string[];
+      retrogradePlanets: string[];
+      dayLord: string;
+      moonSignLord: string;
+      moonStarLord: string;
+      lagnaSignLord: string;
+      lagnaStarLord: string;
+      timingWindow: string;
+      timingWindowHi: string;
+    };
     timeframeRecommendationHi: string;
+    timeframeRecommendationEn: string;
   };
 }
 
@@ -178,7 +241,91 @@ export function evaluateChartAgainstRules(
       : `के.पी. ज्योतिष अनुसार कस्पल सब-लॉर्ड कुछ रुकावट देने वाले भावों को सक्रिय कर रहा है जिससे सतर्कता आवश्यक है।`;
   }
 
-  // 3. Parashari Lens Evaluation
+  // 3-Tier KP Chain Structure: Planet (Source) -> Star Lord (Result Giver) -> Sub-Lord (Quality / Approval)
+  const ownedHouses = masterKundli.houseLordships
+    ?.filter((h) => (h.signLord || '').toLowerCase() === cslName.toLowerCase())
+    .map((h) => h.houseNumber) || [];
+  const cslOccupiedHouse = cslPlanetObj ? (cslPlanetObj.bhavaChalitHouse || cslPlanetObj.d1House) : primaryHouseNum;
+
+  // Sub-lord houses signified
+  const subLordHouses = new Set<number>();
+  if (masterKundli.fourFoldSignificators) {
+    const checkSub = (levelArray: { house: number; planets: string[] }[]) => {
+      levelArray.forEach((item) => {
+        if (item.planets.some((pName) => pName.toLowerCase() === cslSubLord.toLowerCase())) {
+          subLordHouses.add(item.house);
+        }
+      });
+    };
+    checkSub(masterKundli.fourFoldSignificators.L1 || []);
+    checkSub(masterKundli.fourFoldSignificators.L2 || []);
+    checkSub(masterKundli.fourFoldSignificators.L3 || []);
+    checkSub(masterKundli.fourFoldSignificators.L4 || []);
+  }
+  const subLordHousesList = Array.from(subLordHouses);
+
+  let approvalStatus: 'Promised' | 'Delayed / Obstacles' | 'Denied' = 'Promised';
+  let approvalStatusHi = 'कार्य सिद्धि (स्वीकृत)';
+  if (negatingSignified.length > supportiveSignified.length) {
+    approvalStatus = 'Denied';
+    approvalStatusHi = 'निषेध / प्रतिकूल';
+  } else if (negatingSignified.length > 0 || isCslRetrograde) {
+    approvalStatus = 'Delayed / Obstacles';
+    approvalStatusHi = 'विलंब व परिश्रम उपरांत सिद्धि';
+  }
+
+  const untenantedHi = isCslUntenanted
+    ? `कस्पल सब-लॉर्ड (${cslName}) अप्रयुक्त (Untenanted) है, जिसका अर्थ है कि इसके नक्षत्र में कोई अन्य ग्रह नहीं बैठा है; अतः यह अपने अधिकृत भाव (${cslOccupiedHouse}) और स्वामित्व भावों [${ownedHouses.join(', ') || 'स्थानीय'}] का फल सीधे व पूर्ण सामर्थ्य से देने वाला स्वतंत्र स्रोत बनता है।`
+    : `कस्पल सब-लॉर्ड (${cslName}) प्रयुक्त (Tenanted) है, अतः इसके स्वामित्व भावों के परिणाम अन्य tenant ग्रहों के माध्यम से भी प्रवाहित होते हैं।`;
+
+  const untenantedEn = isCslUntenanted
+    ? `Cuspal Sub-Lord (${cslName}) is Untenanted (no planet occupies its Nakshatra), making it an uninhibited, direct, and powerful primary source for its occupied house (${cslOccupiedHouse}) and owned houses [${ownedHouses.join(', ') || 'own'}].`
+    : `Cuspal Sub-Lord (${cslName}) is Tenanted; its significations also flow through tenant planets.`;
+
+  const stepASummaryHi = `कस्पल सब-लॉर्ड ${cslName} भाव ${cslOccupiedHouse} में स्थित है और भाव [${ownedHouses.join(', ') || 'स्वामित्व'}] का स्वामी है। ${untenantedHi}`;
+  const stepASummaryEn = `CSL ${cslName} occupies House ${cslOccupiedHouse} and rules Houses [${ownedHouses.join(', ') || 'none'}]. ${untenantedEn}`;
+
+  const stepBSummaryHi = `के.पी. मूल सिद्धांत (Planet is the source, Star Lord delivers the results): कस्पल सब-लॉर्ड का नक्षत्र स्वामी ${cslStarLord} 4-स्तरीय भाव संबंधों (L1-L4) द्वारा भाव [${signifiedHousesList.join(', ')}] को सक्रिय कर रहा है (अनुकूल भाव: [${supportiveSignified.join(', ') || 'कोई नहीं'}], प्रतिकूल भाव: [${negatingSignified.join(', ') || 'कोई नहीं'}])।`;
+  const stepBSummaryEn = `KP Core Law (Planet represents the source, Star Lord delivers the actual result): Nakshatra Lord ${cslStarLord} signifies Houses [${signifiedHousesList.join(', ')}] across 4-fold levels (Fruitful: [${supportiveSignified.join(', ') || 'none'}], Opposing: [${negatingSignified.join(', ') || 'none'}]).`;
+
+  const stepCSummaryHi = `के.पी. निर्णायक सिद्धांत (Sub-Lord decides the quality and final fruition): उप-स्वामी ${cslSubLord} द्वारा इस फल की अंतिम स्वीकृति ${approvalStatusHi} के रूप में निर्धारित होती है।`;
+  const stepCSummaryEn = `KP Decisive Law (Sub-Lord determines the quality and final fruition): Sub-Lord ${cslSubLord} modifies the outcome as ${approvalStatus}.`;
+
+  const completeChainHi = `के.पी. 3-स्तरीय विश्लेषण: स्रोत (Planet): ${cslName} [भाव ${cslOccupiedHouse}, स्वामित्व ${ownedHouses.join(', ')}] ${isCslUntenanted ? '(अप्रयुक्त)' : ''} → फल दाता (Star Lord): ${cslStarLord} [भाव ${signifiedHousesList.join(', ')}] → अंतिम स्वीकृति (Sub-Lord): ${cslSubLord} (${approvalStatusHi})।`;
+  const completeChainEn = `KP 3-Tier Analysis: Source (Planet): ${cslName} [House ${cslOccupiedHouse}, Rules ${ownedHouses.join(', ')}] ${isCslUntenanted ? '(Untenanted)' : ''} → Result Giver (Star Lord): ${cslStarLord} [Houses ${signifiedHousesList.join(', ')}] → Final Approval (Sub-Lord): ${cslSubLord} (${approvalStatus}).`;
+
+  const threeTierKpChain: ThreeTierKPChain = {
+    stepA_PlanetSource: {
+      planet: cslName,
+      occupiedHouse: cslOccupiedHouse,
+      ownedHouses,
+      isUntenanted: isCslUntenanted,
+      untenantedSignificanceHi: untenantedHi,
+      untenantedSignificanceEn: untenantedEn,
+      sourceSummaryHi: stepASummaryHi,
+      sourceSummaryEn: stepASummaryEn,
+    },
+    stepB_StarLordResult: {
+      starLord: cslStarLord,
+      housesSignifiedL1toL4: signifiedHousesList,
+      supportiveHouses: supportiveSignified,
+      negatingHouses: negatingSignified,
+      resultGiverSummaryHi: stepBSummaryHi,
+      resultGiverSummaryEn: stepBSummaryEn,
+    },
+    stepC_SubLordApproval: {
+      subLord: cslSubLord,
+      housesSignified: subLordHousesList,
+      approvalStatus,
+      approvalStatusHi,
+      qualityModifierSummaryHi: stepCSummaryHi,
+      qualityModifierSummaryEn: stepCSummaryEn,
+    },
+    completeChainSummaryHi: completeChainHi,
+    completeChainSummaryEn: completeChainEn,
+  };
+
+  // 4. Parashari Lens Evaluation
   const ascSignId = masterKundli.ascendant.signId || 1;
   const functionalNature = ASCENDANT_FUNCTIONAL_MAP[ascSignId] || ASCENDANT_FUNCTIONAL_MAP[1];
 
@@ -222,7 +369,7 @@ export function evaluateChartAgainstRules(
   }
   parashariSynthesisHi += `। (अष्टकवर्ग में इस भाव को ${savPoints} बिंदु प्राप्त हैं)।`;
 
-  // 4. Timing Synthesis (Vimshottari Dasha + Gochar)
+  // 5. Timing Synthesis (Vimshottari Dasha + Live Gochar + Double Transit + Purified Live RP)
   const todayDasha = masterKundli.dashaHierarchy;
   const activeMD = todayDasha.mahadasha.planet;
   const activeAD = todayDasha.antardasha.planet;
@@ -236,13 +383,53 @@ export function evaluateChartAgainstRules(
 
   const navtaraResult = calculateNavtara(moonNakIdx, mdNakIdx);
 
-  const doubleTransitHouses = masterKundli.liveGochar?.doubleTransitHouses?.housesFromLagna || [];
+  // Live Transit Details
+  const liveGochar = masterKundli.liveGochar;
+  const saturnTransit = liveGochar?.transitPlanets?.find((p: any) => p.name === 'Saturn') || {
+    signName: 'Aquarius',
+    houseFromLagna: 10,
+    houseFromMoon: 12,
+    isRetrograde: false,
+  };
+  const jupiterTransit = liveGochar?.transitPlanets?.find((p: any) => p.name === 'Jupiter') || {
+    signName: 'Taurus',
+    houseFromLagna: 1,
+    houseFromMoon: 3,
+    isRetrograde: false,
+  };
+  const rahuTransit = liveGochar?.transitPlanets?.find((p: any) => p.name === 'Rahu') || {
+    houseFromLagna: 11,
+  };
+  const ketuTransit = liveGochar?.transitPlanets?.find((p: any) => p.name === 'Ketu') || {
+    houseFromLagna: 5,
+  };
+
+  const doubleTransitHouses = liveGochar?.doubleTransitHouses?.housesFromLagna || [];
+  const doubleTransitSummaryHi = doubleTransitHouses.length > 0
+    ? `शनि एवं गुरु का संयुक्त दृष्टि/गोचर प्रभाव भाव [${doubleTransitHouses.join(', ')}] पर है, जो इस भाव से जुड़े कार्यों के फलित होने का अटल समय निर्धारित करता है।`
+    : `शनि एवं गुरु के गोचर से संबंधित भावों की सक्रियता अनुकूल है।`;
+  const doubleTransitSummaryEn = doubleTransitHouses.length > 0
+    ? `The Double Transit Principle locks cosmic manifestation into Houses [${doubleTransitHouses.join(', ')}] simultaneously influenced by Saturn and Jupiter.`
+    : `Saturn and Jupiter transits establish favorable cosmic timing for the queried matter.`;
+
+  // Compute Live Ruling Planets using the exact query timestamp and user coordinates
+  const lat = masterKundli.meta.latitude || 28.6139;
+  const lon = masterKundli.meta.longitude || 77.209;
+  const liveRP = computeLiveRulingPlanets(lat, lon, new Date(), {
+    fruitfulHouses: domainRule.supportiveHouses,
+    fourFoldSignificators: masterKundli.fourFoldSignificators,
+    dashaHierarchy: todayDasha,
+  });
+
+  const timingRecommendationHi = `वर्तमान में ${activeMD} की महादशा में ${activeAD} की अंतर्दशा एवं ${activePD} की प्रत्यंतर्दशा गतिमान है। तात्कालिक शुद्ध रूलिंग प्लैनेट्स [${liveRP.purifiedRulingPlanets.join(', ')}] तथा गोचर में द्वि-गोचर के प्रभाव से यह समय ${liveRP.eventTimingWindowHi || 'आगामी महीनों में फलित होने के अनुकूल है'}।`;
+  const timingRecommendationEn = `Currently running ${activeMD} Mahadasha, ${activeAD} Antardasha, and ${activePD} Pratyantardasha. Cross-matching with purified Live Ruling Planets [${liveRP.purifiedRulingPlanets.join(', ')}] and the Double Transit impact on House(s) [${doubleTransitHouses.join(', ')}], the timing window is: ${liveRP.eventTimingWindow || 'Active during the upcoming transition'}.`;
 
   return {
     topic: classified?.topic || 'general',
     topicHi: classified?.topicHi || 'सामान्य',
     primaryHouseNum,
     domainRule,
+    threeTierKpChain,
     kpDiagnosis: {
       primaryCuspalSubLord: cslName,
       cslStarLord: cslStarLord,
@@ -280,8 +467,38 @@ export function evaluateChartAgainstRules(
       dashaPeriodDates: `${todayDasha.antardasha.startDate.slice(0, 10)} से ${todayDasha.antardasha.endDate.slice(0, 10)}`,
       dashaLordNavtara: `${navtaraResult.taraHindi} (${navtaraResult.taraNature})`,
       dashaLordIsFavorableInNavtara: navtaraResult.isFavorable,
+      saturnTransit: {
+        sign: saturnTransit.signName,
+        houseFromLagna: saturnTransit.houseFromLagna,
+        houseFromMoon: saturnTransit.houseFromMoon,
+        isRetrograde: Boolean(saturnTransit.isRetrograde),
+      },
+      jupiterTransit: {
+        sign: jupiterTransit.signName,
+        houseFromLagna: jupiterTransit.houseFromLagna,
+        houseFromMoon: jupiterTransit.houseFromMoon,
+        isRetrograde: Boolean(jupiterTransit.isRetrograde),
+      },
+      rahuKetuAxis: {
+        rahuHouseFromLagna: rahuTransit.houseFromLagna,
+        ketuHouseFromLagna: ketuTransit.houseFromLagna,
+      },
       doubleTransitHouses,
-      timeframeRecommendationHi: `वर्तमान में ${activeMD} की महादशा में ${activeAD} की अंतर्दशा गतिशील है। गोचर में द्वि-गोचर का प्रभाव भाव [${doubleTransitHouses.join(', ') || 'सक्रिय'}] पर होने से आगामी महीनों में अनुकूल परिणाम दृष्टिगोचर होंगे।`,
+      doubleTransitSummaryHi,
+      doubleTransitSummaryEn,
+      liveRulingPlanets: {
+        purifiedRPs: liveRP.purifiedRulingPlanets,
+        retrogradePlanets: liveRP.retrogradePlanets,
+        dayLord: liveRP.dayLord,
+        moonSignLord: liveRP.moonSignLord,
+        moonStarLord: liveRP.moonStarLord,
+        lagnaSignLord: liveRP.lagnaSignLord,
+        lagnaStarLord: liveRP.lagnaStarLord,
+        timingWindow: liveRP.eventTimingWindow || '',
+        timingWindowHi: liveRP.eventTimingWindowHi || '',
+      },
+      timeframeRecommendationHi: timingRecommendationHi,
+      timeframeRecommendationEn: timingRecommendationEn,
     },
   };
 }

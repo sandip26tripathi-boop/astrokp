@@ -12,6 +12,7 @@ import KPDataTable from '@/components/KPDataTable';
 import AstrologyChat from '@/components/AstrologyChat';
 import ReportView from '@/components/ReportView';
 import PanditJiIcon from '@/components/PanditJiIcon';
+import AutoRecoveryBoundary from '@/components/AutoRecoveryBoundary';
 import { useAstrologyStore } from '@/store/useAstrologyStore';
 import { t } from '@/lib/i18n';
 import {
@@ -57,7 +58,9 @@ export default function Home() {
       </div>
 
       {/* Real-time Ruling Planets HUD Header Banner */}
-      <RulingPlanetsBar />
+      <AutoRecoveryBoundary moduleName="RulingPlanetsHUD">
+        <RulingPlanetsBar />
+      </AutoRecoveryBoundary>
 
       {/* Main Navigation */}
       <Navbar onOpenReport={() => setShowReport(true)} />
@@ -117,7 +120,9 @@ export default function Home() {
 
         {/* Section 1: Birth Details & Geocoding Input Form */}
         <div className="w-full">
-          <KundliForm />
+          <AutoRecoveryBoundary moduleName="KundliForm">
+            <KundliForm />
+          </AutoRecoveryBoundary>
         </div>
 
         {/* Section 2: Astrological Calculations & Charts Suite (Hidden by default; opens on demand) */}
@@ -220,29 +225,31 @@ export default function Home() {
               </div>
 
               {/* Tab Contents */}
-              {activeCalcTab === 'chart' && (
-                <div className="w-full space-y-4">
-                  <ChartViewer />
-                </div>
-              )}
+              <AutoRecoveryBoundary moduleName="CalculationsSuite">
+                {activeCalcTab === 'chart' && (
+                  <div className="w-full space-y-4">
+                    <ChartViewer />
+                  </div>
+                )}
 
-              {activeCalcTab === 'events' && (
-                <div className="w-full">
-                  <EventChecklist />
-                </div>
-              )}
+                {activeCalcTab === 'events' && (
+                  <div className="w-full">
+                    <EventChecklist />
+                  </div>
+                )}
 
-              {activeCalcTab === 'matrix' && (
-                <div className="w-full">
-                  <KPDataTable />
-                </div>
-              )}
+                {activeCalcTab === 'matrix' && (
+                  <div className="w-full">
+                    <KPDataTable />
+                  </div>
+                )}
 
-              {activeCalcTab === 'btr' && (
-                <div className="w-full">
-                  <BTRWorkspace />
-                </div>
-              )}
+                {activeCalcTab === 'btr' && (
+                  <div className="w-full">
+                    <BTRWorkspace />
+                  </div>
+                )}
+              </AutoRecoveryBoundary>
             </div>
           )}
         </div>
@@ -269,7 +276,9 @@ export default function Home() {
             </button>
           </div>
 
-          <AstrologyChat />
+          <AutoRecoveryBoundary moduleName="AstrologyChat">
+            <AstrologyChat />
+          </AutoRecoveryBoundary>
         </div>
 
         {/* Section 5: Legal Disclaimer Box */}
