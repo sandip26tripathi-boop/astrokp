@@ -36,7 +36,7 @@ function attachFinalVerdict(
   timing: string,
   remedy: string
 ): string {
-  if (text.includes('Final Verdict') || text.includes('अंतिम निर्णय')) {
+  if (text.includes('सरल शब्दों में मुख्य निष्कर्ष') || text.includes('Simple Takeaway')) {
     return text;
   }
   const q = activeSynthesizerQuery.toLowerCase();
@@ -52,7 +52,8 @@ function attachFinalVerdict(
       extraParts += ` Recommended astrological measure: ${remedy}.`;
     }
     const verdict = `**Final Verdict:** Overall analysis indicates a ${outcome}.${extraParts}`;
-    return `${text.trim()}\n\n${verdict}`;
+    const plainSummary = `\n\n---\n\n### Simple Takeaway (Easy-to-Understand Summary)\nIn plain words, your path ahead is ${outcome.toLowerCase().includes('positive') || outcome.toLowerCase().includes('favorable') ? 'promising and moving in a positive direction' : 'steady, requiring patient and consistent effort'}. The upcoming phase${timing ? ` (especially around ${timing})` : ' in the coming months'} is a key window where your focused actions will bring noticeable results. Avoid second-guessing yourself or rushing into uncalculated risks. As a peaceful real-world step, maintain daily morning focus, stay disciplined with your health, and keep your communication clear and grounded.`;
+    return `${text.trim()}\n\n${verdict}${plainSummary}`;
   } else {
     if (askedTiming && timing) {
       extraParts += ` कार्य सिद्धि का संभावित कालखंड ${timing} के मध्य बनता है।`;
@@ -61,7 +62,8 @@ function attachFinalVerdict(
       extraParts += ` ग्रह अनुकूलता संवर्धन हेतु ${remedy}।`;
     }
     const verdict = `**अंतिम निर्णय:** समग्र ज्योतिषीय विश्लेषण अनुसार यह परिणाम ${outcome} है।${extraParts}`;
-    return `${text.trim()}\n\n${verdict}`;
+    const plainSummary = `\n\n---\n\n### सरल शब्दों में मुख्य निष्कर्ष (आसान सारांश)\nसरल और सीधे शब्दों में कहें तो आपके इस प्रश्न के संदर्भ में आने वाला समय ${outcome.includes('सकारात्मक') || outcome.includes('सुनिश्चित') ? 'काफी अनुकूल और प्रगति देने वाला रहेगा' : 'धैर्य, संयम और योजनाबद्ध तरीके से आगे बढ़ने का है'}। जीवन में अनुकूल बदलाव${timing ? ` (विशेषकर ${timing} के आसपास)` : ' आगामी महीनों में'} स्पष्ट दिखाई देंगे। किसी भी प्रकार की जल्दबाजी या मानसिक तनाव से बचें और अपने कर्म पर पूरा भरोसा रखें। दैनिक जीवन में मन की शांति के लिए सुबह कुछ समय शांत वातावरण में ध्यान लगाएं, नियमित दिनचर्या रखें और बड़ों का आशीर्वाद लेकर महत्वपूर्ण काम शुरू करें।`;
+    return `${text.trim()}\n\n${verdict}${plainSummary}`;
   }
 }
 

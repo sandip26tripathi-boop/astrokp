@@ -123,14 +123,27 @@ function renderFormattedContent(content: string, onSelectQuestion?: (q: string) 
       }
     }
 
+    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+      elements.push(
+        <hr key={`hr-${i}`} className="my-3 border-t border-[#E4D5B7] dark:border-[#443525]" />
+      );
+      continue;
+    }
+
     if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
       const title = trimmed.replace(/^#+\s*/, '');
+      const isPlainSummary = title.includes('सरल शब्दों में मुख्य निष्कर्ष') || title.includes('Simple Takeaway');
       elements.push(
         <div
           key={`h-${i}`}
-          className="font-bold text-[#B87314] dark:text-[#D4AF37] mt-2.5 mb-1 text-sm sm:text-base border-b border-[#E4D5B7] dark:border-[#443525] pb-0.5"
+          className={`font-bold ${
+            isPlainSummary
+              ? 'text-[#B87314] dark:text-[#D4AF37] mt-3 mb-1.5 text-sm sm:text-base flex items-center gap-1.5'
+              : 'text-[#B87314] dark:text-[#D4AF37] mt-2.5 mb-1 text-sm sm:text-base border-b border-[#E4D5B7] dark:border-[#443525] pb-0.5'
+          }`}
         >
-          {title}
+          {isPlainSummary && <Sparkles className="w-4 h-4 text-[#B87314] shrink-0" />}
+          <span>{title}</span>
         </div>
       );
       continue;

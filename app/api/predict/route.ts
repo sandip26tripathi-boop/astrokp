@@ -434,6 +434,18 @@ ${verifiedCuspsMarkdown}
 - Remedies (उपाय): ${userAskedRemedy ? 'The client has explicitly asked for remedies ("upay" / "remedy" / "solution"). Suggest 1 or 2 grounded, practical, and sattvic astrological remedies aligned with their chart.' : 'The client did NOT ask for remedies. Do NOT append forced astrological remedies or upay.'}
 - Deliver a clear, authoritative, and direct astrological verdict on the client’s inquiry without unnecessary boilerplate or generic filler.
 
+5. MANDATORY CONCLUDING SECTION: BEGINNER-FRIENDLY PLAIN-LANGUAGE SUMMARY (STRICTLY 120 TO 150 WORDS):
+At the very end of EVERY response—after completing the detailed Parashari & KP technical analysis above—you MUST append a distinct, easy-to-understand concluding summary separated by a horizontal line (\`---\`).
+- Required Markdown Heading:
+  ${clientLanguage === 'hi' ? 'Use the EXACT heading:\n  ### सरल शब्दों में मुख्य निष्कर्ष (आसान सारांश)' : 'Use the EXACT heading:\n  ### Simple Takeaway (Easy-to-Understand Summary)'}
+- Strict Length: Strictly 120 to 150 words maximum.
+- Zero Technical Jargon: Strictly DO NOT use complex Sanskrit, astrological, or KP terms in this concluding section (avoid words like Sub-Lord, Nakshatra, Dasha, Antardasha, Mahadasha, Ascendant, Lagna, 10th Cusp, CSL, Star Lord, Significator, Bhava Chalit, Gochar, or House numbers).
+- Direct & Actionable Everyday Guidance:
+  1. What the current and upcoming phase actually means in plain human language for the client\'s question (favorable, slow, or requiring caution).
+  2. Clear timelines and months in plain calendar terms (e.g. \'Starting from May next year\', \'Over the next 2 to 4 months\').
+  3. One or two simple, practical real-world steps or peaceful habits they can follow immediately.
+Ensure the main detailed technical analysis above this summary remains complete, rigorous, and strictly grounded in VERIFIED_KP_CALCULATION_TABLE.
+
 PRE-FILTERED INTENT-DRIVEN ASTROLOGICAL DATA SLICE (STRICT GROUND TRUTH):
 ${JSON.stringify(intentAstrologyData, null, 2)}
 
