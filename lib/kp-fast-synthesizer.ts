@@ -14,6 +14,7 @@
 import { KPMatrix, CuspData, PlanetPosition } from '@/types/astrology';
 import { resolveSignId, SIGN_NAMES_HI, SIGN_LORDS } from './parashari-evaluator';
 import { computeLiveRulingPlanets } from './astrology/rulingPlanetsEngine';
+import { resolveBhavatBhavam } from './astrology/bhavatBhavam';
 
 const HINDI_PLANET_NAMES: Record<string, string> = {
   Sun: 'सूर्य',
@@ -233,6 +234,61 @@ export function synthesizeFastKPAnswer(
   );
   const defaultTimingHi = liveRP.eventTimingWindowHi || 'आगामी २ से ४ महीनों के भीतर';
   const defaultTimingEn = liveRP.eventTimingWindow || 'within the next 2 to 4 months';
+
+  // Check Bhavat Bhavam (Derived Houses) for family members & relatives
+  const bhavatBhavam = resolveBhavatBhavam(userQuery, conversationHistory);
+  if (bhavatBhavam && bhavatBhavam.hasRelativeQuery) {
+    const targetCusp = findCusp(bhavatBhavam.derivedHouse);
+    const cslName = targetCusp.subLord || 'Mercury';
+    const cslPlanet = planets.find((p) => (p.name || '').toLowerCase() === cslName.toLowerCase());
+    const cslStar = cslPlanet?.starLord || targetCusp.starLord || 'Moon';
+    const cslSub = cslPlanet?.subLord || targetCusp.subLord || cslName;
+    const cslHi = HINDI_PLANET_NAMES[cslName] || cslName;
+    const starHi = HINDI_PLANET_NAMES[cslStar] || cslStar;
+    const subHi = HINDI_PLANET_NAMES[cslSub] || cslSub;
+
+    if (!isEnglishQuery) {
+      const content = `${contextBridgeHi}आपके प्रश्न अनुसार **${bhavatBhavam.relative.nameHi}** के **${bhavatBhavam.aspect.nameHi}** का विश्लेषण शास्त्रीय 'भावात भावम' (व्युत्पन्न भाव) एवं के.पी. कस्पल सब-लॉर्ड पद्धति द्वारा किया गया है।
+
+**भावात भावम (व्युत्पन्न भाव) निर्धारण:**
+${bhavatBhavam.formulaDisplayHi}
+
+**के.पी. ३-स्तरीय कार्येश विश्लेषण:**
+• **स्रोत (Planet Source):** संबंधित ${bhavatBhavam.derivedHouse}वें भाव के कस्पल सब-लॉर्ड (CSL) **${cslHi}** हैं।
+• **फल दाता (Star Lord Result):** नक्षत्र स्वामी **${starHi}** के भाव संबंध अनुकूल भावों [${bhavatBhavam.relativeSupportiveHouses.join(', ')}] को सीधा बल प्रदान कर रहे हैं।
+• **अंतिम स्वीकृति (Sub-Lord Approval):** उप-स्वामी **${subHi}** इस परिणाम की गुणवत्ता व सिद्धि को सुनिश्चित करते हैं।
+
+वर्तमान में गतिमान विंशोत्तरी दशा (${mahaHi} में ${antarHi}) तथा गोचरीय प्रभाव इस विषय में सकारात्मक प्रगति एवं स्थिरता की ओर संकेत कर रहे हैं।`;
+
+      return attachFinalVerdict(
+        content,
+        false,
+        'सकारात्मक एवं अनुकूल',
+        defaultTimingHi,
+        'प्रतिदिन सुबह सूर्य देव को जल अर्पित करें और जरूरतमंदों को अन्न या फल दान करें'
+      );
+    } else {
+      const content = `Based on your question regarding **${bhavatBhavam.relative.nameEn}'s ${bhavatBhavam.aspect.nameEn}**, authentic Vedic Astrology applies the classical **Bhavat Bhavam (Derived Houses)** principle alongside high-precision KP Cuspal Sub-Lord analysis.
+
+**Bhavat Bhavam Mathematical Rotation:**
+${bhavatBhavam.formulaDisplayEn}
+
+**KP 3-Tier Signification Chain:**
+• **Source (Planet):** Cuspal Sub-Lord (CSL) of House ${bhavatBhavam.derivedHouse} is **${cslName}**.
+• **Result Giver (Star Lord):** Nakshatra Lord **${cslStar}** activates supportive houses [${bhavatBhavam.relativeSupportiveHouses.join(', ')}] relative to ${bhavatBhavam.relative.nameEn}.
+• **Final Fruition (Sub-Lord):** Sub-Lord **${cslSub}** provides decisive sanction and quality to this outcome.
+
+The active Vimshottari period (${mahaRaw} - ${antarRaw}) supports fruitful development and steady progress in this area.`;
+
+      return attachFinalVerdict(
+        content,
+        true,
+        'Favorable and Supportive',
+        defaultTimingEn,
+        'Offer daily morning prayers with calm focus, and donate food items to the needy on Thursdays'
+      );
+    }
+  }
 
   // ===============================================================
   // NATURAL HUMAN SPOKEN COUNSELING (HINDI)

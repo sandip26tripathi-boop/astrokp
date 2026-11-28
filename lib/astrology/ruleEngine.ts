@@ -16,6 +16,7 @@ import {
   HouseGroupRule
 } from './classicalRules';
 import { computeLiveRulingPlanets } from './rulingPlanetsEngine';
+import { resolveBhavatBhavam, BhavatBhavamResult } from './bhavatBhavam';
 
 export interface ThreeTierKPChain {
   stepA_PlanetSource: {
@@ -53,6 +54,7 @@ export interface AstrologicalAuditReport {
   topicHi: string;
   primaryHouseNum: number;
   domainRule: HouseGroupRule;
+  bhavatBhavam?: BhavatBhavamResult;
   threeTierKpChain: ThreeTierKPChain;
   kpDiagnosis: {
     primaryCuspalSubLord: string;
@@ -131,8 +133,9 @@ export function evaluateChartAgainstRules(
   userQuery: string,
   previousTurns: Array<{ role: string; content?: string; text?: string }> = []
 ): AstrologicalAuditReport {
-  // 1. Identify Topic & Target House via Strict Intent Router
+  // 1. Identify Topic & Target House via Strict Intent Router & Bhavat Bhavam (Relatives)
   const routedIntent = routeUserIntent(userQuery, previousTurns);
+  const bhavatBhavam = routedIntent.bhavatBhavam || resolveBhavatBhavam(userQuery, previousTurns);
   const domainKey = routedIntent.domain;
   const topicKey = domainKey;
 
@@ -155,12 +158,12 @@ export function evaluateChartAgainstRules(
     }
   }
 
-  const classified = {
-    topic: domainRule.domain,
-    topicHi: domainRule.domainHi,
-  };
+  const primaryHouseNum = bhavatBhavam ? bhavatBhavam.derivedHouse : domainRule.primaryHouse;
 
-  const primaryHouseNum = domainRule.primaryHouse;
+  const classified = {
+    topic: bhavatBhavam ? `${bhavatBhavam.relative.nameEn}'s ${bhavatBhavam.aspect.nameEn} (Bhavat Bhavam)` : domainRule.domain,
+    topicHi: bhavatBhavam ? `${bhavatBhavam.relative.nameHi} का ${bhavatBhavam.aspect.nameHi} (भावात भावम)` : domainRule.domainHi,
+  };
   const cusps = masterKundli.cusps || [];
   const primaryCusp = cusps.find(
     (c) => (c.houseNumber || (c as any).cuspNumber) === primaryHouseNum
@@ -207,8 +210,16 @@ export function evaluateChartAgainstRules(
   }
 
   const signifiedHousesList = Array.from(cslHousesSignified);
-  const supportiveSignified = signifiedHousesList.filter((h) => domainRule.supportiveHouses.includes(h));
-  const negatingSignified = signifiedHousesList.filter((h) => domainRule.negatingHouses.includes(h));
+  const supportiveSignified = signifiedHousesList.filter((h) =>
+    bhavatBhavam
+      ? bhavatBhavam.relativeSupportiveHouses.includes(h)
+      : domainRule.supportiveHouses.includes(h)
+  );
+  const negatingSignified = signifiedHousesList.filter((h) =>
+    bhavatBhavam
+      ? bhavatBhavam.relativeNegatingHouses.includes(h)
+      : domainRule.negatingHouses.includes(h)
+  );
 
   // Tattva & Dosha Mappings
   const cslElemental = PLANET_ELEMENTAL_MAP[cslName] || null;
@@ -432,6 +443,7 @@ export function evaluateChartAgainstRules(
     topicHi: classified?.topicHi || 'सामान्य',
     primaryHouseNum,
     domainRule,
+    bhavatBhavam: bhavatBhavam || undefined,
     threeTierKpChain,
     kpDiagnosis: {
       primaryCuspalSubLord: cslName,

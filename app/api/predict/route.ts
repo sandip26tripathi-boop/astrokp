@@ -13,6 +13,7 @@ import { extractQueriedTargetDate, getDashaForDate, getAllMahadashasTable } from
 import { evaluateChartAgainstRules } from '@/lib/astrology/ruleEngine';
 import { PLANET_ELEMENTAL_MAP } from '@/lib/astrology/classicalRules';
 import { routeUserIntent, extractIntentAstrologyData } from '@/lib/astrology/intentRouter';
+import { resolveBhavatBhavam, BhavatBhavamResult } from '@/lib/astrology/bhavatBhavam';
 import { ChartInput } from '@/types/astrology';
 
 try {
@@ -211,6 +212,7 @@ export async function POST(req: NextRequest) {
 
     // Programmatic Rule Engine Evaluation (KP Laws + Parashari Laws + Tattva/Dosha)
     const astrologicalAudit = evaluateChartAgainstRules(masterKundli, currentQuestion, recentMessages);
+    const bhavatBhavam = userIntent.bhavatBhavam || astrologicalAudit.bhavatBhavam || resolveBhavatBhavam(currentQuestion, recentMessages);
 
     const cusps = activeChart.cusps || [];
     const currentDBA = masterKundli.dashaHierarchy;
@@ -421,7 +423,48 @@ ${verifiedCuspsMarkdown}
 2. UNDERSTAND THE QUESTION'S NATURE FIRST:
 - Read the client's exact intent: Are they asking for a general career direction, a job vs. business choice, timing of a change, or solving a current struggle? Answer that exact point first without wandering into unrelated houses (never discuss the 4th house of property when asked about career unless it directly links to a specific job transfer).
 
-3. COMPLETE KP 3-TIER CHAIN + PARASHARI DASHA-GOCHAR SYNTHESIS:
+3. BHAVAT BHAVAM (DERIVED HOUSES / भावात भावम) RULE FOR FAMILY MEMBERS & RELATIVES:
+Whenever the client asks about any family member or relative (spouse, children, mother, father, siblings, grandparents, maternal relatives, business partners, etc.), you MUST automatically apply the classical principle of Bhavat Bhavam (Derived House Rotation) combined with KP Cuspal Sub-Lord (CSL) and Parashari analysis:
+
+- PART 1: RELATIVE BASE HOUSE MAPPING (PRIMARY HOUSE OF EACH RELATIVE = HOUSE X):
+  • Self (Native): House 1
+  • Younger Siblings (छोटे भाई-बहन): House 3
+  • Mother (माता): House 4
+  • 1st Child (पहली संतान / बेटा / बेटी): House 5
+  • Maternal Uncle / Aunt (मामा-मामी): House 6
+  • Spouse / Life Partner / Business Partner (पत्नी / पति / साझेदार): House 7
+  • 2nd Child (दूसरी संतान — 3rd from 5th): House 7
+  • Father (पिता): House 9
+  • 3rd Child (तीसरी संतान — 3rd from 7th): House 9
+  • Elder Siblings / Friends (बड़े भाई-बहन / मित्र): House 11
+  • 4th Child (चौथी संतान — 3rd from 9th): House 11
+  • Father's Mother / Paternal Grandmother (दादी — 4th from 9th): House 12
+  • Father's Father / Paternal Grandfather (दादा — 9th from 9th): House 5
+  • Mother's Father / Maternal Grandfather (नाना — 9th from 4th): House 12
+  • Mother's Mother / Maternal Grandmother (नानी — 4th from 4th): House 7
+
+- PART 2: DERIVED HOUSE CALCULATION FORMULA (ROTATING FROM HOUSE X):
+  Once the relative's Base House X is locked, calculate the queried life aspect of that relative using inclusive counting:
+  Derived House = ((X + Offset - 2) % 12) + 1
+  1. Personality, Nature & Appearance (व्यक्तित्व और स्वभाव): 1st from X (House X itself)
+  2. Wealth, Bank Balance & Speech (धन, कुटुंब और वाणी): 2nd from X (e.g. for Spouse [7], it is 8th house; for Mother [4], it is 5th house)
+  3. Courage, Communication & Younger Sibling (पराक्रम और संवाद): 3rd from X
+  4. Home, Property, Vehicles & Peace (सुख, संपत्ति और वाहन): 4th from X (e.g. for Spouse [7], it is 10th house; for 1st Child [5], it is 8th house)
+  5. Education, Intelligence & Speculation (शिक्षा और बुद्धि): 5th from X (e.g. for 1st Child [5], 5th from 5th = 9th house; for Spouse [7], 5th from 7th = 11th house)
+  6. Health Issues, Diseases, Debts & Enemies (रोग, स्वास्थ्य और शत्रु): 6th from X (e.g. for Spouse [7], 6th from 7th = 12th house; for Father [9], 6th from 9th = 2nd house; for Mother [4], 6th from 4th = 9th house)
+  7. Longevity & Sudden Events (आयु और संकट): 8th from X (e.g. for Spouse [7], 8th from 7th = 2nd house; for Father [9], 8th from 9th = 4th house)
+  8. Luck, Dharma & Higher Studies (भाग्य और उच्च शिक्षा): 9th from X (e.g. for 1st Child [5], 9th from 5th = 1st house)
+  9. Career, Profession, Status & Karma (करियर, व्यवसाय और पद-प्रतिष्ठा): 10th from X (e.g. for Spouse [7], career is 10th from 7th = 4th house; for 1st Child [5], career is 10th from 5th = 2nd house; for Father [9], career is 10th from 9th = 6th house)
+  10. Gains, Income & Fulfillment of Desires (आय, लाभ और इच्छापूर्ति): 11th from X (e.g. for Spouse [7], income is 11th from 7th = 5th house; for 1st Child [5], income is 11th from 5th = 3rd house)
+  11. Hospitalization, Losses & Foreign Travel (व्यय, अस्पताल और विदेश): 12th from X
+
+- PART 3: MANDATORY STEP-BY-STEP EXECUTION & OUTPUT FORMAT FOR RELATIVE QUERIES:
+  1. Explicitly State the Derived House Logic First: Show the mathematical rotation clearly in opening sentences (e.g. ${bhavatBhavam ? `"${bhavatBhavam.formulaDisplayHi}" / "${bhavatBhavam.formulaDisplayEn}"` : '"पत्नी का मुख्य भाव = ७वाँ भाव। पत्नी के करियर के लिए ७वें से १०वाँ भाव = कुंडली का ४था भाव देखा जाएगा।"'}).
+  2. Read Exact Cuspal Sub-Lord (CSL) from VERIFIED_KP_CALCULATION_TABLE: Inspect the CSL, Star Lord (NL), and Sub-Lord (SL) of that derived house strictly without guessing, checking supportive houses relative to X (2, 6, 10, 11 from X for career/wealth; 1, 5, 11 from X for health recovery; 6, 8, 12 from X for illness).
+  3. Check Active Dasha-Antardasha: Evaluate the running Mahadasha/Antardasha lords in relation to those derived houses.
+  4. Always Conclude with the 120-150 Word Plain-Language Summary Section below the \`---\` line.
+
+4. COMPLETE KP 3-TIER CHAIN + PARASHARI DASHA-GOCHAR SYNTHESIS:
 - Trace the complete 3-tier KP logic for the relevant house:
   (A) Planet (Source): Explain the Cuspal Sub-Lord (CSL), its house placement and ownership, and explicitly note if it is Untenanted (no planet occupying its stars, meaning it acts as a direct, unhindered source of its own houses).
   (B) Star Lord (Result Giver): What actual results its Nakshatra Lord delivers across 4-fold significations (L1–L4) (favorable vs opposing houses). Must match the Star Lord verbatim from VERIFIED_KP_CALCULATION_TABLE.
@@ -429,12 +472,12 @@ ${verifiedCuspsMarkdown}
 - Parashari & Gochar Synthesis: Weave Parashari house lord placement, Yuti, Drishti, active Vimshottari Mahadasha-Antardasha-Pratyantardasha, live Gochar (Saturn & Jupiter transits), and the Double Transit principle (Saturn + Jupiter simultaneous activation) into natural, flowing sentences.
 - Cross-match with Purified Live Ruling Planets: Incorporate current Live Ruling Planets to corroborate the astrological reading.
 
-4. CONDITIONAL TIMING & REMEDIES (NO FORCED REPETITIVE BOXES):
+5. CONDITIONAL TIMING & REMEDIES (NO FORCED REPETITIVE BOXES):
 - Timing (समयावधि): ${userAskedTiming ? 'The client has explicitly asked WHEN / Timing ("kab" / "when" / "samay"). State the exact calculated event timing window derived from Ruling Planets + Dasha + Double Transit Gochar.' : 'The client did NOT ask for event timing. Do NOT force a dedicated timing window, dates, or time box into this response.'}
 - Remedies (उपाय): ${userAskedRemedy ? 'The client has explicitly asked for remedies ("upay" / "remedy" / "solution"). Suggest 1 or 2 grounded, practical, and sattvic astrological remedies aligned with their chart.' : 'The client did NOT ask for remedies. Do NOT append forced astrological remedies or upay.'}
 - Deliver a clear, authoritative, and direct astrological verdict on the client’s inquiry without unnecessary boilerplate or generic filler.
 
-5. MANDATORY CONCLUDING SECTION: BEGINNER-FRIENDLY PLAIN-LANGUAGE SUMMARY (STRICTLY 120 TO 150 WORDS):
+6. MANDATORY CONCLUDING SECTION: BEGINNER-FRIENDLY PLAIN-LANGUAGE SUMMARY (STRICTLY 120 TO 150 WORDS):
 At the very end of EVERY response—after completing the detailed Parashari & KP technical analysis above—you MUST append a distinct, easy-to-understand concluding summary separated by a horizontal line (\`---\`).
 - Required Markdown Heading:
   ${clientLanguage === 'hi' ? 'Use the EXACT heading:\n  ### सरल शब्दों में मुख्य निष्कर्ष (आसान सारांश)' : 'Use the EXACT heading:\n  ### Simple Takeaway (Easy-to-Understand Summary)'}
@@ -445,6 +488,23 @@ At the very end of EVERY response—after completing the detailed Parashari & KP
   2. Clear timelines and months in plain calendar terms (e.g. \'Starting from May next year\', \'Over the next 2 to 4 months\').
   3. One or two simple, practical real-world steps or peaceful habits they can follow immediately.
 Ensure the main detailed technical analysis above this summary remains complete, rigorous, and strictly grounded in VERIFIED_KP_CALCULATION_TABLE.
+
+${bhavatBhavam ? `
+ACTIVE BHAVAT BHAVAM DERIVED ROTATION (PROGRAMMATICALLY VERIFIED BY ENGINE):
+${JSON.stringify({
+  targetRelative: bhavatBhavam.relative.nameEn,
+  relativeNameHi: bhavatBhavam.relative.nameHi,
+  baseHouseX: bhavatBhavam.baseHouseX,
+  queriedAspect: bhavatBhavam.aspect.nameEn,
+  aspectOffsetFromX: bhavatBhavam.offset,
+  targetDerivedNatalHouse: bhavatBhavam.derivedHouse,
+  formulaDisplayHi: bhavatBhavam.formulaDisplayHi,
+  formulaDisplayEn: bhavatBhavam.formulaDisplayEn,
+  supportiveNatalHousesForRelative: bhavatBhavam.relativeSupportiveHouses,
+  negatingNatalHousesForRelative: bhavatBhavam.relativeNegatingHouses,
+  targetCuspToEvaluateInTable: bhavatBhavam.derivedHouse,
+}, null, 2)}
+` : ''}
 
 PRE-FILTERED INTENT-DRIVEN ASTROLOGICAL DATA SLICE (STRICT GROUND TRUTH):
 ${JSON.stringify(intentAstrologyData, null, 2)}

@@ -9,6 +9,7 @@
  */
 
 import { MasterKundliJSON, MasterPlanetDetails } from '../master-kundli-engine';
+import { resolveBhavatBhavam, BhavatBhavamResult } from './bhavatBhavam';
 
 export type AstrologyDomain = 'career' | 'marriage' | 'finance' | 'health' | 'education' | 'property' | 'general';
 
@@ -22,10 +23,12 @@ export interface IntentClassification {
   supportiveHouses: number[];
   negatingHouses: number[];
   userQuery: string;
+  bhavatBhavam?: BhavatBhavamResult;
 }
 
 export interface IntentAstrologyData {
   intent: IntentClassification;
+  bhavatBhavam?: BhavatBhavamResult;
   kpSlice: {
     primaryHouseNum: number;
     primaryCsl: {
@@ -90,6 +93,31 @@ export function routeUserIntent(
   previousTurns: Array<{ role: string; content?: string; text?: string }> = []
 ): IntentClassification {
   const q = (userQuery || '').trim().toLowerCase();
+
+  // 0. Master Bhavat Bhavam (Derived Houses) check for family members & relatives
+  const bhavatBhavam = resolveBhavatBhavam(userQuery, previousTurns);
+  if (bhavatBhavam && bhavatBhavam.hasRelativeQuery) {
+    let domain: AstrologyDomain = 'general';
+    if (bhavatBhavam.aspect.id === 'career') domain = 'career';
+    else if (bhavatBhavam.aspect.id === 'health') domain = 'health';
+    else if (bhavatBhavam.aspect.id === 'marriage') domain = 'marriage';
+    else if (bhavatBhavam.aspect.id === 'wealth') domain = 'finance';
+    else if (bhavatBhavam.aspect.id === 'education') domain = 'education';
+    else if (bhavatBhavam.aspect.id === 'property') domain = 'property';
+
+    return {
+      domain,
+      domainHi: `${bhavatBhavam.relative.nameHi} का ${bhavatBhavam.aspect.nameHi} (भावात भावम)`,
+      subIntent: `bhavat_bhavam_${bhavatBhavam.relative.id}_${bhavatBhavam.aspect.id}`,
+      isFollowUp: false,
+      inheritedFromPreviousTurn: false,
+      primaryHouses: [bhavatBhavam.derivedHouse, bhavatBhavam.baseHouseX],
+      supportiveHouses: bhavatBhavam.relativeSupportiveHouses,
+      negatingHouses: bhavatBhavam.relativeNegatingHouses,
+      userQuery,
+      bhavatBhavam,
+    };
+  }
 
   // Helper to test regex
   const testRegex = (re: RegExp) => re.test(q);
@@ -453,6 +481,7 @@ export function extractIntentAstrologyData(
 
   return {
     intent,
+    bhavatBhavam: intent.bhavatBhavam,
     kpSlice: {
       primaryHouseNum,
       primaryCsl: {
