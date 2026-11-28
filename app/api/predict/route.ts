@@ -8,6 +8,7 @@ import { synthesizeFastKPAnswer } from '@/lib/kp-fast-synthesizer';
 import { analyzeQuestionAstrology } from '@/lib/kp-question-analyzer';
 import { apiRateLimiter } from '@/lib/cache-manager';
 import { generateMasterKundli, MasterKundliJSON } from '@/lib/master-kundli-engine';
+import { NAKSHATRAS } from '@/lib/kp-calculator';
 import { extractQueriedTargetDate, getDashaForDate, getAllMahadashasTable } from '@/lib/dasha-date-resolver';
 import { evaluateChartAgainstRules } from '@/lib/astrology/ruleEngine';
 import { PLANET_ELEMENTAL_MAP } from '@/lib/astrology/classicalRules';
@@ -169,11 +170,11 @@ export async function POST(req: NextRequest) {
 
     // Ensure comprehensive Master Kundli JSON from backend calculation engine
     let masterKundli: MasterKundliJSON;
-    if (activeChart.masterKundli) {
+    if (activeChart.masterKundli && activeChart.masterKundli.planets?.length && activeChart.masterKundli.cusps?.length === 12) {
       masterKundli = activeChart.masterKundli;
     } else {
       const bInput: ChartInput = {
-        name: birthDetails?.name || 'Native',
+        name: birthDetails?.name || activeChart.masterKundli?.meta?.name || 'Native',
         gender: (birthDetails?.gender || 'male') as 'male' | 'female' | 'other',
         dateOfBirth: birthDetails?.dateOfBirth || activeChart.dateOfBirth || '1995-10-24',
         timeOfBirth: birthDetails?.timeOfBirth || activeChart.timeOfBirth || '12:00',
@@ -349,7 +350,67 @@ export async function POST(req: NextRequest) {
     const userAskedTiming = /kab|when|timing|samay|date|year|month|kisme|kis varsh|kab tak|कब|समय|तिथि|वर्ष|कब होगा|कब तक/i.test(currentQuestion);
     const userAskedRemedy = /upay|remedy|puja|path|ratna|stone|mantra|daan|solution|उपाय|निवारण|पूजा|दान|मंत्र|रत्न|समाधान|क्या करूं|kya karun/i.test(currentQuestion);
 
+    // 🌟 BUILD EXPLICIT VERIFIED KP CALCULATION TABLE (ZERO-HALLUCINATION GROUND TRUTH)
+    const planetHousesOwnedMap: Record<string, number[]> = {};
+    (masterKundli.houseLordships || []).forEach((hl: any) => {
+      if (hl.signLord) {
+        const lordKey = hl.signLord.trim();
+        if (!planetHousesOwnedMap[lordKey]) planetHousesOwnedMap[lordKey] = [];
+        planetHousesOwnedMap[lordKey].push(hl.houseNumber);
+      }
+    });
+
+    const standardPlanetOrder = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
+    const sortedPlanets = [...masterKundli.planets].sort((a, b) => {
+      const idxA = standardPlanetOrder.indexOf(a.name);
+      const idxB = standardPlanetOrder.indexOf(b.name);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return 0;
+    });
+
+    const verifiedPlanetsMarkdown = sortedPlanets.map((p) => {
+      const ownedHouses = planetHousesOwnedMap[p.name]?.length
+        ? planetHousesOwnedMap[p.name].sort((x, y) => x - y).join(', ')
+        : 'None';
+      const degreeStr = p.formattedSignDMS || (p.degreeInSign !== undefined ? `${p.degreeInSign.toFixed(2)}°` : `${p.longitude.toFixed(2)}°`);
+      const nakStr = p.nakshatraName || (p as any).nakshatra || '';
+      const padaStr = p.nakshatraPada ? ` (Pada ${p.nakshatraPada})` : '';
+      const houseOccupied = p.bhavaChalitHouse || p.houseOccupied || p.d1House || 1;
+      return `| ${p.name} | ${degreeStr} | ${p.signName} | ${p.signLord} | ${nakStr}${padaStr} | ${p.starLord} | ${p.subLord} | House ${houseOccupied} | Houses ${ownedHouses} |`;
+    }).join('\n');
+
+    const cuspsSource = (masterKundli.cusps && masterKundli.cusps.length === 12)
+      ? masterKundli.cusps
+      : (activeChart.cusps && activeChart.cusps.length === 12)
+        ? activeChart.cusps
+        : [];
+
+    const verifiedCuspsMarkdown = cuspsSource.map((c: any) => {
+      const hNum = c.houseNumber || c.cuspNumber;
+      const degreeStr = c.formattedSignDMS || (c.degreeInSign !== undefined ? `${c.degreeInSign.toFixed(2)}°` : `${c.longitude.toFixed(2)}°`);
+      const nakIdx = Math.floor(((Number(c.longitude) % 360 + 360) % 360) / (360 / 27));
+      const nakStr = c.nakshatraName || c.nakshatra || (NAKSHATRAS && NAKSHATRAS[nakIdx] ? NAKSHATRAS[nakIdx].name : '');
+      return `| Cusp ${hNum} | ${degreeStr} | ${c.signName} | ${c.signLord} | ${nakStr} | ${c.starLord} | ${c.subLord} |`;
+    }).join('\n');
+
     const masterSystemPrompt = `You are "VedicWisdom", a sharp, perceptive, and deeply knowledgeable Indian Astrologer sitting face-to-face with a client.
+
+### MANDATORY GROUNDING RULE (ZERO HALLUCINATION):
+Never compute or guess any planet's or cusp's Sign Lord, Star Lord (Nakshatra Lord), or Sub-Lord from memory. You MUST read every planet's and cusp's Sign Lord, Star Lord, and Sub-Lord strictly and verbatim from the provided VERIFIED_KP_CALCULATION_TABLE below.
+Before writing your final answer, internally verify every single planet you mention (for example, if checking a Cuspal Sub-Lord like Mercury, look up Mercury's row in VERIFIED_KP_CALCULATION_TABLE and copy its exact Star Lord and Sub-Lord). Any mismatch between your text and VERIFIED_KP_CALCULATION_TABLE is strictly forbidden.
+
+### VERIFIED_KP_CALCULATION_TABLE:
+#### PLANETS TABLE:
+| Planet | Degree | Sign | Sign Lord | Nakshatra | Star Lord (NL) | Sub Lord (SL) | House Occupied | Houses Owned |
+|---|---|---|---|---|---|---|---|---|
+${verifiedPlanetsMarkdown}
+
+#### CUSPS TABLE (1 TO 12):
+| House Cusp | Degree | Sign | Sign Lord | Nakshatra | Star Lord (NL) | Sub Lord (SL) |
+|---|---|---|---|---|---|---|
+${verifiedCuspsMarkdown}
 
 1. STRICT LANGUAGE & TONE LOCK:
 - Follow the active UI language (uiLanguage: "${clientLanguage}"): if "hi", respond in warm, natural spoken Hindi (Devanagari); if "en", respond in natural, articulate Indian English. Even if the client asks in Hinglish or romanized text, you MUST reply strictly in the active UI language (${clientLanguage === 'hi' ? 'Pure, natural Hindi in Devanagari script' : 'Natural, articulate English'}).
@@ -363,8 +424,8 @@ export async function POST(req: NextRequest) {
 3. COMPLETE KP 3-TIER CHAIN + PARASHARI DASHA-GOCHAR SYNTHESIS:
 - Trace the complete 3-tier KP logic for the relevant house:
   (A) Planet (Source): Explain the Cuspal Sub-Lord (CSL), its house placement and ownership, and explicitly note if it is Untenanted (no planet occupying its stars, meaning it acts as a direct, unhindered source of its own houses).
-  (B) Star Lord (Result Giver): What actual results its Nakshatra Lord delivers across 4-fold significations (L1–L4) (favorable vs opposing houses).
-  (C) Sub-Lord (Quality & Final Approval): How the Sub-Lord modifies the quality, speed, or gives final sanction to the event.
+  (B) Star Lord (Result Giver): What actual results its Nakshatra Lord delivers across 4-fold significations (L1–L4) (favorable vs opposing houses). Must match the Star Lord verbatim from VERIFIED_KP_CALCULATION_TABLE.
+  (C) Sub-Lord (Quality & Final Approval): How the Sub-Lord modifies the quality, speed, or gives final sanction to the event. Must match the Sub-Lord verbatim from VERIFIED_KP_CALCULATION_TABLE.
 - Parashari & Gochar Synthesis: Weave Parashari house lord placement, Yuti, Drishti, active Vimshottari Mahadasha-Antardasha-Pratyantardasha, live Gochar (Saturn & Jupiter transits), and the Double Transit principle (Saturn + Jupiter simultaneous activation) into natural, flowing sentences.
 - Cross-match with Purified Live Ruling Planets: Incorporate current Live Ruling Planets to corroborate the astrological reading.
 

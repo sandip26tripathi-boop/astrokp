@@ -167,13 +167,16 @@ export function evaluateChartAgainstRules(
   ) || cusps[primaryHouseNum - 1] || cusps[0];
 
   const cslName = primaryCusp?.subLord || 'Mercury';
-  const cslStarLord = primaryCusp?.starLord || 'Moon';
-  const cslSubLord = primaryCusp?.subLord || cslName;
 
-  // 2. Fetch CSL and Star Lord Planet Details
+  // 2. Fetch CSL Planet Details to get its exact computed Star Lord & Sub-Lord from Planetary Matrix
   const cslPlanetObj = masterKundli.planets.find(
     (p) => (p.name || '').toLowerCase() === cslName.toLowerCase()
   );
+
+  // In KP Astrology, a planet represents the source, its Star Lord delivers actual results, and its Sub-Lord decides fruition
+  const cslStarLord = cslPlanetObj?.starLord || primaryCusp?.starLord || 'Moon';
+  const cslSubLord = cslPlanetObj?.subLord || primaryCusp?.subLord || cslName;
+
   const starLordPlanetObj = masterKundli.planets.find(
     (p) => (p.name || '').toLowerCase() === cslStarLord.toLowerCase()
   );
