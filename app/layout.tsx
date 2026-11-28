@@ -4,17 +4,18 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.vedicwisdom.world'),
   title: {
-    default:
-      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
-    template:
-      '%s | VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
+    default: 'VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
+    template: '%s | VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
   },
   description:
-    'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
+    'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.',
   keywords: [
     'VedicWisdom',
     'Personal AI Astrologer',
+    'Ancient Jyotish Wisdom',
+    'Modern AI Precision',
     'Exact Event Timing Astrology',
     'KP Astrology Online',
     'Precise Kundli Analysis',
@@ -24,41 +25,15 @@ export const metadata: Metadata = {
     'Kundli Generator',
     'Janam Kundali',
     'Vimshottari Dasha',
+    'Placidus Cusps',
+    'Bhava Chalit Kundli',
     'Gochar Transit Today',
   ],
   authors: [{ name: 'Sandeep K. Tripathi — Astro-Vastu Researcher | Wealth & Business Growth Architect' }],
   creator: 'VedicWisdom',
   publisher: 'VedicWisdom',
-  metadataBase: new URL('https://www.vedicwisdom.world'),
   alternates: {
-    canonical: 'https://www.vedicwisdom.world',
-  },
-  openGraph: {
-    title:
-      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
-    description:
-      'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
-    url: 'https://www.vedicwisdom.world',
-    siteName: 'VedicWisdom',
-    images: [
-      {
-        url: '/images/pandit-ji.jpg',
-        width: 800,
-        height: 800,
-        alt: 'VedicWisdom - Personal AI Astrologer',
-      },
-    ],
-    locale: 'en_US',
-    alternateLocale: ['hi_IN'],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title:
-      'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
-    description:
-      'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
-    images: ['/images/pandit-ji.jpg'],
+    canonical: 'https://www.vedicwisdom.world/',
   },
   robots: {
     index: true,
@@ -70,6 +45,31 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  openGraph: {
+    title: 'VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
+    description:
+      'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.',
+    url: 'https://www.vedicwisdom.world/',
+    siteName: 'VedicWisdom',
+    images: [
+      {
+        url: '/images/pandit-ji.jpg',
+        width: 800,
+        height: 800,
+        alt: 'VedicWisdom - Ancient Jyotish Wisdom, Modern AI Precision',
+      },
+    ],
+    locale: 'en_US',
+    alternateLocale: ['hi_IN'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
+    description:
+      'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.',
+    images: ['/images/pandit-ji.jpg'],
   },
   category: 'Astrology & Horoscope',
 };
@@ -93,12 +93,12 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'VedicWisdom — Personal AI Astrologer | Exact Event Timing & Kundli',
+      name: 'VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
       applicationCategory: 'LifestyleApplication',
       operatingSystem: 'All',
-      url: 'https://www.vedicwisdom.world',
+      url: 'https://www.vedicwisdom.world/',
       description:
-        'Ancient Jyotish Wisdom, Modern AI Precision. Get instant, pinpoint accurate answers on career, marriage, finance & exact timing using Classical KP & Parashari Astrology.',
+        'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.',
       offers: {
         '@type': 'Offer',
         price: '0',
@@ -108,9 +108,9 @@ export default function RootLayout({
     {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
-      name: 'VedicWisdom — Personal AI Astrologer',
+      name: 'VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision',
       image: 'https://www.vedicwisdom.world/images/pandit-ji.jpg',
-      url: 'https://www.vedicwisdom.world',
+      url: 'https://www.vedicwisdom.world/',
       priceRange: 'Free / ₹0',
       address: {
         '@type': 'PostalAddress',
@@ -139,6 +139,23 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning className="min-h-screen antialiased bg-ivory-bg text-ivory-text dark:bg-cosmic-obsidian dark:text-slate-100 overflow-x-hidden max-w-full w-full selection:bg-amber-500 selection:text-black">
+        {/* Server-Rendered Semantic Fallback for Search Engines and Non-JS Crawlers */}
+        <noscript>
+          <div style={{ padding: '24px', textAlign: 'center', backgroundColor: '#FAF4E6', color: '#231A12', fontFamily: 'serif' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
+              VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision
+            </h1>
+            <p style={{ maxWidth: '700px', margin: '0 auto 12px auto', lineHeight: '1.6' }}>
+              Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.
+            </p>
+            <p style={{ maxWidth: '700px', margin: '0 auto 12px auto', lineHeight: '1.6' }}>
+              शास्त्रीय वैदिक ज्योतिष की गहराई, आधुनिक AI की सटीकता। सटीक खगोलीय गणना, कस्पल सब-लॉर्ड विश्लेषण एवं वास्तविक समय गोचर।
+            </p>
+            <a href="https://www.vedicwisdom.world/" style={{ color: '#B87314', fontWeight: 'bold' }}>
+              https://www.vedicwisdom.world/
+            </a>
+          </div>
+        </noscript>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
             {children}

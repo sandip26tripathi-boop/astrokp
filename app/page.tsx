@@ -82,6 +82,18 @@ export default function Home() {
 
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
+        {/* Semantic Server-Rendered Crawler Header for Googlebot & SEO Crawlers */}
+        <section className="sr-only" aria-label="SEO Summary">
+          <h1>VedicWisdom — Ancient Jyotish Wisdom, Modern AI Precision</h1>
+          <h2>Personal AI Astrologer | Exact Event Timing &amp; Kundli</h2>
+          <p>
+            Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.
+          </p>
+          <p>
+            सटीक खगोलीय गणना, कस्पल सब-लॉर्ड विश्लेषण एवं वास्तविक समय गोचर आधारित प्रामाणिक ज्योतिषीय मार्गदर्शन।
+          </p>
+        </section>
+
         {/* Hero Section */}
         <div className="text-center space-y-2.5 sm:space-y-4 max-w-3xl mx-auto pt-1 sm:pt-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-[#F3E8D2] text-[#B87314] dark:bg-[#2A1F16] dark:text-[#D4AF37] border border-[#E4D5B7] dark:border-[#443525] shadow-sm animate-fade-in max-w-full flex-wrap justify-center">
@@ -106,7 +118,7 @@ export default function Home() {
           <p className="text-sm sm:text-base text-[#5C4D3C] dark:text-[#D8C39E] max-w-2xl mx-auto leading-relaxed px-1">
             {language === 'hi'
               ? 'वैदिक लग्न चक्र, भाव चलित, विंशोत्तरी महादशा-अंतर्दशा एवं वास्तविक गोचर आधारित १००% प्रामाणिक विश्लेषण व VedicWisdom फलादेश।'
-              : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Vimshottari dasha, and real-time verifiable predictions from VedicWisdom.'}
+              : 'Generate authentic Vedic D1 and Bhava Chalit Kundlis with exact planetary positions, Placidus Cusps, Vimshottari Dasha, and real-time AI astrological guidance by Sandeep K. Tripathi.'}
           </p>
 
           {/* Quick Metrics Bar */}
